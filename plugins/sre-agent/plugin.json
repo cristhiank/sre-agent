@@ -1,0 +1,19 @@
+{
+  "name": "sre-agent",
+  "description": "Host-agnostic SRE incident root-cause agent. Coordinates intake, scout, specialist theories, grading, and evidence-cited reports using dynamically discovered capabilities.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Cris Lopez"
+  },
+  "license": "MIT",
+  "keywords": [
+    "sre",
+    "incident-investigation",
+    "root-cause-analysis",
+    "azure-devops",
+    "observability",
+    "multi-agent"
+  ],
+  "category": "development",
+  "skills": "skills/"
+}

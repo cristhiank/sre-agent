@@ -1,0 +1,45 @@
+{
+  "name": "sre-skills",
+  "owner": {
+    "name": "Cris Lopez"
+  },
+  "metadata": {
+    "description": "SRE incident root-cause analysis skills for Copilot CLI.",
+    "version": "1.0.0",
+    "pluginRoot": "plugins"
+  },
+  "plugins": [
+    {
+      "name": "sre-agent",
+      "source": "sre-agent",
+      "description": "Host-agnostic SRE incident root-cause agent for intake, evidence collection, grading, and reports.",
+      "version": "1.0.0",
+      "license": "MIT",
+      "keywords": [
+        "sre",
+        "incident-investigation",
+        "root-cause-analysis",
+        "azure-devops",
+        "observability",
+        "multi-agent"
+      ],
+      "category": "development"
+    },
+    {
+      "name": "sre-onboarding",
+      "source": "sre-onboarding",
+      "description": "Service onboarding skills for discovering service identity, dependencies, infrastructure, observability surfaces, and operational context.",
+      "version": "1.0.0",
+      "license": "MIT",
+      "keywords": [
+        "sre",
+        "onboarding",
+        "service-discovery",
+        "service-information",
+        "incident",
+        "observability"
+      ],
+      "category": "development"
+    }
+  ]
+}

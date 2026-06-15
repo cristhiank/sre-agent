@@ -1,0 +1,107 @@
+# Grading Rubric
+
+The grader is the adversarial judge: it refuses proximate-as-root while an answerable upstream lead remains, and closes every material lead with cited evidence or an honest dead-end. Shared rules live in [investigation-invariants.md](investigation-invariants.md); this file says how to judge.
+
+## Verdict classes
+
+- **Confirmed / Likely-rooted**: cause and mechanism are verified against an authoritative source for that mechanism; timing fits, the decisive discriminator is checked and cited, and material alternatives are addressed.
+- **Proximate-only**: the named cause is the failure mechanism itself, the upstream "why" is unexplained, or a reachable mechanism discriminator remains unchecked.
+- **Inconclusive-blocked**: the next discriminating evidence is unreachable with available evidence sources.
+- **Refuted**: observations contradict the theory.
+
+## Symptom-vs-cause test
+
+A theory that names only an error, missing resource, timeout, exception, or failed job is **Proximate-only** unless it explains the upstream mechanism: what made that condition occur.
+
+## Target-alignment gate
+
+The primary RCA target is the intake `rca_target`: the underlying measured/impacted failure. When real unresolved measured failures exist, the failure-cause lead is primary; alert/monitor mechanics are secondary or contributing unless the signal is pure noise or the underlying failures are already explained.
+
+The report's primary finding must address the declared `rca_target` or carry the `5_grader` discovery receipt proving that target unreachable or clean. No third path.
+
+Pure-noise/tuning-artifact closure is valid only with a receipt showing the underlying failure dimension was inspected and found clean or immaterial. Any scope expansion beyond `literal_trigger` must cite evidence that the same measured failure exists in the expanded scope.
+
+## Mechanism-discriminator gate
+
+A proposed root cause is not eligible for **Likely-rooted** or **Confirmed** until the claimed mechanism is verified against an authoritative source for that mechanism, not merely inferred from symptom telemetry.
+
+Before promotion, the grader must record all four:
+
+1. The proposed causal mechanism, including the specific state it corrupts or the decision it changes, not just the failure signal.
+2. At least one plausible rival mechanism that produces the same observed symptom.
+3. A pre-declared, falsifiable discriminator predicate with the expected observation under each mechanism, favored and rival, stated before checking.
+4. The checked concrete observed value of that discriminator.
+
+The discriminator predicate and per-mechanism expected values must be pre-registered before the checked value is observed: carried as an `open-answerable: mechanism-unverified` obligation or specialist hypothesis from a prior round/turn, then checked. A discriminator first stated with its own result is post-hoc and does not pass; keep **Proximate-only** and run one focused verification turn against the pre-registered discriminator.
+
+Multi-arm defects: when a confirmed code/config defect has more than one supported failure arm that produces the same observed symptom class, pre-register expected values for EACH in-scope arm, not only the favored one. Limit arms to those supported by the mechanism source, matching the observed symptom class, and plausible for the incident window/entity (reachable within budget). Refuting one arm does NOT refute the defect while another in-scope arm matches; positive in-incident evidence of the defect's mechanism firing counts as support even when not keyed to the exact failing id. For drop/suppress arms, state whether the missing id is the EXPECTED signature — absence of the id can be the arm's signature, not its refutation.
+
+A symptom-consistent narrative does not pass: "telemetry is consistent with X" is not a discriminator unless it names distinct expected values per mechanism and a checked result.
+
+Authoritative source means whatever fits the claimed mechanism: implementation behavior, configuration or rollout state, runtime/control-plane state, maintained operational documentation, or telemetry that observes the mechanism itself. Require implementation reading only when the mechanism depends on implementation behavior; runtime, infrastructure, configuration, or control-plane claims can be verified by authoritative state for that claim.
+
+If the surviving mechanism depends on implementation/config behavior, the checked mechanism must include the producer code/config path: the code/config that creates the corrupt state or decision, not only the runtime/telemetry layer that propagates or consumes the symptom. Telemetry that only shows the symptom is not sufficient for a code/logic-rooted cause.
+
+Boundedness: require one serious same-symptom rival, not exhaustive enumeration. Code/config reading is scoped to the minimal producer path indicated by the discriminator, not broad archaeology. If that producer code/config is unreachable within budget, use **Inconclusive-blocked** with the discovery receipt and engineer next step, not **Likely-rooted** on the symptom story. If the scoped producer code/config does not confirm the defect, disconfirm or downgrade the hypothesis; do not keep spelunking.
+
+If the discriminator is reachable and unchecked, mark the lead `open-answerable: mechanism-unverified`, keep the verdict **Proximate-only**, and require one focused verification turn. If the discriminator is unreachable with available evidence sources, use **Inconclusive-blocked** with an engineer next step.
+
+Verified-enough means the mechanism source was checked, timing fits, the checked discriminator supports the theory, and material alternatives are refuted or bounded as non-material. Stop when remaining gaps would not reasonably change the user-facing RCA; do not loop solely to raise confidence.
+
+Live-verdict provenance floor: before emitting `Likely-rooted` or `Confirmed`, apply the mechanism-discriminator gate and the failing-unit enumeration gate (when population/aggregate evidence is material) as a pre-promotion checklist, plus the disqualifier that an unverified change/version is actionability-only, never causal verification, so it cannot stand as the cause (this disqualifies; it does not require producing provenance to promote). A rooted verdict rests on a verified mechanism and checked discriminator against an authoritative source — quality, not count: a purely temporal or correlational association, an unkeyed convenience sample, or a named-but-unverified change treated as the cause cannot satisfy that bar, and stacking several such thin threads does not either. Follow the reachability disposition above (reachable-unchecked → `Proximate-only`; unreachable decisive mechanism check → blocked path), and do not over-hunt once verified-enough (above) is met. Record the result in the grader's `Confidence reducer / verdict cap` field — REQUIRED for every `Likely-rooted`/`Confirmed`, with `status=none` admissible only via the positive attestation that the discriminator is none of those thin threads.
+
+When a **Confirmed** or **Likely-rooted** verdict is tied to a verified code/config/schema/artifact/service-owned location, emit an actionability-only introduction provenance obligation: closest introducing change or labeled last-touching change for the implicated path/symbol. This is post-verdict actionability only, may reuse the producer-code citation from this gate, and does not gate the verdict.
+
+## Failing-unit enumeration gate
+
+After target-alignment and signal-validity establish that real underlying failures exist, when the cause claim rests on an aggregate signal (a rate, count, ratio, or threshold breach) the grader checks whether the concrete failing units were enumerated and their correlation/identity/lineage keys followed to the producing layer. If those units were enumerable — the failures exist and a reachable key joins them to their producer — but were not inspected, mark the lead `open-answerable`, keep the verdict **Proximate-only**, and require one focused enumeration pass. A justified keyed sample or cohort of the failing units satisfies this gate when exhaustive inspection is too large; a convenience sample not keyed to the failing population does not. The gate does not fire when signal-validity has shown a pure measurement/threshold artifact, when the mechanism is already verified from a direct non-aggregate source, or when fit-for-purpose enumeration was attempted and the units or keys are genuinely unreachable — the last becomes `blocked-unreachable` with the discovery receipt. Enumeration composes with, and precedes, the producer code/config verification the mechanism-discriminator gate requires.
+
+## Duplicate / sibling incidents and verdict determinism
+
+When the scout's recurrence check reports a recent or concurrent incident sharing this incident's recurrence identity (the identity defined in the recurrence invariant — see [investigation-invariants.md](investigation-invariants.md)), the grader classifies the current incident as `canonical` or `duplicate-of <incident>` rather than judging it in isolation, and records the relationship so the report cross-links it. Selection is over the sibling set the scout actually observed (a run sees only siblings already created within its recurrence window), so scope the claim as canonical-as-observed: prefer an external incident-management parent/duplicate link when the scout recorded one (recurrence output carries any parent/duplicate link the incident-history exposes); otherwise order by one clock chosen for the whole comparison — authoritative trigger-fire time if every ordered sibling exposes it, else declared start if every ordered sibling exposes it, else created/opened time — and the canonical is the earliest sibling on that clock, tie-broken by stable incident id. Compare only siblings that expose the chosen clock; a sibling lacking it, or whose time is too coarse to order against the others, is a related/unordered match rather than silently ordered, and if no shared clock exists across the observed siblings, record them as related with no time-canonical. The current run is `duplicate-of <canonical>` unless it is itself the canonical. This classifies the relationship only; it never imports the sibling's cause, verdict, or mitigation as truth, and each run still grades its own evidence independently.
+
+Verdict determinism: the grader applies the same verdict gate to every incident sharing the recurrence identity, so independent runs on equivalent evidence converge rather than diverge — convergence is an emergent property of applying the gate, not an instruction to match or import a sibling's verdict. When the trigger is an alert/monitor/SLO and the authoritative definition of what it measures (numerator, denominator, window, threshold) is the decisive source for whether the alerted condition is real, and that definition is unreachable, this rule sets only the MAXIMUM verdict that trigger-definition evidence allows — cap at **Likely-rooted**; the mechanism-discriminator and failing-unit enumeration gates can still lower it, and target-alignment still governs whether the underlying failure is real. The cap lifts to **Confirmed** only when the alerted condition is independently reconstructed from authoritative raw/service-owned signals — its numerator, denominator, and scope, over the incident's declared window from intake — AND rooted to a verified producer per the mechanism-discriminator gate, so the unreachable trigger definition is no longer load-bearing; the report then states the trigger-definition gap as immaterial. Does not qualify (cap stays at **Likely-rooted** or lower): incident narrative or alert summary only; aggregate or proxy telemetry that does not reconstruct the numerator/denominator/window/scope of the alerted condition; raw failures without threshold or scope equivalence; or a producer not verified by the mechanism gate.
+
+## Adversarial pass
+
+Each grading round, independently ask: "what would make this theory false or incomplete?" and "why did this condition exist?" Re-derive defeat modes from the goal + evidence; do not rubber-stamp the specialists' conclusion.
+
+## Lead ledger: no silent null-close
+
+List each material lead or hypothesis from scout + specialists and close each as:
+
+- `closed-supported` with cited `OBS###` evidence,
+- `closed-refuted` with cited `OBS###` evidence,
+- `open-answerable` with the missing discriminator and reachable evidence shape,
+- `blocked-unreachable` with an explicit access/source limitation.
+
+A causal lead targets the declared `rca_target` / actual failure cause. It may be closed
+`blocked-unreachable` only with the discovery receipt defined in
+`artifact-contracts.md` §`5_grader/`, proving target discovery was exhausted from
+sourced candidates, not asserted. Bounded discovery budget: (1) observability/service-
+knowledge lookup, (2) schema/catalog discovery against sourced candidates, (3) one
+correct/authed probe against a discovered diagnostic source. No invented or guessed
+targets; no receipt means the causal lead remains `open-answerable` or needs another
+focused follow-up.
+
+No material lead is silently dropped.
+
+## Loop decision
+
+Mark a lead `open-answerable` when it targets the upstream "why" or mechanism verification, a reachable evidence path exists, the result could materially change the verdict, and it fits one focused specialist batch. Emit a bounded follow-up obligation. A reachable evidence path includes the access invariant's cross-source pivot: when an unresolved upstream/mechanism lead's failing units carry in-hand keys to an unprobed next-causal-layer source, that pivot is a required first call on the follow-up budget — keep the lead `open-answerable` and spend one focused pass following those keys before a final `Proximate-only` settles, recording the result in the discovery receipt; only a spent fit-for-purpose probe, or no such reachable source, lets the verdict settle on that lead.
+
+Mark a lead `blocked-unreachable` when the discriminator requires evidence this agent cannot reach. A causal lead may close `blocked-unreachable` only after either (1) a fit-for-purpose probe (per the "Empty is not absent" invariant in [investigation-invariants.md](investigation-invariants.md)) was attempted and the next discriminating evidence is genuinely unavailable, or (2) bounded discovery (the 2-3 round budget below) could not identify an authoritative signal/key/path — where "could not identify" is established by a live schema/catalog probe of the candidate service evidence source, not a service-knowledge or documentation lookup alone — recording the attempted discovery and remaining gap. Then stop and name the engineer's suggested next step; do not spin on weaker proxies, and do not re-probe beyond the budget.
+
+A documentation gap never satisfies `blocked-unreachable` (see the access invariant in [investigation-invariants.md](investigation-invariants.md)): an unattempted or never-targeted evidence source — including the service's own telemetry source when only the incident-record source was probed — is `open-answerable`, not blocked. The block is honest only once either a fit-for-purpose probe of the source that answers the lead came back genuinely empty or denied per "Empty is not absent", or the bounded-discovery budget was spent without finding a probeable source; the spent budget, not an endless search for another source, is the terminal.
+
+An unread incident discussion thread is likewise not a block: a causal lead cannot close `blocked-unreachable` until the incident's own discussion thread — the discussion-thread summary captured at intake and carried by scout (human comments, transfers, prior RCA/mitigation, linked change/rollout notes) — was read or recorded genuinely unavailable; an unread thread is not "unavailable" (apply the access invariant in [investigation-invariants.md](investigation-invariants.md)), and skipping it is a probe defect, not a true block. A human-stated cause or mitigation read from the thread is still a claim, not authority: it requires the mechanism-discriminator gate's authoritative corroboration before it can close, confirm, or downgrade a lead.
+
+## Over-rejection calibration
+
+Be adversarial but fair: stop at a grounded-enough verdict when the cause precedes the symptom, the mechanism source was checked, the decisive discriminator supports the theory, evidence is cited from reachable non-narrative observations, major alternatives are refuted or bounded as non-material, and remaining gaps would not reasonably change the user-facing RCA.
+
+Budget: 2 follow-up rounds by default; a 3rd only if the prior round produced new material evidence. Stop if two consecutive rounds add nothing material.
+
+## Report binding
+
+Report wording matches the verdict class. Reserve root-cause, likely, or probable language for **Likely-rooted** or **Confirmed**. A **Proximate-only** or **Inconclusive-blocked** result is reported as such with the unresolved "why" and the engineer suggested next step. Never give a clean all-clear while material leads are open. When the unresolved "why" or a verdict cap rests on a decisive discriminator that needs a human-only or out-of-band capability, the report carries the Manual Investigation Kit (canonical shape in `artifact-contracts.md` §`6_report/`); the kit's decisive check is the one that would lift the cap.
