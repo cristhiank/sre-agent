@@ -35,6 +35,7 @@ Dispatch one scout per material unit or operational plane, not per repo unless t
 - `topology/` edge/blast-radius plane
 - `observability/` source and join-key plane
 - `failure-knowledge/` hotspot/signature plane
+- AI-asset discovery (capability-gated): the AI-guidance asset corpus under `repos/`, via a read-only local AI-guidance-asset discovery capability or a bounded filename/dir glob fallback
 - incremental re-mine partition for changed surfaces in `incremental` mode
 
 Partition so scouts do not overlap reads. A plane with no app entry point still gets a scout if operationally material.
@@ -87,6 +88,12 @@ Packets record searched scope, evidence classes used, gaps, claims promoted, and
 **Builder:** From repo-lower evidence and scout packets, derive assigned CORE area. Classify candidates, apply rules, attach trust/grounding, honor closed-world ban, write only assigned files, and record promote-up or cited drops/gaps.
 
 **Incremental builder:** Follow `kb-mutation.md`; re-mine changed surfaces only, produce old-layout migration map when needed, preserve curated/promoted/higher-grade facts, status touched facts, and emit mutation records.
+
+**AI-asset discovery+triage:** Enumerate the AI-guidance asset corpus under `repos/` via a read-only local AI-guidance-asset discovery capability (degrade to bounded filename/dir glob if absent); classify `kind` (per the canonical illustrative enum in `kb-layout.md`) and `consumer-relevance` (tags `incident | review | dev`, multi-tag); map to material units / CORE areas where evidenced; grade `docs-only` or `suspected ⚠️`; write every discovered asset to the `kb/<repo>/ai-assets.md` floor (inventory + triaged-lead rows, non-promotable, sensitive values pointer-only, `none-found (searched scope)` when empty).
+
+Catalog-inclusion rule (decided here, not in the catalog): an asset is included in `00-index/ai-asset-catalog` only when it maps to >=1 named materiality test from the routing set `incident-routing | ownership/escalation | observability | failure-discrimination | review-guidance`. Incident- or review-relevant assets are included whenever they map to any of the five tests (including `review-guidance`). Dev-relevant assets are included ONLY when they map to one of the four incident-flavored tests (`incident-routing | ownership/escalation | observability | failure-discrimination`); `review-guidance` alone does not include a dev-relevant asset. Everything else stays floor-only. Each catalog row records the named materiality test as its `why-included` basis, carries the anti-authority marker, and inherits grounding via the `asset-ref` pointer to the floor row.
+
+Cross-link incident-relevant catalog entries from `00-index/telemetry-routing-card` and `failure-knowledge/` as secondary playbook leads (pointer only). Catalog inclusion never promotes an asset to implementation grounding — the floor remains non-promotable. Capability-gated; on capability unavailability, record a capability-gap + `glob-fallback = partial-coverage` note and continue.
 
 **Auditor:** Independently sample inventory, breadth trail, ledger, CORE areas, repo `deep/` contracts/invariants, source-catalog warning content, restricted-sources, telemetry-routing-card, promote-up records, `kb-mutation` records, old-layout migration map when applicable, and Clean Deliverable Packet. Record findings and closure decision.
 

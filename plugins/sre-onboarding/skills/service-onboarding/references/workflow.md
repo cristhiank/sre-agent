@@ -50,6 +50,7 @@ Hotspots seed `failure-knowledge/` candidates and verification queue entries.
 - Spot telemetry emission names, join keys, dimensions, query/recipe corpus, dashboards/recipes, state/config/secret surfaces, owners/escalation, and docs.
 - Extract domain vocabulary into repo-lower `concepts.md`: identity/tenancy/partition, correlation/trace, lifecycle/state, topology, routing, capacity, policy/config.
 - Mine deep candidates from declaration surfaces: API/schema/event/queue declarations and validation/guard/enforcement code. Apply the `kb-layout.md` incident-material predicate and `verification-and-evidence.md` rulebook before trust labeling; deep rows use trust-label + grounding_type, and partial coverage is `suspected ⚠️` plus a verification-queue entry.
+- Enumerate the AI-guidance asset corpus (agent docs, instruction files, skill packs, subagents, chatmodes, prompt files, shared agent reference docs) under `repos/` via a read-only local AI-guidance-asset discovery capability; degrade to a bounded filename/dir glob if that capability is absent. Bound the sweep to `repos/` and to known asset filenames/dirs; record provenance per asset (repo + path + SHA). Capability-gated and degradable: if the capability is unavailable, record a capability-gap note plus a `glob-fallback = partial-coverage` marker and continue core onboarding. This sweep is never a hard done-gate.
 
 ## Phase 2 — Evidence normalization and inventory reconciliation
 
@@ -100,6 +101,8 @@ Fold in sanitized 90-day `overlays/incidents/` priors when reachable. Priors inf
 
 Write concise, cited, versioned CORE artifacts, the produced-now incident `telemetry-routing-card`, and index/seam files. Initialize `contributions/` shape only. Avoid empty ceremonial folders; incident-material repo `deep/` contracts/invariants must be populated or explicit `unknown` with searched scope + verify-later action.
 
+Also write the AI-guidance asset products: per-repo `kb/<repo>/ai-assets.md` (inventory + triaged-lead split rows, non-promotable, capped at `docs-only`/`suspected ⚠️`, sensitive values pointer-only) and `00-index/ai-asset-catalog` (pointer-only, multi-consumer tags, `why-included` basis tied to a named materiality test, anti-authority header, freshness=repo SHA). Cross-link incident-relevant catalog entries FROM `00-index/telemetry-routing-card` and `failure-knowledge/` as SECONDARY "human-authored playbook lead" pointers — pointer only, never a new canonical fact. Floor and catalog schemas: `kb-layout.md`; catalog-inclusion rule: `dispatch.md`.
+
 ## Clean Deliverable Packet (hard gate before done)
 
 Deliverable root is `services/<service>/`. Before final, write a packet the independent audit can sample. It contains:
@@ -125,6 +128,7 @@ No trusted KB until:
 - deployable-unit coverage matrix is present
 - Clean Deliverable Packet is clean after remediation
 - independent completeness audit runs and persists findings, including incremental mutation/migration evidence when mode is `incremental`
+- AI-asset corpus is discovered + cataloged via the AI-guidance-asset discovery capability, OR per-repo `none-found (searched scope)` plus a capability-gap/partial-coverage note recorded when the capability was unavailable; capability-gated, not a hard blocker
 
 ## Anti-naive guardrails
 

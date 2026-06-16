@@ -34,7 +34,7 @@ A design-time bootstrap with no live signal reaches `source-inferred/declared` a
 - `docs-only`
 - `manual-curated`
 
-Implementation claims require `repo-source` grounding. Service recurrence, ownership/escalation, live schema, monitor history, and incident overlay claims may carry non-repo grounding; they still require typed evidence or they fail. Do not force repo-cell-or-fail where the claim is not an implementation claim.
+Implementation claims require `repo-source` grounding. Service recurrence, ownership/escalation, live schema, monitor history, and incident overlay claims may carry non-repo grounding; they still require typed evidence or they fail. Do not force repo-cell-or-fail where the claim is not an implementation claim. AI-guidance asset rows in the floor `kb/<repo>/ai-assets.md` carry `grounding_type` `docs-only` or `manual-curated`. The `00-index/ai-asset-catalog` is pointer-only and inherits grounding via the `asset-ref` pointer to the floor row; it carries no grounding column of its own.
 
 ## Two axes — `rule_status` ⊥ `evidence_trust`
 
@@ -66,6 +66,8 @@ An invariant enforcement site is verified under the existing control/auth presen
 
 **citation — re-resolve.** Every `file:line` or typed anchor is re-resolved after generation. Unresolved evidence is fixed, downgraded to suspected, or moved to verification queue.
 
+**AI-asset (auxiliary) — non-promotable lead.** AI-guidance assets (agent docs, instruction files, skill packs, subagents, chatmodes, prompt files, shared agent reference docs) are docs-only/suspected leads. An `ai-assets.md` row never satisfies cross-layer grounding and never promotes an implementation claim; re-resolve to repo-source or live evidence first and apply the relevant rule before promotion. Stamp freshness to repo SHA and downgrade on drift. Sensitive operational metadata (cluster URLs, subscription/principal/team IDs, GUIDs) is recorded as pointer + sanitized purpose only; raw values only if already allowed in a canonical KB home.
+
 ## Closed-world examples
 
 Bad: `Service A has no downstream dependencies.`
@@ -92,6 +94,7 @@ The audit samples:
 - old-layout migration map when an existing KB predates this layout
 - Clean Deliverable Packet
 - observability source-catalog consumer-warning content and restricted-sources map
+- per-repo `kb/<repo>/ai-assets.md` floor and `00-index/ai-asset-catalog`
 
 Audit checks:
 1. Inventory first: omitted material unit/plane invalidates the rest.
@@ -105,5 +108,6 @@ Audit checks:
 9. Migration completeness: old-layout migration map is complete; no orphaned old-home artifact remains, including root concept/glossary/tracing/state/config/failure/topology artifacts.
 10. Repo deep: samples included repos for populated or explicit-`unknown` contracts/invariants with searched scope + verify-later action, and excluded repos for a `not-material` record with searched scope; any populated `deep/` row with no materiality-category is over-extraction. Test-oracles are not produced.
 11. Incident route: telemetry-routing-card resolves to CORE observability rows and stable anchors.
+12. AI-asset corpus: catalog is pointer-only and non-normative — no ordering/precedence, no "use this first", no `evidence_required`, no `stop_conditions`, no acceptance criteria; every included catalog row carries a `why-included` basis tied to a named materiality test from the routing set `incident-routing | ownership/escalation | observability | failure-discrimination | review-guidance` and the anti-authority marker; the dev-tag inclusion threshold is honored — a dev-tagged asset is included only when it maps to one of the four incident-flavored tests (`review-guidance` alone does not include a dev-relevant asset); floor `ai-assets.md` is non-promotable (no row used as cross-layer grounding for an implementation claim); empty repos record `none-found (searched scope)`; a capability-gap + `glob-fallback = partial-coverage` note is recorded when the AI-guidance-asset discovery capability was unavailable.
 
 Valid audit output records auditor identity/pass, inspected artifacts, findings, and closure decision. Missing or self-graded audit does not count.

@@ -47,10 +47,12 @@ Build CORE first:
 - `topology/` — service-graph · endpoints/ports catalog · dependencies · blast-radius · deployable-unit coverage matrix.
 - `observability/` — source-catalog · join-keys · canonical-signals · restricted-sources · dashboards/recipes.
 - `failure-knowledge/` — discriminator-first signatures · mechanisms.
-- `kb/<repo>/` — entry-points · modules · concepts, plus `deep/` contracts/invariants for incident-material repos per `references/kb-layout.md`; test-oracles not produced.
-- `00-index/` — `task-router`, `core-map`, restored candidate `.toon` catalogs `ownership` and `incident-clusters`.
+- `kb/<repo>/` — entry-points · modules · concepts, plus `deep/` contracts/invariants for incident-material repos per `references/kb-layout.md`; `ai-assets.md` auxiliary AI-guidance asset inventory + triaged leads (non-promotable, capped at `docs-only`/`suspected ⚠️`); test-oracles not produced.
+- `00-index/` — `task-router`, `core-map`, restored candidate `.toon` catalogs `ownership` and `incident-clusters`, and `ai-asset-catalog` (multi-consumer pointer-only inventory/routing seam over `kb/<repo>/ai-assets.md` floor rows).
 - `overlays/incidents/` — 90-day priors only: aggregates + stable IDs + owner DLs; no raw titles, PII, or copied restricted payloads.
 - `contributions/` — intake/accepted shape only; curator writes later under `references/kb-mutation.md`.
+
+Incident is the only authored workflow lens; the `00-index/ai-asset-catalog` is a passive multi-consumer inventory/routing seam, not a lens, and is capability-gated — not a hard/blocking done-gate (satisfied by a recorded `none-found`/capability-gap note).
 
 Cross-layer grounding, layouts, concept schema, observability source-catalog row schema, consumer warnings, restricted-sources, freshness header, and update procedure: `references/kb-layout.md`.
 </output_contract>
@@ -75,6 +77,7 @@ Done/no-blocking-issues is invalid unless all hold:
 - Freshness/provenance header and verification queue exist.
 - Clean Deliverable Packet is present and clean after remediation per `references/workflow.md`.
 - Independent completeness audit ran after ledger/packet preparation and sampled opposite-family for missing/falsely closed threads.
+- AI-asset corpus is discovered + cataloged via a read-only local AI-guidance-asset discovery capability, OR each repo records `none-found (searched scope)` plus a capability-gap/partial-coverage note when the capability was unavailable; capability-gated, never a hard blocker.
 </done_gates>
 
 <boundaries>
