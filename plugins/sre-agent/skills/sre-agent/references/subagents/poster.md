@@ -65,7 +65,9 @@ Compose the post body for the incident system format supported by the capability
    target-specific duplicate-detection contract. Do not invent a marker format in the coordinator.
 3. The RCA/status body following **Post-body structure** below, bounded by the verdict policy below.
 
-**Post-body structure — concise but never a blurb:** project the content-bearing `6_report` always-sections (`artifact-contracts.md` §`6_report/`) into an incident-safe post; keep a recognizable, verdict-scaled skeleton — **Verdict + #1 action** -> **what we observe** (the measured failure in plain service terms) -> **mechanism, or the open upstream "why"** -> **impact & scope** -> **timeline when timing carries content** (onset distinct from detection) -> **what we checked / ruled out** (when it changes confidence or closes the suspected cause) -> **safe owner-routing / correlation references if any** -> **next check / reply-back**. This spine is non-exclusive: any other content-bearing `6_report` always-section still projects when incident-safe. Scale depth to the verdict and collapse a thin section to a one-line bullet, but keep the skeleton recognizable; omit only a section with no incident-safe content. A short verdict (`Proximate-only`, `Inconclusive-blocked`, or closure) stays structured, not a paragraph blurb. A collaborator-additive or duplicate post follows the additive shape instead (see §`6_report/` Post mode) — **the addition / evidence delta -> why it matters -> owner-routed next action/reference**.
+### Post-body structure
+
+Concise but never a blurb: project the content-bearing `6_report` always-sections (`artifact-contracts.md` §`6_report/`) into an incident-safe post; keep a recognizable, verdict-scaled skeleton — **Verdict + #1 action** -> **what we observe** (the measured failure in plain service terms) -> **mechanism, or the open upstream "why"** -> **impact & scope** -> **timeline when timing carries content** (onset distinct from detection) -> **what we checked / ruled out** (when it changes confidence or closes the suspected cause) -> **safe owner-routing / correlation references if any** -> **next check / reply-back**. This spine is non-exclusive: any other content-bearing `6_report` always-section still projects when incident-safe. Scale depth to the verdict and collapse a thin section to a one-line bullet, but keep the skeleton recognizable; omit only a section with no incident-safe content; the collapse allowance never applies to a required Manual Investigation Kit — when a kit is required (Inconclusive-blocked or a manual-handoff-capped verdict) it renders in full as the titled, multi-step kit section (per §Verdict policy / `artifact-contracts.md` §`6_report/`), never collapsed to a bullet or a generic 'next checks' line. A short verdict (`Proximate-only`, `Inconclusive-blocked`, or closure) stays structured, not a paragraph blurb. A collaborator-additive or duplicate post follows the additive shape instead (see §`6_report/` Post mode) — **the addition / evidence delta -> why it matters -> owner-routed next action/reference**.
 
 **Idempotency — verify absence before posting, fail CLOSED:**
 - Ask the live incident-posting capability to perform its target-specific duplicate/idempotency check
@@ -80,6 +82,15 @@ Compose the post body for the incident system format supported by the capability
   later iteration, but only the live capability's target-specific check can authorize a mutation.
 - The scan-then-post may not be atomic; assume same-iteration runs are single-flight unless the
   capability explicitly provides a stronger concurrency guarantee.
+
+Before posting, reconcile the post against the internal report (`6_report/investigation-report.md`): every content-bearing report section is projected — any **Manual Investigation Kit** section rendered in full (§Post-body structure), the verified facts + open "why"/blocker stated (§Verdict policy), and a content-bearing timeline kept — and bulk identifiers no on-call-engineer action uses are summarized (count + 1–3 examples, or folded into the kit step that consumes them), never displacing the kit, known/unknown, or timeline. If the post drops or flattens any versus the report, re-render before posting; report-only is the fallback only for an un-rewritable leak, never a license to drop sections.
+
+<bad-example>
+Verdict Inconclusive-blocked; the internal report has a 4-step Manual Investigation Kit + timeline + ruled-outs.
+Wrong: a ~2KB post that flattens the kit into one "manual next checks" bullet, drops the timeline/ruled-outs, and spends a paragraph listing a long list of raw failing-unit identifiers.
+Why wrong: the kit is the on-call engineer's primary payload for a blocked post; flattening it and dumping non-action identifiers leaves them unable to continue, while the report had everything.
+Correct: render the kit as a titled multi-step section, state what's verified and what's open/blocked, and summarize the failing-unit identifiers as a count + 1–3 examples.
+</bad-example>
 
 **Post:**
 - Target ONLY the provided incident record. The post target and any confirm-binding returned by the

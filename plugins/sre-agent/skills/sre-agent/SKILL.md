@@ -208,7 +208,7 @@ with a required dispatch pending.
    `Likely-rooted`, or `Inconclusive-blocked`, OR the follow-up budget is exhausted.
    If any material lead is `open-answerable` and budget remains, the coordinator MUST
    run one focused follow-up specialist pass targeted ONLY at the missing discriminator,
-   merge new observations, and re-grade. A report after `Proximate-only` is allowed
+   merge new observations, and re-grade. Before settling `Inconclusive-blocked`/`Proximate-only` on a lead whose failing units carry in-hand keys to an unprobed next-causal-layer source, confirm the Grader's discovery receipt names a probed source AND an observed result (or a terminal denied/missing error after an authed probe), not a soft 'unavailable'; if a reachable next-causal-layer source remains unprobed, run one cross-source-pivot follow-up pass first (within the existing follow-up budget). When no reachable next-causal-layer source exists, that terminal is itself the receipt — settle and name the engineer next step. A report after `Proximate-only` is allowed
    only when no `open-answerable` material lead remains, the budget is exhausted, or
    the lead has been converted to `blocked-unreachable` with an engineer next step.
    Budget is 2 follow-up turns by default; allow a 3rd only if the prior turn produced
