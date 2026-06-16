@@ -43,7 +43,8 @@ limits:
     observations/                # factual observations keyed by OBS###
   4_specialists/<name>/          # that specialist's theory notes and local artifacts
   5_grader/                      # ranking, verdict rationale, optional follow-up
-  6_report/                      # final investigation report
+  6_report/                      # bounded investigation report (+ live post when authorized)
+  7_knowledge/                   # durable knowledge candidates (only when triage finds novelty)
 ```
 
 Do not rename the stage directories.

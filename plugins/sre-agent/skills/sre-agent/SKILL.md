@@ -54,10 +54,12 @@ subagents pending while pretending they will complete.
 
 In unattended/headless/single-shot runs (no human is present to re-prompt;
 the session ends when the coordinator's turn ends), the coordinator MUST
-drive the investigation to its terminal state — Report dispatched, or an
-explicit abort/degraded note in `run.md` — within one continuous working
-turn. It MUST NOT end or yield its turn while any required Scout, Specialist,
-Grader, or Report dispatch is still incomplete.
+drive the investigation to its terminal state — Report dispatched, then the
+knowledge-value triage completed (the Knowledge Curator awaited in-turn when the
+triage dispatches it), or an explicit abort/degraded note in `run.md` — within
+one continuous working turn. It MUST NOT end or yield its turn while any required
+Scout, Specialist, Grader, Report, or dispatched Knowledge Curator step is still
+incomplete.
 
 A dispatch is complete ONLY after the coordinator has received the subagent's
 finished output and merged it into the run state. If a dispatch returns only
@@ -68,7 +70,7 @@ waiting — it ends the turn and orphans the work.
 
 Therefore, in unattended runs, fire-and-forget / background / detached
 dispatch is FORBIDDEN for the required pipeline stages (Scout, Specialist,
-Grader, Report). Default to synchronous, blocking dispatch and collect each
+Grader, Report, and a dispatched Knowledge Curator). Default to synchronous, blocking dispatch and collect each
 result before proceeding. Parallelism is allowed ONLY as an awaited group:
 launch the set, then actively block in-turn until every member has completed
 and its output is collected, before moving to the next stage. The same rule
@@ -162,7 +164,7 @@ Every dispatch is also an AWAITED step in unattended runs: see Coordinator
 contract → Execution model (single-turn, awaited). Do not yield the turn
 with a required dispatch pending.
 
-## Five-stage flow
+## Six-stage flow
 
 1. **Bootstrap / capture (`1_intake`, intent frame).** Resolve the incident
    identity, create the run, capture the incident record AND its discussion thread
@@ -192,7 +194,7 @@ with a required dispatch pending.
    recurrence matches (or an explicit none/unavailable note), the discussion-thread summary
    (or empty/unavailable note), how they shape the
    hypotheses, at least two materially different hypotheses, and the
-   questions/observations that would discriminate them; no findings or verdicts.
+   questions/observations that would discriminate them; no findings or verdicts. Scout also consults the service's curated/promoted prior knowledge (`failure-modes/` and any reviewed-promoted items) as orientation evidence — claims not authority, bounded by service/component/symptom; it never reads unreviewed run-local `7_knowledge` candidates or sibling run directories, and absence is a gap, not a block.
 3. **Specialists (`3_evidence`, `4_specialists`).** Dispatch one Specialist per
    material hypothesis area. Each fetches and analyzes its own observations through the
    evidence sources and capabilities you pass it, cites what it saw, and proposes
@@ -228,6 +230,18 @@ with a required dispatch pending.
    + mechanism, verdict wording, gaps, closest known introduction for verified
    code/config causes, unresolved upstream why when not rooted, the Grader's
    engineer suggested step, and (when authorized) the posted incident update.
+6. **Knowledge value triage + capture (`7_knowledge`, adaptive reflective pass).** After Report, run a brief
+   Knowledge Value Triage over the FINAL artifacts only (`5_grader/ranking.md`, `6_report`, and the scout's
+   recurrence/sibling findings). Dispatch the Knowledge Curator ONLY if at least one evidence-backed novelty
+   trigger is present: a new or revised reusable signature, a recurring sibling pattern, a verified
+   observability/source gap, a misleading monitor/telemetry gotcha, a repeated manual-handoff gap, or a verified
+   mechanism absent from the service KB. If none, record `knowledge_capture: skipped — no durable novelty/value`
+   and stop — never create a candidate just to fill the stage. The pass is non-blocking and never changes the
+   verdict, the report, or the post; it writes run-local candidate knowledge only (no mutation of curated service
+   knowledge). The skip record (when no Curator is dispatched) is written to `run.md`. Details in
+   `references/subagents/knowledge.md`. Expected output: either the skip record, or
+   classified candidate items (kind/status/confidence/evidence/recurrence/freshness) plus a proposed, un-applied
+   KB delta.
 
 ## Iteration mode (new information)
 
@@ -260,3 +274,4 @@ lead-state transitions, isolation, and the delta-report contract — in
 - Scout role: `references/subagents/scout.md`
 - Grader role: `references/subagents/grader.md`
 - Report role: `references/subagents/poster.md`
+- Knowledge Curator role: `references/subagents/knowledge.md`

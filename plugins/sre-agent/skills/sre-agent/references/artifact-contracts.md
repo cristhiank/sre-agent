@@ -142,4 +142,15 @@ Before composing any incident post, classify the incident's discussion thread (c
 
 Never restate or override the humans, and never ignore an existing mitigation. Post mode chooses whether to contribute a standalone RCA versus a collaborative addition; the grader's verdict still bounds the strength of what you assert. Across all branches, the Manual Investigation Kit is driven by the grader's verdict (a blocked or `Likely-rooted`-capped decisive discriminator), not by the post-mode branch — it can accompany a collaborator post.
 
+## `7_knowledge/` — durable knowledge (candidate)
+
+Written only when the coordinator's Knowledge Value Triage (see `SKILL.md` § Six-stage flow) found evidence-backed novelty; otherwise the run records `knowledge_capture: skipped — no durable novelty/value` in `run.md` and writes nothing here. One file, `knowledge.md`, compact markdown (not JSON), run-local and candidate-only — it never mutates curated `services/<svc>/` knowledge. Produced by the Knowledge Curator (`subagents/knowledge.md`).
+
+Always-sections:
+- **Run summary** — one line: service, incident, verdict, and whether new durable knowledge was found (or the skip record).
+- **Items** — each carries `kind` (signature-candidate | reusable-gotcha | knowledge-gap | already-known | follow-up), `status` (verified | probable-unverified | single-incident-candidate), `confidence` (high|medium|low), service + component/scope + symptom, the claim, **evidence** (OBS id + a one-line source summary — external, never introspection), `recurrence` (sibling incidents or prior-signature link, or `single-incident candidate`), and `freshness` (run date). A `signature-candidate` must pass the two-key rule (signature + recurrence-or-reusable-mechanism); `already-known` names only material reused knowledge.
+- **Proposed KB delta** — a suggestion list only: which `failure-modes/` signature or `observability/` binding a human could add or update, in the service's template, with the evidence to validate first. Explicitly NOT applied by this run; cross-run dedup and promotion into curated knowledge happen in a separate reviewed curation step.
+
+Empty-but-honest is valid: if nothing durable cleared the bar, state what prior knowledge was reused and stop. Never fabricate a signature to fill the file.
+
 Keep sections concise and omit any section that carries no content. A scoped or partial run remains scoped or partial; do not turn gaps into an all-clear.
