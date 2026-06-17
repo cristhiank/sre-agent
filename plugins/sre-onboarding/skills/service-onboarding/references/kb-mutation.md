@@ -1,13 +1,13 @@
 # KB Mutation
 
-Size budget: ~160 lines. Canonical home for incremental re-mine and curator write-back safety. Other files point here instead of restating the preservation rule.
+Canonical home for incremental re-mine and curator write-back safety. Input/run lock schema: `references/reproducibility-contract.md`. Evidence ledger, drop-reason taxonomy, and changed-surface closure: `references/reproducibility-contract.md`. Other files point here instead of restating the preservation rule.
 
 ## Purpose
 
 The KB is living. It changes through two triggers that share one mutation-safety contract:
 
 1. `incremental` — repo SHAs advanced; diff them and re-mine only changed surfaces.
-2. write-back — a separate curator agent proposes a learned contribution. This skill initializes `contributions/` shape and states the contract; it does not perform curator writes.
+2. write-back — a separate curation workflow proposes a learned contribution. This skill initializes `contributions/` shape and states the contract; it does not perform curator writes.
 
 ## Shared preservation rule
 
@@ -45,13 +45,16 @@ If a fact is not contradicted but its source is old or unverified, mark `stale`,
 
 ## `incremental` procedure
 
-1. Read current provenance: source SHAs, scan date, verification queue, contribution records, and prior layout version.
+1. Read `00-index/evidence-ledger.toon` from the prior committed KB as the authoritative prior ledger state (prior record statuses, trust grades, and predicate outcomes). Read current provenance: source SHAs, scan date, verification queue, contribution records, and prior layout version. Record the new input lock per `references/reproducibility-contract.md` (input lock includes prior KB state hash and old repo SHAs alongside new ones).
 2. If the KB predates this layout, produce an old-layout migration map before mutating; do not half-migrate.
 3. Diff repo SHAs and declaration surfaces.
-4. Re-mine only changed surfaces plus any dependent surfaces needed to classify edges, observability, failure-knowledge, and concept impacts.
-5. Apply evidence-strength comparison.
-6. Update canonical homes, cross-links, `00-index/core-map`, verification queue, freshness, and overlays if their source window changed.
-7. Emit mutation records, migration map if applicable, and the Clean Deliverable Packet.
+4. Apply the changed-surface → affected record classes → destination artifacts table from `references/reproducibility-contract.md` to determine which ledger records must be re-mined. Re-mine only those changed surfaces plus any dependent surfaces needed to classify edges, observability, failure-knowledge, and concept impacts.
+5. Apply evidence-strength comparison to all re-mined records.
+6. **Re-render affected artifacts from the ledger** — do not patch artifact files directly. Rebuild each affected artifact's table by projecting updated ledger rows through the manifest schema from `references/artifact-manifest.md`. Unaffected artifacts are not touched.
+7. Update canonical homes, cross-links, `00-index/core-map`, verification queue, freshness, and overlays if their source window changed.
+8. Emit mutation records, migration map if applicable, and the Clean Deliverable Packet.
+
+**Final KB clean target-state:** no migration breadcrumbs, no stale transitional notes, no `_delta` or `_old` artifacts in the committed deliverable. The delivered KB must read as a current-state document grounded in the new locked inputs.
 
 ## Old-layout migration
 
@@ -68,13 +71,15 @@ Map old -> new before incremental mutation. Literal runs must not orphan old-hom
 | old `observability/` | `observability/` with source-catalog, join-keys, canonical-signals, restricted-sources, dashboards/recipes |
 | old `failure-modes/` | `failure-knowledge/` |
 | old `incident-knowledge/` | `overlays/incidents/` |
-| old per-repo READMEs | `kb/<repo>/entry-points.md`, `modules.md`, `concepts.md`; `deep/` follows the incident-material populated-or-explicit-`unknown` rule in `kb-layout.md` |
+| old per-repo READMEs | `kb/<repo>/entry-points.md`, `modules.md`, `concepts.md`; `deep/` follows P3: incident-material repos get populated `deep/contracts.toon` and `deep/invariants.toon`, non-material repos get `deep/not-material.md`, and inconclusive materiality is recorded as an `open:escalated` evidence-ledger gap |
 
 Migration records cite old path, new canonical home, mutation status, stable anchor/core-map update, and unresolved gaps. The independent audit checks this map and fails orphaned old-home artifacts.
 
 ## Clean-deliverable across mutation
 
 Incremental runs must emit the same Clean Deliverable Packet as first-time runs. The prior `_work/*-delta` leak is a failure mode: mutation scratch never lands in the deliverable. The allowlist/denylist and remediation requirements live in `workflow.md`; do not duplicate them here.
+
+**Preservation contract re-stated:** higher-grade ledger records are not overwritten by weaker evidence. Re-renders of affected artifacts preserve unaffected rows at their current trust grade. Rows touched by the re-mine receive a mutation status; rows untouched by the re-mine are carried through unchanged.
 
 ## Contribution record
 
@@ -100,9 +105,10 @@ Block promotion of secrets, raw PII, restricted samples, and copied sensitive pa
 
 ## Initialized shape
 
-Onboarding may create:
+Onboarding initializes the manifest-declared contribution shape:
 
 - `contributions/README.md` — states curator-owned lifecycle and this contract
+- `contributions/INTAKE.md` — intake instructions and required fields for future contributions
 - `contributions/intake/`
 - `contributions/accepted/`
 

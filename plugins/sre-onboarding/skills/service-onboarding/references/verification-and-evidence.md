@@ -1,8 +1,12 @@
 # Verification & Evidence
 
-Size budget: ~170 lines. Canonical home for claim fields, trust labels, `grounding_type`, rule_status/evidence_trust separation, rulebook, and independent completeness audit.
+Canonical home for claim fields, trust labels, `grounding_type`, rule_status/trust-label separation, rulebook, mechanical reproducibility audit, and independent completeness audit. Evidence ledger row schema, stable ID algorithm, and status/drop-reason taxonomy: `references/reproducibility-contract.md`.
 
 Found != claimed. A fact is promoted only when the right rule is applied or explicitly blocked, evidence is cited, and trust/grounding are labeled.
+
+## Evidence ledger and drop-reason taxonomy
+
+The normalized evidence ledger is the canonical data structure for all promoted claims. Schema and full status/drop-reason taxonomy (`promoted · duplicate · stale · non-material · sensitive-unsafe · superseded · open:escalated · rejected`): `references/reproducibility-contract.md`. Builders fill artifact schemas from ledger rows; never draft KB pages directly from exploration.
 
 ## Claim-ledger fields
 
@@ -10,7 +14,7 @@ Every promoted claim upgrades the evidence line every doc already writes:
 
 `class | evidence(file:line or typed anchor) | trust-label | grounding_type | rule_status | confidence | blast-radius-if-wrong | verify-later`
 
-Classes: control/auth · config/secret · edge/dependency · failure-mode · concept · observability · ownership/escalation · overlay.
+Classes: control/auth · config/secret · edge/dependency · failure-mode · concept · observability · ownership/escalation · overlay · ai-asset.
 
 ## Trust labels
 
@@ -36,12 +40,12 @@ A design-time bootstrap with no live signal reaches `source-inferred/declared` a
 
 Implementation claims require `repo-source` grounding. Service recurrence, ownership/escalation, live schema, monitor history, and incident overlay claims may carry non-repo grounding; they still require typed evidence or they fail. Do not force repo-cell-or-fail where the claim is not an implementation claim. AI-guidance asset rows in the floor `kb/<repo>/ai-assets.md` carry `grounding_type` `docs-only` or `manual-curated`. The `00-index/ai-asset-catalog` is pointer-only and inherits grounding via the `asset-ref` pointer to the floor row; it carries no grounding column of its own.
 
-## Two axes — `rule_status` ⊥ `evidence_trust`
+## Two axes — `rule_status` ⊥ `trust-label`
 
 - `rule_status`: `not-applied | applied | blocked`. Did the class rule run against reachable evidence?
-- `evidence_trust`: `verified/observed | source-inferred/declared | docs-only | suspected ⚠️`.
+- `trust-label`: `verified/observed | source-inferred/declared | docs-only | suspected ⚠️`.
 
-Promotion rule: evidence may rise above suspected/presence-only only after `rule_status=applied` or `rule_status=blocked` with the block recorded. `applied` does not imply a live signal. Example: a cold bootstrap can be `rule_status=applied`, `evidence_trust=source-inferred/declared`, `grounding_type=repo-source`.
+Promotion rule: evidence may rise above suspected/presence-only only after `rule_status=applied` or `rule_status=blocked` with the block recorded. `applied` does not imply a live signal. Example: a cold bootstrap can be `rule_status=applied`, `trust-label=source-inferred/declared`, `grounding_type=repo-source`.
 
 ## Collision map — contract/invariant artifact types
 
@@ -66,7 +70,7 @@ An invariant enforcement site is verified under the existing control/auth presen
 
 **citation — re-resolve.** Every `file:line` or typed anchor is re-resolved after generation. Unresolved evidence is fixed, downgraded to suspected, or moved to verification queue.
 
-**AI-asset (auxiliary) — non-promotable lead.** AI-guidance assets (agent docs, instruction files, skill packs, subagents, chatmodes, prompt files, shared agent reference docs) are docs-only/suspected leads. An `ai-assets.md` row never satisfies cross-layer grounding and never promotes an implementation claim; re-resolve to repo-source or live evidence first and apply the relevant rule before promotion. Stamp freshness to repo SHA and downgrade on drift. Sensitive operational metadata (cluster URLs, subscription/principal/team IDs, GUIDs) is recorded as pointer + sanitized purpose only; raw values only if already allowed in a canonical KB home.
+**AI-asset (auxiliary) — non-promotable lead.** AI-guidance assets (agent docs, instruction files, skill packs, subagents, chatmodes, prompt files, shared agent reference docs) are docs-only/suspected leads. An `ai-assets.md` row never satisfies cross-layer grounding and never promotes an implementation claim; re-resolve to repo-source or live evidence first and apply the relevant rule before promotion. Stamp freshness to repo SHA and downgrade on drift. Sensitive operational metadata (cluster URLs, subscription/principal/team IDs, GUIDs) is always recorded as pointer + sanitized purpose only; concrete non-sensitive source names may appear only when evidence-cited and necessary.
 
 ## Closed-world examples
 
@@ -78,6 +82,20 @@ Bad: `Telemetry table returned zero rows, so event did not happen.`
 
 Good: `0 rows from source S with filter F/window W; non-dispositive because source is source-inferred and canonical source not live-checked via join key J.`
 
+## Mechanical reproducibility audit
+
+Runs before done; distinct from the independent completeness audit. Checks structural and schema integrity to ensure the run is reproducible against its locked inputs.
+
+Audit items (all must pass):
+1. **Manifest completeness:** every mandatory artifact from `references/artifact-manifest.md` exists or has a recorded gap/capability-gap note; variable-slots exist iff their promotion predicate passed; no extra transient artifacts in deliverable root.
+2. **Schema conformity:** each artifact's table columns match the manifest schema exactly; no extra or missing columns; no informal substitutes.
+3. **No duplicate canonical facts:** each fact appears in exactly one canonical home; cross-references are pointers (`see <canonical-home>:<stable-id>`), never copies; `00-index/ai-asset-catalog` is pointer-only.
+4. **Predicate inputs recorded:** every promoted ledger row has `predicate-inputs` filled with the name(s) of the evaluated predicate(s).
+5. **Stable IDs sorted:** artifact tables are sorted per canonical ordering rules from `references/reproducibility-contract.md`; stable IDs are not sequential integers derived from row order.
+6. **Host-agnostic steering vs concrete output facts:** skill instruction content contains no concrete tool/product/cluster names; KB output artifacts cite concrete names only where evidence-grounded and necessary for fidelity.
+7. **Sanitization:** no secrets, raw PII, or restricted payloads in KB artifacts; sensitive values are pointers + sanitized purpose only; confirm across `kb/<repo>/ai-assets.md` rows and overlays files.
+8. **No unverified absence claims:** every `no X found` statement names searched scope and still-unverified scope.
+
 ## Independent completeness audit
 
 The audit is mandatory before done. It runs after the open-thread ledger exists and is performed by an independent, opposite-family review pass that hunts for missing or falsely closed material threads.
@@ -85,7 +103,7 @@ The audit is mandatory before done. It runs after the open-thread ledger exists 
 The audit samples:
 - final KB
 - breadth trail and stage packets
-- open-thread ledger
+- open-thread ledger and `00-index/evidence-ledger.toon` (committed)
 - claim ledger entries
 - repo incident-material roll-up records, including `not-material` exclusions with searched scope
 - repo `deep/` contracts/invariants for incident-material repos
@@ -99,14 +117,14 @@ The audit samples:
 Audit checks:
 1. Inventory first: omitted material unit/plane invalidates the rest.
 2. Ledger: every material thread is `promoted`, `rejected`, or `open:escalated`; no reachable static action remains untried for an escalation.
-3. Rule/trust/grounding: promoted claims have `rule_status`, `evidence_trust`, and `grounding_type`; implementation claims have repo-source grounding.
+3. Rule/trust/grounding: promoted claims have `rule_status`, `trust-label`, and `grounding_type`; implementation claims have repo-source grounding.
 4. Payload grounding: each service-higher promoted implementation fact traces to a repo-lower cell and matching destination payload, or has a valid cited drop/gap.
 5. Concept-model: mostly names, missing required categories without searched scope, or unpromoted load-bearing vocabulary fails.
 6. Observability: source-inferred rows include NEVER live verification, exact verify-later action, and CONSUMER WARNING content containing the anti-absence clause with concrete source and join key; restricted-source gates are scoped.
 7. Clean deliverable: packet contains deliverable-root file tree, allowlist scan, fast-path denylist scan, remediation record, and is clean after remediation.
 8. Incremental packet: an `incremental` run produced mutation records and the Clean Deliverable Packet; self-asserted preservation without audit-sampled records fails.
 9. Migration completeness: old-layout migration map is complete; no orphaned old-home artifact remains, including root concept/glossary/tracing/state/config/failure/topology artifacts.
-10. Repo deep: samples included repos for populated or explicit-`unknown` contracts/invariants with searched scope + verify-later action, and excluded repos for a `not-material` record with searched scope; any populated `deep/` row with no materiality-category is over-extraction. Test-oracles are not produced.
+10. Repo deep: samples included repos for populated `deep/` contracts/invariants (P3=incident-material) or `open:escalated`/`non-material` gap records in `00-index/evidence-ledger.toon`; samples excluded repos for a `deep/not-material.md` record; any populated `deep/` row with no materiality-category is over-extraction. Test-oracles are not produced.
 11. Incident route: telemetry-routing-card resolves to CORE observability rows and stable anchors.
 12. AI-asset corpus: catalog is pointer-only and non-normative — no ordering/precedence, no "use this first", no `evidence_required`, no `stop_conditions`, no acceptance criteria; every included catalog row carries a `why-included` basis tied to a named materiality test from the routing set `incident-routing | ownership/escalation | observability | failure-discrimination | review-guidance` and the anti-authority marker; the dev-tag inclusion threshold is honored — a dev-tagged asset is included only when it maps to one of the four incident-flavored tests (`review-guidance` alone does not include a dev-relevant asset); floor `ai-assets.md` is non-promotable (no row used as cross-layer grounding for an implementation claim); empty repos record `none-found (searched scope)`; a capability-gap + `glob-fallback = partial-coverage` note is recorded when the AI-guidance-asset discovery capability was unavailable.
 

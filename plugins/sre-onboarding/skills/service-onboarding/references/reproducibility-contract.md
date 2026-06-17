@@ -1,0 +1,173 @@
+# Reproducibility Contract
+
+Canonical home for the operational definition of a reproducible KB, the input/run lock schema, normalized evidence ledger schema, stable-ID algorithm, canonical ordering, decidable predicates, render-from-ledger contract, and incremental changed-surface closure rules.
+
+## Operational definition
+
+A KB run is **reproducible** when: given the same locked inputs (§ Input/run lock), the same capability reachability, and the same evidence snapshot/window, a re-run produces:
+
+1. The same artifact tree (manifest-defined files present/absent per status codes and predicate outcomes).
+2. The same stable IDs assigned to the same subjects.
+3. The same fact rows with equivalent content, evidence citations, trust grades, and canonical placements.
+4. Semantically equivalent narrative (same claims, same caveats) — not byte-identical prose.
+5. The same gap/open-thread set, and the same drop-reason for each dropped candidate.
+
+**Not required for reproducibility:** prose phrasing, whitespace, section ordering within prose blocks, or the exact wording of verification-queue actions.
+
+**Source-derived facts are reproducible.** Live telemetry and incident overlay evidence is reproducible only if snapshotted or if the live-evidence mode is recorded as `attempted` or `disabled` (not pretended to be deterministic). Record the mode honestly.
+
+## Input/run lock schema
+
+Record before scouting begins. Store as `_run-lock.yaml` in the transient run-root (never in the committed KB). The committed provenance header summarizes these fields.
+
+| Field | Type | Notes |
+|---|---|---|
+| `service-identity` | string | canonical service slug; matches `service.yaml:name` |
+| `manifest-version` | string | artifact-manifest version this run targets (e.g., `1.0`) |
+| `source-roots[]` | path list | local roots where repos are checked out |
+| `repo-names[]` | string list | names matching `service.yaml:repos[].name` |
+| `repo-branches[]` | string list | one per repo, same order |
+| `repo-SHAs[]` | string list | one per repo at scan date; must be exact, not approximate |
+| `live-evidence-mode` | enum | `disabled` / `attempted` / `snapshot` |
+| `overlay-window` | string | e.g., `90d` or `none`; must be explicit |
+| `capability-map[]` | record list | `capability \| reachable(yes/no/partial) \| probe-result` |
+| `prior-kb-state-hash` | string | SHA of prior committed KB root, or `none` for first-time |
+| `scan-date` | ISO date | date the run was initiated |
+
+A run is only reproducible relative to its locked input set. Changing any field (even adding one new repo) produces a new distinct run; do not compare outputs across different input locks.
+
+## Normalized evidence ledger schema
+
+The ledger is the central data structure. Builders fill artifact schemas from ledger rows; they never draft KB pages directly from exploration.
+
+**Transient vs committed ledger.** During the run, `_ledger.toon` in the transient run-root is the full working ledger. After Phase 5, a redacted subset is written to `00-index/evidence-ledger.toon` in the committed KB — the committed replay surface. The done gate requires the committed ledger to exist and be current. Incremental runs MUST read `00-index/evidence-ledger.toon` from the prior committed KB to establish prior record statuses; they must not read the prior transient run-root artifact (which may not exist). No secrets, raw PII, or restricted payloads in the committed ledger.
+
+**Row schema:**
+
+`record-id | claim-class | normalized-subject | predicate-inputs | evidence | trust-label | grounding_type | rule_status | confidence | blast-radius-if-wrong | destination | status | verify-later`
+
+| Column | Values / Notes |
+|---|---|
+| `record-id` | stable ID (see § Stable ID algorithm) |
+| `claim-class` | `control/auth · config/secret · edge/dependency · failure-mode · concept · observability · ownership/escalation · overlay · ai-asset` |
+| `normalized-subject` | canonical slug for the fact's subject (service, unit, repo, edge, signal, concept) |
+| `predicate-inputs` | which decidable predicate(s) were evaluated; comma-separated predicate names |
+| `evidence` | `file:line` or typed anchor; re-resolved after generation |
+| `trust-label` | `verified/observed · source-inferred/declared · docs-only · suspected ⚠️` |
+| `grounding_type` | `repo-source · live-telemetry · incident-overlay · monitor-history · docs-only · manual-curated` |
+| `rule_status` | `not-applied · applied · blocked` |
+| `confidence` | `high · medium · low · unknown` |
+| `blast-radius-if-wrong` | free text: what breaks or who is affected if this claim is incorrect; `unknown` when scope is unclear |
+| `destination` | canonical artifact path + stable-ID anchor where this row will be rendered |
+| `status` | `promoted · duplicate · stale · non-material · sensitive-unsafe · superseded · open:escalated · rejected` |
+| `verify-later` | exact action: source class, join key, expected proof; or `none` |
+
+**Status / drop-reason taxonomy:**
+
+| Status | Meaning |
+|---|---|
+| `promoted` | rule applied/blocked, evidence cited, trust/grounding justified, destination recorded |
+| `duplicate` | same claim already promoted to same destination with equal or stronger evidence |
+| `stale` | source anchor disappeared or unverified past freshness threshold |
+| `non-material` | investigated; does not meet any incident-materiality trigger |
+| `sensitive-unsafe` | contains secrets, raw PII, or restricted payload; blocked from KB |
+| `superseded` | stronger evidence for same claim was found in same run |
+| `open:escalated` | decisive evidence unreachable in this run; exact gap and action named |
+| `rejected` | investigated and unsupported; searched scope cited |
+
+## Stable ID algorithm
+
+IDs are assigned to subjects before rendering. Assignment is deterministic: derived from a normalized source key, not from row order or discovery sequence. Collision suffix appended from the first 6 chars of the SHA-1 of the full source key — not an incrementing integer.
+
+**ID prefixes and source keys:**
+
+| ID pattern | Subject | Source key |
+|---|---|---|
+| `svc.<slug>` | service identity anchor | normalized service name |
+| `repo.<slug>` | per-repo floor root | repo name (normalized) |
+| `topo.unit.<unit-slug>` | deployable unit or operational plane | normalized unit name from deployment manifest |
+| `topo.edge.<caller>.<callee>` | topology edge | `<caller-unit-slug>.<callee-unit-slug>.<kind>` |
+| `obs.source.<source-slug>` | observability source / telemetry table | normalized source name from discovery source |
+| `obs.signal.<symptom>.<source>` | canonical signal | `<symptom-family-slug>.<source-slug>` |
+| `fk.<symptom-family>.<mechanism>` | failure-knowledge signature family | `<symptom-slug>.<mechanism-slug>` |
+| `asset.<repo>.<path-hash>` | AI-guidance asset | `<repo-slug>.<first-6-of-path-sha>` |
+
+**Slug rules:** lowercase alphanumeric + hyphens only; strip punctuation; collapse whitespace to hyphen; max 48 chars; truncate at last hyphen boundary. Example: `"Query Engine Web App"` → `query-engine-web-app`.
+
+**ID stability invariant:** once assigned, a stable ID is never recycled for a different subject. If a subject moves, update `00-index/core-map.md`. If a subject splits, mint scoped child IDs (`fk.parent.mechanism-a`, `fk.parent.mechanism-b`) and add a supersession pointer in core-map.
+
+## Canonical ordering
+
+Apply in priority order within any artifact table:
+
+1. **Manifest order** — follow the artifact's defined section sequence from `references/artifact-manifest.md`.
+2. **Category enum** — rows within a section sort by the canonical enum order for that column.
+3. **Stable ID** — within same category, sort by stable ID lexically ascending.
+4. **Evidence priority** — tie-break: `verified/observed` > `source-inferred/declared` > `docs-only` > `suspected ⚠️`.
+5. **Lexical path** — final tie-break: source path lexical ascending.
+
+## Decidable predicates
+
+Predicates are evaluated against evidence before any artifact is rendered. Record each predicate evaluation as `predicate-inputs` in the ledger row.
+
+### P1 — Deployable-unit enumeration
+
+A unit is enumerated iff ≥1 of: (a) has a deployment/runtime manifest (container spec, service config, scheduler config); (b) is explicitly exposed as a runnable surface; (c) is referenced as a distinct operational entity in ownership or on-call data. Operational planes (data, control, telemetry) are first-class units even with no app entry point.
+
+### P2 — Concept inclusion
+
+A concept is included in `service/concept-model.md` iff ≥2 of 4 hold: (a) appears in telemetry/log/query dimensions; (b) drives routing/partitioning/ownership/blast-radius; (c) encodes lifecycle/state/process order; (d) is needed to map symptom to root cause/mitigation/owner. Component/repo/deployable names alone do not qualify.
+
+### P3 — Incident-material repo
+
+A repo is incident-material iff ≥1 mined fact meets a trigger: incident-routing | blast-radius | failure-discrimination | ownership/escalation | high-risk operational change. A repo with zero qualifying facts is `not-material` with searched scope. Each `deep/` row cites its `materiality-category`.
+
+### P4 — AI-asset catalog inclusion
+
+An asset is included in `00-index/ai-asset-catalog.md` iff it maps to ≥1 named test from the routing set: `incident-routing | ownership/escalation | observability | failure-discrimination | review-guidance`. Dev-relevant assets are included ONLY when they map to one of the four incident-flavored tests; `review-guidance` alone does not include a dev-relevant asset. Everything else stays floor-only (`kb/<repo>/ai-assets.md`).
+
+### P5 — Source-catalog inclusion
+
+An observability source is included in `observability/source-catalog.md` iff: (a) a telemetry emission name, table name, metric name, or log stream was discovered in repo source, manifests, or docs; or (b) a live probe confirmed the source is reachable. A mention of a source name in a doc is sufficient for a `docs-only` row; it is not sufficient for a `source-inferred/declared` row without a code/config discovery.
+
+### P6 — Failure-signature three-way routing
+
+Route each non-rejected signature family deterministically:
+
+1. `promoted` → dedicated `failure-knowledge/<id>.md` iff ≥1 holds: (a) traced to a confirmed incident record with discriminator evidence; (b) ≥2 independent source signals (for example, telemetry + code, or telemetry + overlay); (c) independently reviewed with grounded evidence.
+2. `secondary` → `failure-knowledge/secondary-signatures.md` iff it does not meet promotion but has exactly one reusable key (recurrence OR cross-source mechanism) and an actionable discriminator.
+3. `candidate` → `failure-knowledge/candidate-signatures.md` for all other non-rejected patterns with searched scope and verify-later action.
+
+The routing decision is recorded in `failure-knowledge/README.md` and in the evidence ledger through `destination` and `predicate-inputs`; it is not an extra status column in signature files.
+
+### P7 — Open/escalated validity
+
+`open:escalated` is valid iff: (a) the decisive evidence is genuinely unreachable in this run (not just inconvenient); (b) the exact gap is named; (c) a concrete verify-later action is recorded; (d) reachable static paths were tried first. Naming unverified scope without trying reachable paths does not discharge a row.
+
+## Render-from-ledger contract
+
+1. **No direct page drafting from exploration.** Scouts produce normalized candidate records. Builders classify records, evaluate predicates, and assign ledger statuses. Only then do builders render artifact tables by projecting `promoted` rows into their declared `destination` using the manifest schema.
+2. **Narratives summarize records and cite canonical IDs.** Any prose section in a KB artifact derives from promoted ledger rows; each claim cites the `record-id` or equivalent typed anchor.
+3. **Gaps are ledger-derived.** A `none-found` gap note means no record with a matching subject and class reached `promoted` status; it must cite the searched scope from the `rejected` or `open:escalated` rows, not from inference.
+4. **Idempotency test.** A re-render from the same locked ledger must produce the same artifact content. If re-rendering changes an artifact, a ledger row changed — that is a mutation event requiring a new ledger version, not silent re-rendering.
+
+## Incremental changed-surface closure
+
+When `mode = incremental`, the input lock includes the prior KB state hash and old repo SHAs. The closure rule determines which records must be re-mined.
+
+### Changed-surface → affected record classes → destination artifacts
+
+| Changed surface | Re-mine record classes | Destination artifacts to re-render |
+|---|---|---|
+| repo source (entry-points, modules, contracts, invariants) | `edge/dependency · control/auth · observability · concept · failure-mode` | `kb/<repo>/` floor; `topology/`; `failure-knowledge/`; `observability/source-catalog.md` |
+| deployment/runtime manifests | `edge/dependency · config/secret · ownership/escalation` | `topology/per-deployable-units.md`; `topology/service-graph.md`; `topology/endpoints-ports-catalog.md` |
+| telemetry/observability config | `observability` | `observability/source-catalog.md`; `observability/canonical-signals.md`; `observability/join-keys.md` |
+| ownership/escalation config | `ownership/escalation` | `service/ownership.md`; `service/access-escalation.md`; `00-index/ownership.toon` |
+| incident overlay source (new window) | `overlay` | `overlays/incidents/`; `00-index/incident-clusters.toon` |
+| concept/glossary sources | `concept` | `service/concept-model.md`; `service/glossary.md`; `kb/<repo>/concepts.md` |
+| docs (human docs only) | `failure-mode · concept · observability` (suspected ⚠️ cap) | `failure-knowledge/`; `service/`; `observability/` (with `docs-only` trust cap) |
+| AI-guidance assets | `ai-asset` | `kb/<repo>/ai-assets.md`; `00-index/ai-asset-catalog.md` |
+
+**Preservation contract:** higher-grade ledger records are preserved unless the new run produces stronger evidence (see `references/kb-mutation.md` for evidence-strength comparison). Re-graded and superseded records carry a mutation status; they are never silently replaced.
+
+**Final KB clean target-state:** no migration breadcrumbs, no stale transitional notes, no `_delta` or `_old` artifacts in the committed deliverable. The delivered KB must read as a current-state document grounded in the locked inputs of this run.
