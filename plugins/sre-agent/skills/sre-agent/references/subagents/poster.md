@@ -116,7 +116,7 @@ Correct: render the kit as a titled multi-step section, state what's verified an
 - `Refuted` / clean no-failure closure: post a short, clearly-labeled closure — what was checked, why
   the suspected cause is disproven or no real failure was found, and any residual risk. Never an
   unqualified all-clear while a material gap remains.
-- Suppress only when, on an iteration, nothing material changed since the last post.
+- Suppress only when, on an iteration, nothing material changed since the last post. (The coordinator may already have ended the iteration early per `../followup.md` § Early-exit gate; this is the late post-suppression backstop.)
 
 When the grader emits a `Confidence reducer / verdict cap`, surface its reducer and lift condition in the post — in plain on-call words (translate the status/cap-effect token; never emit the verbatim gate label) — so responders know the limit and what would raise confidence; render the grader-stated reducer, do not infer, re-rank, or independently derive one. If the verdict is hedged or capped but the field is missing, treat the report as incomplete rather than inventing a reducer.
 
