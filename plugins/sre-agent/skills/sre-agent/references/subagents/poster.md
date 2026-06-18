@@ -59,7 +59,9 @@ capability dry-run gated)`, or `report-only (no posting capability)`.
 
 Compose the post body for the incident system format supported by the capability, in this order:
 1. **AI-generated notice — required first line:** clearly identify the update as AI-generated / automated
-   investigation content. Never post live without this notice.
+   investigation content. Never post live without this notice. Some capabilities OWN this disclosure (and
+   the idempotency marker) and inject it themselves; when they do, pass it through and do not duplicate it.
+   The disclosure must render plainly visible — never rely on stylable or collapsible markup to carry it.
 2. **Capability-owned idempotency/audit marker:** include or pass through the marker exactly as the
    posting capability defines it. The capability owns the marker format, visibility, audit fields, and
    target-specific duplicate-detection contract. Do not invent a marker format in the coordinator.
@@ -72,6 +74,16 @@ Compose the post body for the incident system format supported by the capability
 ### Post-body structure
 
 Concise but never a blurb: project the content-bearing `6_report` always-sections (`artifact-contracts.md` §`6_report/`) into an incident-safe post; keep a recognizable, verdict-scaled skeleton — **Verdict + #1 action** -> **what we observe** (the measured failure in plain service terms) -> **mechanism, or the open upstream "why"** -> **impact & scope** -> **timeline when timing carries content** (onset distinct from detection) -> **what we checked / ruled out** (when it changes confidence or closes the suspected cause) -> **safe owner-routing / correlation references if any** -> **next check / reply-back**. This spine is non-exclusive: any other content-bearing `6_report` always-section still projects when incident-safe. Scale depth to the verdict and collapse a thin section to a one-line bullet, but keep the skeleton recognizable; omit only a section with no incident-safe content; the collapse allowance never applies to a required Manual Investigation Kit — when a kit is required (Inconclusive-blocked or a manual-handoff-capped verdict) it renders in full as the titled, multi-step kit section (per §Verdict policy / `artifact-contracts.md` §`6_report/`), never collapsed to a bullet or a generic 'next checks' line. A short verdict (`Proximate-only`, `Inconclusive-blocked`, or closure) stays structured, not a paragraph blurb. A collaborator-additive or duplicate post follows the additive shape instead (see §`6_report/` Post mode) — **the addition / evidence delta -> why it matters -> owner-routed next action/reference**.
+
+**Rich rendering when supported:** when the posting capability supports structured/visual rendering
+(headings, tables, colored badges, a divider, collapsible sections), prefer a *scannable* layout over a
+dense text wall: lead with the verdict and a short TL;DR, surface state as badges, keep a narrative for
+what/when/where/how plus a timeline table, make the owner's single next action prominent, and fold a long
+manual kit into a collapsible section — while preserving the same recognizable skeleton, verdict scaling,
+the honesty floor, and the leak-scrub. Any SEV or incident-state badge MUST be grounded in incident
+metadata, never guessed; verdict/confidence badges describe your investigation. Keep the disclosure notice
+and any required kit plainly visible — never behind a collapsed or styled-to-hide element. When the
+capability cannot render structure, fall back to the same skeleton in plain text/markdown.
 
 **Idempotency — verify absence before posting, fail CLOSED:**
 - Ask the live incident-posting capability to perform its target-specific duplicate/idempotency check
