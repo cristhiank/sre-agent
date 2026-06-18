@@ -102,9 +102,19 @@ Schema: `stable-id | kind | canonical-home | aliases | superseded-by | notes`. C
 
 Committed replay surface for all terminal ledger records from the most recent run. Required for incremental determinism: subsequent runs read this artifact to establish prior record statuses and avoid overwriting higher-grade facts.
 
-**`@meta` block (provenance lock summary — all replay-relevant fields):** `manifest-version | scan-date | live-evidence-mode | overlay-window | prior-kb-state-hash | capability-map-summary`. `capability-map-summary` embeds each capability's reachability result (`capability: reachable|partial|unreachable + probe-result summary`) rather than pointing to a transient file. This block is the authoritative committed provenance lock; `service.yaml` carries repo/SHA only.
+**`@meta` block (provenance lock summary — all replay-relevant fields):** `manifest-version | scan-date | live-evidence-mode | overlay-window | prior-kb-state-hash | capability-map-summary`. `capability-map-summary` embeds each capability's reachability result using the canonical vocabulary from `references/reproducibility-contract.md §Live-capability vocabulary` (`disabled-by-scope | attempted-unreachable | reachable-snapshot` + probe-result summary) rather than pointing to a transient file. This block is the authoritative committed provenance lock; `service.yaml` carries repo/SHA only.
+
+**`@run-trail` block (mandatory):** records how the run was orchestrated. Contains:
+- **dispatch-decision sub-record (one per run):** `dispatch-available | dispatch-required | used | packet-evidence | degraded-reason`. `single-pass` or `degraded` dispatch-mode is valid ONLY when `dispatch-available=no` or `dispatch-required=no`; if `dispatch-available=yes AND dispatch-required=yes AND used=no`, the run must ABORT.
+- **stage rows (one per executed stage):** `stage | worker-role | packet-id-or-hash | searched-scope | merge-status | outcome`.
+- **dispatch-mode summary:** `dispatched | single-pass | degraded` — derived from the dispatch-decision record.
+Must be committed to this file BEFORE any transient scratch or `_work/` directories are deleted.
+
+**`@audit` block (mandatory):** records the independent audit result. Fields: `auditor-identity/capability | non-builder-attestation(yes/no) | sampled-artifacts | findings | closure`. Auditor must differ from any builder or orchestrator recorded in `@run-trail`. Must be committed to this file BEFORE any transient scratch or `_work/` directories are deleted.
 
 **`@schema` block + data rows:** all terminal records from the normalized evidence ledger. Same schema as `references/reproducibility-contract.md`, redacted of secrets and raw restricted payloads. Records with `status = promoted`, `rejected`, `non-material`, `stale`, `open:escalated`, `sensitive-unsafe`, `superseded`, or `duplicate` are all included. Transient `_ledger.toon` in the run-root is the full working copy; this committed artifact is the redacted, finalized subset.
+
+**`@promote-up` block:** records cross-layer promote-up events. Schema: one row per event: `source_cell | destination_cell | payload`. Each row documents a service-higher implementation claim's floor-cell origin. Referenced by audit items D and F.
 
 Gap records for `deep/` predicate outcomes (`open:escalated` or `non-material`) live here, not as schema rows in `contracts.toon`/`invariants.toon`.
 

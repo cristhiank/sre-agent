@@ -14,9 +14,11 @@ Every promoted claim upgrades the evidence line every doc already writes:
 
 `class | evidence(file:line or typed anchor) | trust-label | grounding_type | rule_status | confidence | blast-radius-if-wrong | verify-later`
 
-Classes: control/auth · config/secret · edge/dependency · failure-mode · concept · observability · ownership/escalation · overlay · ai-asset.
+Claim classes: `references/reproducibility-contract.md §Canonical enums`.
 
 ## Trust labels
+
+Canonical value set: `references/reproducibility-contract.md §Canonical enums`.
 
 | Label | Meaning |
 |---|---|
@@ -29,21 +31,16 @@ A design-time bootstrap with no live signal reaches `source-inferred/declared` a
 
 ## `grounding_type` axis
 
-`grounding_type` is separate from trust:
-
-- `repo-source`
-- `live-telemetry`
-- `incident-overlay`
-- `monitor-history`
-- `docs-only`
-- `manual-curated`
+`grounding_type` is separate from trust. Canonical values: `references/reproducibility-contract.md §Canonical enums`.
 
 Implementation claims require `repo-source` grounding. Service recurrence, ownership/escalation, live schema, monitor history, and incident overlay claims may carry non-repo grounding; they still require typed evidence or they fail. Do not force repo-cell-or-fail where the claim is not an implementation claim. AI-guidance asset rows in the floor `kb/<repo>/ai-assets.md` carry `grounding_type` `docs-only` or `manual-curated`. The `00-index/ai-asset-catalog` is pointer-only and inherits grounding via the `asset-ref` pointer to the floor row; it carries no grounding column of its own.
 
 ## Two axes — `rule_status` ⊥ `trust-label`
 
-- `rule_status`: `not-applied | applied | blocked`. Did the class rule run against reachable evidence?
-- `trust-label`: `verified/observed | source-inferred/declared | docs-only | suspected ⚠️`.
+Canonical values for both axes: `references/reproducibility-contract.md §Canonical enums`.
+
+- `rule_status`: did the class rule run against reachable evidence?
+- `trust-label`: what evidence strength supports the claim?
 
 Promotion rule: evidence may rise above suspected/presence-only only after `rule_status=applied` or `rule_status=blocked` with the block recorded. `applied` does not imply a live signal. Example: a cold bootstrap can be `rule_status=applied`, `trust-label=source-inferred/declared`, `grounding_type=repo-source`.
 
@@ -84,17 +81,86 @@ Good: `0 rows from source S with filter F/window W; non-dispositive because sour
 
 ## Mechanical reproducibility audit
 
-Runs before done; distinct from the independent completeness audit. Checks structural and schema integrity to ensure the run is reproducible against its locked inputs.
+Runs first, before done; distinct from the independent completeness audit. Each item has a scope, procedure, and explicit PASS/FAIL condition. All items (A–K) must PASS before the done gate clears. Canonical enum values referenced below: `references/reproducibility-contract.md §Canonical enums`.
 
-Audit items (all must pass):
-1. **Manifest completeness:** every mandatory artifact from `references/artifact-manifest.md` exists or has a recorded gap/capability-gap note; variable-slots exist iff their promotion predicate passed; no extra transient artifacts in deliverable root.
-2. **Schema conformity:** each artifact's table columns match the manifest schema exactly; no extra or missing columns; no informal substitutes.
-3. **No duplicate canonical facts:** each fact appears in exactly one canonical home; cross-references are pointers (`see <canonical-home>:<stable-id>`), never copies; `00-index/ai-asset-catalog` is pointer-only.
-4. **Predicate inputs recorded:** every promoted ledger row has `predicate-inputs` filled with the name(s) of the evaluated predicate(s).
-5. **Stable IDs sorted:** artifact tables are sorted per canonical ordering rules from `references/reproducibility-contract.md`; stable IDs are not sequential integers derived from row order.
-6. **Host-agnostic steering vs concrete output facts:** skill instruction content contains no concrete tool/product/cluster names; KB output artifacts cite concrete names only where evidence-grounded and necessary for fidelity.
-7. **Sanitization:** no secrets, raw PII, or restricted payloads in KB artifacts; sensitive values are pointers + sanitized purpose only; confirm across `kb/<repo>/ai-assets.md` rows and overlays files.
-8. **No unverified absence claims:** every `no X found` statement names searched scope and still-unverified scope.
+### A. Artifact presence & scope
+
+**Scope:** all manifest-declared artifacts (`references/artifact-manifest.md`) + `kb/**/deep/*.toon`.  
+**Procedure:** for every M/G/P/V artifact, check presence and predicate outcome against ledger evidence. Record the count of files scanned and the explicit file-glob scope.  
+**PASS:** every M artifact FILE is present (a `none-found`/gap note is content within that file about what was found — it is never a substitute for the file's existence); every P artifact is present iff its predicate outcome is true (gap record in `00-index/evidence-ledger.toon` required for inconclusive predicates); every G artifact present or has a capability-gap note; every V artifact present for each passing promotion predicate; no extra transient or scratch artifacts in deliverable root; `kb/**/deep/*.toon` included in audit scope; file count and glob scope reported.  
+**FAIL:** any M artifact FILE absent; any P artifact present for a false/inconclusive predicate without a gap record; any G artifact absent without a capability-gap note; any V artifact missing for a true predicate; any transient/scratch artifact in the deliverable root; deep/*.toon excluded from audit scope.
+
+### B. Schema arity
+
+**Scope:** all artifacts incl `kb/**/deep/*.toon` — every markdown table and every TOON `@data` row.  
+**Procedure:** count cells in each markdown table row vs header column count; count fields in each TOON `@data` row vs `@schema` column count.  
+**PASS:** every row's cell/field count equals the header/schema count.  
+**FAIL:** any row with wrong arity (too few or too many). Report `file:line` of each violation. A column-shifted row (e.g., merged cell pushing data right) is a FAIL.
+
+### C. Enum conformance
+
+**Scope:** all artifacts incl `kb/**/deep/*.toon`.  
+**Procedure:** for every `trust-label`, `grounding_type`, `claim-class`, `status`, and `rule_status` cell in any table or TOON row, check membership in the canonical set defined in `references/reproducibility-contract.md §Canonical enums`. Layer words (`floor`, `core`, `gap`, `floor-promotion`) used as `grounding_type` values and any `*-doc` or `code+*` compound tokens are not in the canonical set.  
+**PASS:** every enum-column value is a member of its canonical set.  
+**FAIL:** any non-canonical value. Report `file:line` and the unknown value.
+
+### D. Cross-layer grounding + promote-up coverage
+
+**Scope:** service-higher artifacts (`service/`, `topology/`, `observability/`, `failure-knowledge/`) and `@promote-up` records in the ledger.  
+**Procedure:** for every service-higher implementation row: (1) verify it cites a `kb/<repo>/…` floor cell; (2) verify there is a matching `@promote-up` entry (`source_cell -> destination_cell -> payload`) in the ledger, OR a cited drop/gap in `00-index/evidence-ledger.toon`. Count source implementation rows vs matching promote-up+gap total.  
+**PASS:** every service-higher implementation row cites a floor cell; promote-up count + gap count equals source implementation row count (no silent under-coverage).  
+**FAIL:** any service-higher implementation row citing raw `docs/`, `sources/`, or a non-floor path directly; any row with neither a matching `@promote-up` nor a cited drop/gap; counts do not match.
+
+### E. Escalation earned
+
+**Scope:** `00-index/evidence-ledger.toon` — every row with `status = open:escalated`.  
+**Procedure:** for each `open:escalated` row: (1) verify proof fields `reachable-static-probes-tried`, `attempted-source-classes`, and `why-unreachable` are present and non-empty; (2) verify no same-subject static evidence is both reachable AND dispositive — i.e., sufficient to settle (promote or reject) the specific claim without additional live evidence. Non-implementation claims (live-evidence recurrence, ownership, monitor history) are judged against whether the reachable static evidence actually settles THAT specific claim, not just whether static evidence on the subject exists.  
+**PASS:** every `open:escalated` row has all three proof fields; no `open:escalated` row has same-subject dispositive static evidence reachable in-repo.  
+**FAIL:** any `open:escalated` row missing a proof field; any `open:escalated` row for which same-subject static evidence is reachable AND dispositive for that specific claim (must be promoted or rejected instead).
+
+### F. Single-canonical-home consistency
+
+**Scope:** all KB artifacts — evidence ledger, deep rows, topology tables, endpoints catalog, README open-thread summary, `@promote-up` records.  
+**Procedure:** group all fact occurrences by `record-id`/normalized subject/surface across the full artifact set. For each group with multiple occurrences: verify exactly one is the canonical home record; verify all others are pointer references (`see <canonical-home>:<stable-id>`) with MATCHING status/trust/grounding. Verify README open-thread summary matches the ledger's terminal `open:escalated` set exactly.  
+**PASS:** each fact has exactly one canonical home; all cross-references are pointers with matching fields; README open-thread summary equals the ledger's terminal `open:escalated` set.  
+**FAIL:** any fact with two or more non-pointer occurrences; any derived copy with differing status/trust/grounding; README open-thread summary differs from the ledger's `open:escalated` set.
+
+### G. Global sanitization
+
+**Scope:** EVERY committed KB artifact under `services/<service>/` — not only `kb/<repo>/ai-assets.md` and overlays.  
+**Procedure:** scan all files for sensitive operational metadata — application/client/tenant/subscription IDs, GUID principals, secrets/tokens, chat/collaboration/portal/webhook URLs, raw operational endpoint URLs. For each match: verify it is a pointer + sanitized purpose only. Non-sensitive concrete source names (telemetry table names, log stream names, join key names) remain allowed when evidence-cited and necessary for incident fidelity.  
+**PASS:** no raw sensitive operational metadata value in any committed KB artifact; every flagged pattern is a pointer + sanitized purpose.  
+**FAIL:** any raw application/client/tenant/subscription ID, GUID principal, secret/token, or chat/collaboration/portal/webhook URL in any committed artifact. Report `file:line`.
+
+### H. Run-trail & audit present
+
+**Scope:** `00-index/evidence-ledger.toon`.  
+**Procedure:** verify (1) `@run-trail` block exists with a dispatch-decision sub-record containing all 5 fields (`dispatch-available | dispatch-required | used | packet-evidence | degraded-reason`), a `dispatch-mode` value, and ≥1 stage row (`stage | worker-role | packet-id-or-hash | searched-scope | merge-status | outcome`); (2) `@audit` block exists with all required fields (`auditor-identity/capability | non-builder-attestation | sampled-artifacts | findings | closure`); (3) auditor identity differs from builder/orchestrator identities in `@run-trail`; (4) `non-builder-attestation=yes`; (5) `sampled-artifacts`, `findings`, and `closure` are non-empty; (6) dispatch-decision does NOT show `dispatch-available=yes AND dispatch-required=yes AND used=no` — this combination is a HARD FAIL regardless of the `dispatch-mode` value recorded.  
+**PASS:** both blocks exist and are well-formed; dispatch-decision sub-record present with all 5 fields; no ABORT-condition (`dispatch-available=yes AND dispatch-required=yes AND used=no`) present; auditor ≠ builder/orchestrator; all required sub-fields are non-empty.  
+**FAIL:** either block absent; dispatch-decision sub-record missing or any of its 5 fields absent; dispatch-decision shows `dispatch-available=yes AND dispatch-required=yes AND used=no`; any `@audit` field missing or empty; auditor matches a builder or orchestrator; `non-builder-attestation=no`. Self-graded audit does not count.
+
+### I. Live-mode honesty
+
+**Scope:** `00-index/evidence-ledger.toon @meta` capability-map-summary; all KB artifacts using capability/live state words.  
+**Procedure:** for every capability-map-summary entry and every live/capability state reference in KB artifacts: verify the value is from the canonical vocabulary (`references/reproducibility-contract.md §Live-capability vocabulary`): `disabled-by-scope | attempted-unreachable | reachable-snapshot`. For any `attempted-unreachable` entry: verify a probe-result is recorded (capability name, canonical target, auth-vs-absence result).  
+**PASS:** every capability state uses canonical vocabulary; every `attempted-unreachable` entry has a recorded bounded probe result.  
+**FAIL:** bare `unreachable` or `unknown` without probe proof; any non-canonical state word; any `attempted-unreachable` entry without a probe-result record.
+
+### J. Predicate inputs recorded
+
+**Scope:** `00-index/evidence-ledger.toon` — all rows with `status = promoted`.  
+**Procedure:** for every promoted row, verify the `predicate-inputs` field is non-empty and names at least one predicate from `references/reproducibility-contract.md §Decidable predicates`.  
+**PASS:** every promoted row has a non-empty `predicate-inputs` field naming at least one predicate.  
+**FAIL:** any promoted row with an empty or absent `predicate-inputs` field.
+
+### K. Canonical ordering & stable-ID format
+
+**Scope:** all artifact tables and `00-index/evidence-ledger.toon` data rows.  
+**Procedure:** (1) verify each artifact table is sorted per the canonical ordering rules from `references/reproducibility-contract.md §Canonical ordering` (manifest order → category enum → stable ID → evidence priority → lexical path); (2) verify every stable ID matches a recognized prefix+slug pattern from `references/reproducibility-contract.md §Stable ID algorithm` (`svc.` / `repo.` / `topo.unit.` / `topo.edge.` / `obs.source.` / `obs.signal.` / `fk.` / `asset.`) followed by a lowercase-alphanumeric-hyphen slug; (3) verify no stable ID is a bare integer or appears to derive from row-position order.  
+**PASS:** all tables sorted per canonical ordering; all stable IDs match a recognized prefix+slug pattern; no integer-sequence IDs present.  
+**FAIL:** any table with rows out of canonical order; any stable ID that is a bare integer or lacks a recognized prefix; any ID that appears to derive from row order rather than subject normalization.
+
+---
 
 ## Independent completeness audit
 

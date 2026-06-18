@@ -16,7 +16,19 @@ Scout outputs are candidates only. A builder classifies and applies rules before
 
 ## Dispatch preflight
 
-Determine whether awaitable dispatch exists. If not, record a degraded/gap note in the run trail and proceed minimally; never pretend a dispatch happened.
+Before dispatching, record a dispatch-decision into the `@run-trail` block of `00-index/evidence-ledger.toon`:
+
+`dispatch-available | dispatch-required | used | packet-evidence | degraded-reason`
+
+- `dispatch-available`: `yes` if an awaitable dispatch mechanism is confirmed reachable; `no` only after a bounded probe fails.
+- `dispatch-required`: `yes` for any run with ≥1 scout or builder partition (all first-time and incremental runs).
+- `used`: `yes` when dispatched workers returned merged packets; `no` otherwise.
+- `packet-evidence`: packet IDs or hashes of received worker outputs; `none` when `used=no`.
+- `degraded-reason`: reason dispatch was not used when `used=no`; `n/a` when `used=yes`.
+
+**ABORT rule:** if `dispatch-available=yes AND dispatch-required=yes AND used=no`, ABORT before any KB rendering; set `dispatch-mode=degraded` in `@run-trail`. Inline synthesis cannot satisfy the done gate when dispatch was available and required. Restart with dispatch enabled.
+
+**Degraded path:** if `dispatch-available=no` after a confirmed probe, set `dispatch-mode=degraded`, document the gap, and proceed minimally — never pretend dispatch happened.
 
 A required stage is complete only after output is received, cited, and merged. A handle or running status is not completion. Missing required packet blocks progression; write an explicit degraded/abort note instead of silently continuing.
 
@@ -95,7 +107,7 @@ Packets record searched scope, evidence classes used, gaps, claims promoted, and
 
 **Catalog-inclusion rule** (decided here, not in the catalog): an asset is included in `00-index/ai-asset-catalog` only when it maps to ≥1 named materiality test from the routing set `incident-routing | ownership/escalation | observability | failure-discrimination | review-guidance`. Dev-relevant assets are included ONLY when they map to one of the four incident-flavored tests (`incident-routing | ownership/escalation | observability | failure-discrimination`); `review-guidance` alone does not include a dev-relevant asset. Everything else stays floor-only. Each catalog row records the named materiality test as its `why-included` basis, carries the anti-authority marker, and inherits grounding via the `asset-ref` pointer to the floor row.
 
-**Auditor:** Runs the **mechanical reproducibility audit** (manifest completeness, schema conformity, no duplicate canonical facts, predicate inputs recorded, stable IDs sorted, host-agnostic steering vs concrete output facts, sanitization, no raw sensitive payloads) AND the **independent completeness audit** (adversarial sampling of inventory, ledger, CORE areas, deep contracts/invariants, source-catalog warning content, restricted-sources, telemetry-routing-card, promote-up records, mutation records when applicable, old-layout migration map, and Clean Deliverable Packet). Records findings and closure decision. Does not approve work it performed.
+**Auditor:** Runs the **mechanical reproducibility audit** (decidable checklist A–I: `references/verification-and-evidence.md §Mechanical reproducibility audit`) AND the **independent completeness audit** (adversarial sampling of inventory, ledger, CORE areas, deep contracts/invariants, source-catalog warning content, restricted-sources, telemetry-routing-card, promote-up records, mutation records when applicable, old-layout migration map, and Clean Deliverable Packet). Records findings and closure decision. Writes the `@audit` block in `00-index/evidence-ledger.toon` (auditor identity/capability, non-builder-attestation, sampled-artifacts, findings, closure). Does not approve work it performed.
 
 ## Onboarding vs curator
 

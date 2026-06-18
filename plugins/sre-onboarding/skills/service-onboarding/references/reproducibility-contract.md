@@ -36,6 +36,18 @@ Record before scouting begins. Store as `_run-lock.yaml` in the transient run-ro
 
 A run is only reproducible relative to its locked input set. Changing any field (even adding one new repo) produces a new distinct run; do not compare outputs across different input locks.
 
+## Live-capability vocabulary
+
+Canonical states for `capability-map-summary` entries in `00-index/evidence-ledger.toon @meta` and for any live/capability state recorded in KB artifacts. Any capability state not in this table is a FAIL in mechanical audit item I.
+
+| State | Meaning | Probe required? |
+|---|---|---|
+| `disabled-by-scope` | capability deliberately excluded from this run; no probe attempted | no |
+| `attempted-unreachable` | a bounded probe ran and failed; record capability name, canonical target, and auth-vs-absence result | yes — record probe-result |
+| `reachable-snapshot` | probe succeeded; evidence captured at scan date | yes |
+
+**Forbid bare `unreachable`** without a recorded bounded probe. Use `attempted-unreachable` + probe-result for any failed live probe. Use `disabled-by-scope` when excluded by design.
+
 ## Normalized evidence ledger schema
 
 The ledger is the central data structure. Builders fill artifact schemas from ledger rows; they never draft KB pages directly from exploration.
@@ -49,17 +61,17 @@ The ledger is the central data structure. Builders fill artifact schemas from le
 | Column | Values / Notes |
 |---|---|
 | `record-id` | stable ID (see § Stable ID algorithm) |
-| `claim-class` | `control/auth · config/secret · edge/dependency · failure-mode · concept · observability · ownership/escalation · overlay · ai-asset` |
+| `claim-class` | see `§Canonical enums` |
 | `normalized-subject` | canonical slug for the fact's subject (service, unit, repo, edge, signal, concept) |
 | `predicate-inputs` | which decidable predicate(s) were evaluated; comma-separated predicate names |
 | `evidence` | `file:line` or typed anchor; re-resolved after generation |
-| `trust-label` | `verified/observed · source-inferred/declared · docs-only · suspected ⚠️` |
-| `grounding_type` | `repo-source · live-telemetry · incident-overlay · monitor-history · docs-only · manual-curated` |
-| `rule_status` | `not-applied · applied · blocked` |
+| `trust-label` | see `§Canonical enums` |
+| `grounding_type` | see `§Canonical enums` |
+| `rule_status` | see `§Canonical enums` |
 | `confidence` | `high · medium · low · unknown` |
 | `blast-radius-if-wrong` | free text: what breaks or who is affected if this claim is incorrect; `unknown` when scope is unclear |
 | `destination` | canonical artifact path + stable-ID anchor where this row will be rendered |
-| `status` | `promoted · duplicate · stale · non-material · sensitive-unsafe · superseded · open:escalated · rejected` |
+| `status` | see `§Canonical enums` |
 | `verify-later` | exact action: source class, join key, expected proof; or `none` |
 
 **Status / drop-reason taxonomy:**
@@ -72,8 +84,20 @@ The ledger is the central data structure. Builders fill artifact schemas from le
 | `non-material` | investigated; does not meet any incident-materiality trigger |
 | `sensitive-unsafe` | contains secrets, raw PII, or restricted payload; blocked from KB |
 | `superseded` | stronger evidence for same claim was found in same run |
-| `open:escalated` | decisive evidence unreachable in this run; exact gap and action named |
+| `open:escalated` | decisive evidence unreachable in this run; exact gap and action named; requires proof fields `reachable-static-probes-tried`, `attempted-source-classes`, `why-unreachable`; invalid if same-subject reachable static evidence exists |
 | `rejected` | investigated and unsupported; searched scope cited |
+
+## Canonical enums
+
+This section is the single canonical home for KB enum value sets. All other files that need to reference these values MUST point here (`references/reproducibility-contract.md §Canonical enums`); they must not restate the value lists.
+
+| Enum | Canonical values |
+|---|---|
+| `claim-class` | `control/auth · config/secret · edge/dependency · failure-mode · concept · observability · ownership/escalation · overlay · ai-asset` |
+| `trust-label` | `verified/observed · source-inferred/declared · docs-only · suspected ⚠️` |
+| `grounding_type` | `repo-source · live-telemetry · incident-overlay · monitor-history · docs-only · manual-curated` |
+| `status` | `promoted · duplicate · stale · non-material · sensitive-unsafe · superseded · open:escalated · rejected` |
+| `rule_status` | `not-applied · applied · blocked` |
 
 ## Stable ID algorithm
 
@@ -142,7 +166,7 @@ The routing decision is recorded in `failure-knowledge/README.md` and in the evi
 
 ### P7 — Open/escalated validity
 
-`open:escalated` is valid iff: (a) the decisive evidence is genuinely unreachable in this run (not just inconvenient); (b) the exact gap is named; (c) a concrete verify-later action is recorded; (d) reachable static paths were tried first. Naming unverified scope without trying reachable paths does not discharge a row.
+`open:escalated` is valid iff: (a) the decisive evidence is genuinely unreachable in this run (not just inconvenient); (b) the exact gap is named; (c) a concrete verify-later action is recorded; (d) reachable static paths were tried first; (e) three required proof fields are present: `reachable-static-probes-tried` (list of static probe paths attempted), `attempted-source-classes` (classes of evidence attempted), `why-unreachable` (exact reason decisive evidence is not reachable). `open:escalated` is invalid if same-subject reachable static evidence exists — such rows must be promoted or rejected instead. Naming unverified scope without trying reachable paths does not discharge a row.
 
 ## Render-from-ledger contract
 

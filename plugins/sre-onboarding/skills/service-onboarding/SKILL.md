@@ -28,7 +28,7 @@ Select up front:
 </modes>
 
 <operating_model>
-Orchestration-only run. The orchestrating workflow dispatches and merges; it does not do deep evidence collection or synthesis inline. Two-speed: scouts DISCOVER normalized candidate records; builders CLASSIFY records, apply predicates, and RENDER assigned artifacts from the manifest — not freeform drafting. Two-layer: per-repo evidence FLOOR is built first, then service-higher CORE is DERIVED. Input lock + capability map come before scouting. Detailed dispatch partitions and mission briefs: `references/dispatch.md`.
+Orchestration-only run. The orchestrating workflow dispatches and merges; it does not do deep evidence collection or synthesis inline. Two-speed: scouts DISCOVER normalized candidate records; builders CLASSIFY records, apply predicates, and RENDER assigned artifacts from the manifest — not freeform drafting. Two-layer: per-repo evidence FLOOR is built first, then service-higher CORE is DERIVED. Input lock + capability map come before scouting. If dispatch is available AND required AND not used, ABORT before KB rendering and record degraded in `@run-trail`. Detailed dispatch partitions and mission briefs: `references/dispatch.md`.
 </operating_model>
 
 <invariants>
@@ -44,7 +44,7 @@ Ledger lifecycle details: `references/workflow.md`.
 </invariants>
 
 <evidence>
-Every promoted claim records `class | evidence | trust-label | grounding_type | rule_status | confidence | blast-radius-if-wrong | verify-later`. Trust labels: `verified/observed`, `source-inferred/declared`, `docs-only`, `suspected ⚠️`. Grounding types: `repo-source`, `live-telemetry`, `incident-overlay`, `monitor-history`, `docs-only`, `manual-curated`. `rule_status` is separate from trust; a design-time bootstrap with no live signal is source-inferred at best. Full normalized evidence ledger schema, stable ID algorithm, decidable predicates, and drop-reason taxonomy: `references/reproducibility-contract.md`. Rulebook and audit: `references/verification-and-evidence.md`.
+Every promoted claim records `class | evidence | trust-label | grounding_type | rule_status | confidence | blast-radius-if-wrong | verify-later`. `rule_status` is separate from trust; a design-time bootstrap with no live signal is source-inferred at best. Canonical enum values (trust-label, grounding_type, claim-class, status, rule_status): `references/reproducibility-contract.md §Canonical enums`. Full ledger schema, stable IDs, predicates: `references/reproducibility-contract.md`. Rulebook and audit checklist: `references/verification-and-evidence.md`.
 </evidence>
 
 <output_contract>
@@ -58,11 +58,11 @@ Deterministic spine: lock inputs + capability map → source enumeration + cheap
 <done_gates>
 Done/no-blocking-issues is invalid unless all hold:
 
-- Mode selected; input lock recorded per `references/reproducibility-contract.md`; `00-index/evidence-ledger.toon` committed with provenance lock summary and all terminal ledger records.
+- Mode selected; input lock recorded per `references/reproducibility-contract.md`; `00-index/evidence-ledger.toon` committed with provenance lock summary, `@run-trail`, `@audit`, and all terminal ledger records.
 - All mandatory artifacts from `references/artifact-manifest.md` present; variable-slots iff predicate passed; capability-gated artifacts present or gap noted; P-status artifacts present for true predicate outcomes, with the manifest-declared alternate artifact or evidence-ledger gap for false/inconclusive outcomes.
 - Normalized evidence ledger complete; every material thread is `promoted`, `rejected`, or `open:escalated`; every promoted claim has rule_status, trust-label, grounding_type, confidence, and re-resolved evidence.
 - Closed-world ban honored; no absence/independence claim without named searched + unverified scope.
-- Mechanical reproducibility audit passed per `references/verification-and-evidence.md`.
+- Mechanical reproducibility audit (A–K) passed per `references/verification-and-evidence.md §Mechanical reproducibility audit`: artifact presence, schema arity, enum+rule_status conformance, promote-up coverage, escalation proof, canonical-home consistency, global sanitization, run-trail/audit/dispatch-decision, live-mode honesty, predicate inputs, canonical ordering+stable IDs.
 - Cross-layer grounding holds for service-higher implementation facts.
 - Incident-material deep/ populated (P3) or `open:escalated` gap in evidence-ledger; non-material repos have `deep/not-material.md`.
 - Observability source-catalog CONSUMER WARNINGs complete with concrete source and join key.

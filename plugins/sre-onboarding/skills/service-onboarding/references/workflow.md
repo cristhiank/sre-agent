@@ -103,19 +103,11 @@ Apply `verification-and-evidence.md` rulebook. Re-resolve citations. Verify tele
 
 Fold in sanitized 90-day `overlays/incidents/` priors when reachable. Priors influence suspicion and routing; they do not redefine CORE truth. Priors older than the window roll off unless re-verified by a refreshing source change.
 
-**Mechanical reproducibility audit** (runs before done, distinct from the independent completeness audit):
-1. Manifest completeness: every mandatory artifact from `references/artifact-manifest.md` exists or has a recorded gap/capability note.
-2. Schema conformity: each artifact's table columns match the manifest schema; no extra or missing columns.
-3. No duplicate canonical facts: each fact appears in exactly one canonical home; cross-references are pointers only.
-4. Predicate inputs recorded: every promoted ledger row has `predicate-inputs` filled.
-5. Stable IDs sorted: artifact tables sorted per canonical ordering rules.
-6. Host-agnostic steering vs concrete output facts: skill instructions contain no concrete tool/product names; KB output artifacts cite concrete names only where evidence-grounded.
-7. Sanitization: no secrets, raw PII, or restricted payloads in KB artifacts; sensitive values are pointers only.
-8. No raw sensitive payloads: confirm with a pass over `kb/<repo>/ai-assets.md` and overlays files.
+**Mechanical reproducibility audit** (runs before done, distinct from the independent completeness audit): execute decidable checklist A–I from `references/verification-and-evidence.md §Mechanical reproducibility audit`. All items must PASS before proceeding.
 
 Write concise, cited, versioned CORE artifacts, the produced-now incident `telemetry-routing-card`, and index/seam files. Initialize `contributions/` shape only. Avoid empty ceremonial folders; incident-material repo `deep/` contracts/invariants must be populated per P3, or gap records (`open:escalated`) recorded in `00-index/evidence-ledger.toon` when evidence is unreachable.
 
-After rendering all artifacts, write `00-index/evidence-ledger.toon`: copy all terminal ledger records (promoted, rejected, non-material, stale, open:escalated, sensitive-unsafe, superseded, duplicate), filling all schema fields, redacting secrets and restricted payloads. Set the `@meta` provenance lock summary block. This committed artifact is required for incremental determinism.
+After rendering all artifacts, write `00-index/evidence-ledger.toon`: copy all terminal ledger records (promoted, rejected, non-material, stale, open:escalated, sensitive-unsafe, superseded, duplicate), filling all schema fields, redacting secrets and restricted payloads. Set the `@meta` provenance lock summary block. Write the `@run-trail` block (dispatch-mode + one row per executed stage: `stage | worker-role | packet-id-or-hash | searched-scope | merge-status | outcome`) and the `@audit` block (auditor identity/capability, non-builder attestation, sampled artifacts, findings, closure). **Both `@run-trail` and `@audit` must be committed to this file BEFORE any transient scratch or `_work/` directories are deleted.** This committed artifact is required for incremental determinism.
 
 ## Phase 6 has been merged into Phases 4 and 5
 
@@ -124,6 +116,8 @@ KB generation (former Phase 6) is now integral to Phase 4 (render from manifest)
 ## Clean Deliverable Packet (hard gate before done)
 
 Deliverable root is `services/<service>/`. Before final, write a packet the independent audit can sample. It contains:
+
+**Pre-condition (hard gate):** commit `@run-trail` and `@audit` blocks into `00-index/evidence-ledger.toon` BEFORE deleting any transient scratch files or `_work/` directories. Deleting the only audit/dispatch evidence before it is committed to the evidence ledger is a HARD FAIL.
 
 1. Literal file-tree listing of the deliverable root.
 2. Allowlist scan result: every entry under the deliverable root is a durable KB artifact or is marked `found` and remediated. Novel scratch names such as codegraph-like, symbol-index-like, or run-root-like directories fail even if they are not dot-prefixed.
@@ -144,7 +138,7 @@ No trusted KB until:
 - source-catalog warnings contain the required anti-absence clause with source/join key filled, and restricted-sources gates pass
 - incident telemetry-routing-card is produced from CORE observability
 - incident-material repos have populated `deep/` contracts/invariants (P3), or `open:escalated` gap records in committed `00-index/evidence-ledger.toon` with verify-later action
-- `00-index/evidence-ledger.toon` committed with provenance lock summary and all terminal records
+- `00-index/evidence-ledger.toon` committed with provenance lock summary, `@run-trail`, `@audit`, and all terminal records
 - mechanical reproducibility audit passed (Phase 5)
 - Clean Deliverable Packet is clean after remediation
 - independent completeness audit runs and persists findings
