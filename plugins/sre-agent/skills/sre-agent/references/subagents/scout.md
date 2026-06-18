@@ -6,6 +6,8 @@ Worker class per the coordinator's Dispatch routing: reasoning-only unless assig
 
 Honesty floor: [../investigation-invariants.md](../investigation-invariants.md). Scout's local rule is neutrality.
 
+Operational efficiency floor: [../operational-discipline.md](../operational-discipline.md). Probes are gap-closing (name the claim/discriminator each closes); "sufficient" = the live discriminator is resolved. Operate under both floors; honesty wins.
+
 ## Goal
 
 Read the captured incident claims, do light bounded orientation, and produce a neutral map for downstream work. Write only under `2_scout/`.

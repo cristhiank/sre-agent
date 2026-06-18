@@ -119,6 +119,12 @@ load or dispatch capabilities matching an immediate stage obligation, a
 Scout-discovered discriminator, or a Grader follow-up obligation. Do not load
 everything.
 
+A capability confirmed environment-blocked (per Access confirmation) is recorded in
+the CAPABILITY MAP and not re-attempted within the run by the coordinator; a
+specialist on that evidence path (or a full-evidence context, or a newly discovered/
+provided target) may still re-confirm per Access confirmation. Prefer the host
+availability surface over trial-and-error (see `references/operational-discipline.md`).
+
 ## Access confirmation
 
 After the map, runtime-confirm access only for capabilities on the CRITICAL EVIDENCE PATH: a capability the incident question cannot be answered without, or one intake metadata marks as primary evidence. All others stay `unconfirmed / not-probed`.
@@ -142,13 +148,17 @@ Before code-dependent conclusions for a service-specific incident, resolve the l
 ## Dispatch routing
 
 Each dispatch declares two independent dimensions:
-- Model tier: choose by capability tier first, exact name second. Provisional
-  preferences, set on the subagent dispatch model parameter when available: Scout and
-  broad orientation use a fast/economical Haiku- or Sonnet-class model; Specialists,
-  Grader, and Report use a reasoning-heavy GPT-5.5-high- or Opus-4.8-high-class model.
-  If unavailable, fall back to the nearest available tier and record the per-stage
-  tier decision (preferred tier, model used, availability, fallback reason +
-  selector) in `run.md`'s `model_tiering` record.
+- Model tier: choose by capability tier first, exact name second. Set on the
+  subagent dispatch model parameter when available. DEFAULTS, not soft preferences:
+  Scout and breadth-first orientation DEFAULT to the fast/economical tier
+  (e.g. Haiku-/Sonnet-class); reserve the reasoning-heavy tier (e.g. GPT-5.5-high/
+  Opus-class) for Specialists, Grader, Report, and synthesis.
+  Every dispatch records a Tier Record in `run.md`'s `model_tiering` (schema home:
+  `references/run-store.md`): role · chosen tier · default tier · escalation reason
+  when above default · fallback when the preferred tier is unavailable.
+  A non-economical Scout/orientation dispatch REQUIRES a named escalation reason
+  (claim-gated reasoning, synthesis, or high ambiguity); a missing Tier Record is an
+  incomplete handoff. Efficiency detail: `references/operational-discipline.md`.
 - Worker toolset class: `full-evidence` = worker context inherits the session's
   evidence toolset; `reasoning-only` = restricted/fast worker for tasks that
   invoke NO evidence tools.
@@ -282,6 +292,7 @@ lead-state transitions, isolation, and the delta-report contract — in
 ## Reference map
 
 - Honesty floor: `references/investigation-invariants.md`
+- Operational efficiency floor: `references/operational-discipline.md`
 - Run layout and observation ids: `references/run-store.md`
 - Iteration mode (new information): `references/followup.md`
 - What each stage produces: `references/artifact-contracts.md`

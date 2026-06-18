@@ -54,10 +54,12 @@ Do not rename the stage directories.
 `run.md` is the compact index/status page: incident identity, bounded scope, stage
 completion, artifact pointers, open questions, and gaps.
 
-`run.md` also carries a compact `model_tiering` record: per stage, the preferred
-tier, the model actually used, whether the preferred tier was available, and the
-fallback reason + selector (harness-limited | coordinator-choice |
-model-unavailable | override) when they differ. This makes silent fallback
+`run.md` also carries a compact `model_tiering` record — the single canonical schema
+home for tiering. Recorded per dispatch: role · chosen tier · the role's default tier ·
+the model actually used · whether the preferred tier was available · escalation reason
+when above the role default (claim-gated reasoning | synthesis | high-ambiguity) ·
+fallback reason + selector (harness-limited | coordinator-choice | model-unavailable |
+override) when they differ. This makes silent fallback and above-default escalation
 visible; it does not imply the coordinator can use a tier the host does not expose.
 
 The coordinator tracks open questions and gaps there in whatever compact form is clear.

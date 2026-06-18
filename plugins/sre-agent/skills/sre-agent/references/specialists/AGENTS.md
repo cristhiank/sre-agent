@@ -4,6 +4,8 @@ A specialist owns one hypothesis class. The coordinator discovers sibling specia
 
 Honesty floor: [../investigation-invariants.md](../investigation-invariants.md).
 
+Operational efficiency floor: [../operational-discipline.md](../operational-discipline.md). Probes are gap-closing (name the claim/discriminator each closes); "sufficient" = the live discriminator is resolved. Operate under both floors; honesty wins.
+
 ## Discovery
 
 This file is not a registry. A specialist description should be enough for routing: identify the hypothesis class, include trigger terms or obligation themes, and state that it operates within an investigation workflow that supplies its context, not as a direct user entrypoint.
