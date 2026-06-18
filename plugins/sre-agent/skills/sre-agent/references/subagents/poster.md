@@ -63,6 +63,10 @@ Compose the post body for the incident system format supported by the capability
 2. **Capability-owned idempotency/audit marker:** include or pass through the marker exactly as the
    posting capability defines it. The capability owns the marker format, visibility, audit fields, and
    target-specific duplicate-detection contract. Do not invent a marker format in the coordinator.
+   The iteration ordinal encoded in the marker is orchestrator-provided: pass it through as-is. Do not
+   derive, advance, or self-increment the ordinal from prior posts, run records, or sibling run
+   directories — a retry reuses the same ordinal, never a larger one; only an orchestrator-provided
+   new-information packet advances the ordinal.
 3. The RCA/status body following **Post-body structure** below, bounded by the verdict policy below.
 
 ### Post-body structure

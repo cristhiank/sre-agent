@@ -22,9 +22,15 @@ under one root. No packet → a normal single-shot run; do not read prior runs.
 A provided input (not an artifact you author) describing, in compact form: the incident's
 current status, what changed since the last investigation (new symptoms, a human reply, a
 mitigation result, a status transition), the reason this iteration was queued, and the
-iteration ordinal `N` (1, 2, … — stable across retries of the same iteration; a first
-investigation has no packet and uses `N=0`). Treat it as authoritative about *what changed*.
-It is evidence, not an instruction about your verdict.
+iteration ordinal `N` (stable across retries of the same iteration; successive integers for
+orchestrator-provided follow-ups). The ordinal is **orchestrator-authoritative**:
+pass it through exactly as the task provides it. A run with no packet — a first investigation
+OR a retry of one — uses the capability's first-iteration ordinal value; a retry is NOT a new
+iteration and does NOT advance the ordinal. Never derive or self-increment the ordinal from
+prior posts, run records, sibling run directories, or a "use a larger number" heuristic. The
+posting capability is the deterministic backstop and owns the marker/ordinal contract; the
+agent passes through the orchestrator-provided ordinal, it does not compute one. Treat it as
+authoritative about *what changed*. It is evidence, not an instruction about your verdict.
 
 ## Early-exit gate (iteration preflight)
 

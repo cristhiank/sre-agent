@@ -254,7 +254,9 @@ pointer to what changed since a prior investigation of this incident) AND the ta
 explicitly authorizes reading prior runs under the resolved run-root. Do not infer it from
 the presence of sibling run directories — reruns also produce siblings. This mode is
 distinct from the Grader follow-up loop (a within-run mechanism) and does not change the
-single-turn awaited contract or the per-run pursuit budget.
+single-turn awaited contract or the per-run pursuit budget. The iteration ordinal is
+orchestrator-provided and passed through as-is; retries reuse the same ordinal — never
+self-increment it.
 
 Iteration early-exit preflight (do this first): classify the new-information packet against the
 prior run's verdict and the incident's current state. Proceed only when it carries information
