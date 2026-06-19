@@ -238,7 +238,9 @@ with a required dispatch pending.
    `references/specialists/AGENTS.md` and the mechanism-discriminator gate in
    `references/grading-rubric.md`) — so a lead arrives gate-ready rather than as
    a post-hoc narrative the Grader must bounce back. In later loop turns,
-   re-dispatch focused Specialists with the Grader's refinement obligations;
+   re-dispatch focused Specialists with the Grader's refinement obligations
+   (narrow scoped brief per the refinement-obligation contract; independent obligations
+   dispatched as one awaited parallel-sync wave);
    append a `## pass_N` note to their theory rather than overwriting it. Expected output: cited observations,
    answered/unanswered questions, theories, and gaps. The coordinator merges their
    observations into the shared record.
@@ -248,8 +250,22 @@ with a required dispatch pending.
    pass, the coordinator MUST NOT proceed to report unless the verdict is `Confirmed`,
    `Likely-rooted`, or `Inconclusive-blocked`, OR the follow-up budget is exhausted.
    If any material lead is `open-answerable` and budget remains, the coordinator MUST
-   run one focused follow-up specialist pass targeted ONLY at the missing discriminator,
-   merge new observations, and re-grade. Before settling `Inconclusive-blocked`/`Proximate-only` on a lead whose failing units carry in-hand keys to an unprobed next-causal-layer source, confirm the Grader's discovery receipt names a probed source AND an observed result (or a terminal denied/missing error after an authed probe), not a soft 'unavailable'; if a reachable next-causal-layer source remains unprobed, run one cross-source-pivot follow-up pass first (within the existing follow-up budget). When no reachable next-causal-layer source exists, that terminal is itself the receipt — settle and name the engineer next step. A report after `Proximate-only` is allowed
+   run one focused follow-up round: either a single focused dispatch or, for independent
+   obligations, one awaited parallel-sync wave of up to 5 specialists (see Execution
+   model) — a wave counts as exactly ONE follow-up round, and if independent obligations
+   exceed the concurrency cap the additional awaited batches still count as that same one
+   round (the concurrency cap is not the budget unit). Each follow-up uses the scoped
+   refinement-obligation contract (`references/grading-rubric.md` /
+   `references/artifact-contracts.md`): one specialist per independent missing
+   discriminator/obligation, given the obligation id, the pre-registered discriminator
+   predicate + expected favored/rival, the in-hand keys, and the prior OBS ids with their
+   reuse/freshness mode. It checks ONLY that discriminator plus a minimal premise/freshness
+   preflight, reuses settled/static OBS (only with exact predicate/source/key/scope coverage) but performs a fresh narrow read when the
+   discriminator depends on live state or a required cross-source pivot, does not re-sweep
+   settled evidence or broaden to new leads, and returns an explicit answered /
+   invalid-premise / unanswerable status with citations. A follow-up
+   `invalid-premise`/`unanswerable` never closes a material lead by itself; the Grader
+   reconciles it in the lead ledger. Then merge new observations and re-grade. Before settling `Inconclusive-blocked`/`Proximate-only` on a lead whose failing units carry in-hand keys to an unprobed next-causal-layer source, confirm the Grader's discovery receipt names a probed source AND an observed result (or a terminal denied/missing error after an authed probe), not a soft 'unavailable'; if a reachable next-causal-layer source remains unprobed, run one cross-source-pivot follow-up pass first (within the existing follow-up budget). When no reachable next-causal-layer source exists, that terminal is itself the receipt — settle and name the engineer next step. A report after `Proximate-only` is allowed
    only when no `open-answerable` material lead remains, the budget is exhausted, or
    the lead has been converted to `blocked-unreachable` with an engineer next step.
    Budget is 2 follow-up turns by default; allow a 3rd only if the prior turn produced

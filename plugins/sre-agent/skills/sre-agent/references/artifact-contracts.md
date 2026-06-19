@@ -88,8 +88,13 @@ Keeps a lead ledger (each material lead closed as `closed-supported` /
 dropped.
 Records a duplicate classification (`canonical` / `duplicate-of <incident>` / none) when the scout reports a recent or concurrent sibling sharing the recurrence identity, and applies the verdict-determinism rule so such siblings are judged by the same verdict gate (see `grading-rubric.md`).
 When `Proximate-only` with `open-answerable` leads, also writes
-`refinement-obligations.md` with bounded follow-up obligations for the coordinator's
-pursuit loop (budget ~2-3 rounds); when `blocked-unreachable`, records the dead-end
+`refinement-obligations.md` for the coordinator's pursuit loop (budget ~2-3 rounds),
+carrying per obligation: id; lead id(s); pre-registered discriminator predicate +
+expected favored/rival; acceptable evidence shape; in-hand keys; prior OBS ids with
+reuse/freshness mode; stop condition; dependency-ids/independence-reason; and allowed
+outcome statuses (answered/invalid-premise/unanswerable). Independent obligations are
+dispatched as one awaited parallel-sync wave (one specialist per independent
+discriminator), counting as one focused follow-up round; when `blocked-unreachable`, records the dead-end
 plus an engineer suggested next step.
 Discovery receipt for causal `blocked-unreachable` leads, a final `Proximate-only` whose unresolved upstream/mechanism lead still had reachable in-hand keys, or clean/no-failure target closures:
 - `needed_evidence_type`: metric | log | trace | config | code | other
