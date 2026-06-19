@@ -74,11 +74,24 @@ waiting — it ends the turn and orphans the work.
 
 Therefore, in unattended runs, fire-and-forget / background / detached
 dispatch is FORBIDDEN for the required pipeline stages (Scout, Specialist,
-Grader, Report, and a dispatched Knowledge Curator). Default to synchronous, blocking dispatch and collect each
-result before proceeding. Parallelism is allowed ONLY as an awaited group:
-launch the set, then actively block in-turn until every member has completed
-and its output is collected, before moving to the next stage. The same rule
-applies to Grader-loop follow-up specialist passes.
+Grader, Report, and a dispatched Knowledge Curator). Dispatch is blocking:
+every dispatched stage must be awaited and its output collected before the
+run advances. For a SET of independent same-stage dispatches (specialists
+for different hypotheses, or independent Grader-loop follow-up passes), the
+REQUIRED mode is an awaited parallel-sync batch: launch the whole independent
+set together in one action as synchronous (awaited) dispatches, then block
+in-turn until every member has completed and its output is collected, before
+moving on. The runtime holds the turn open until the awaited batch returns;
+this is NOT background dispatch and does not risk ending the session early.
+Do NOT background/detach the wave (that orphans work and can end the session
+early), and do NOT dribble independent dispatches out one-at-a-time across
+separate turns. Honor the host concurrency limit (max 5 concurrent): when the
+independent set exceeds 5, launch it in awaited batches of at most 5, fully
+collecting each batch before the next. Serialize two dispatches only on a
+genuine data dependency (one's output is a required input to the other) — for
+example, run a common prerequisite pass first when several downstream
+specialists would otherwise each rediscover the same unresolved failing-unit
+enumeration, join key, authoritative source, or producer path.
 
 Bound the wait so "never yield" cannot become "hang forever": keep the whole
 run within the host/lease time budget. If an awaited dispatch cannot complete
@@ -208,13 +221,25 @@ with a required dispatch pending.
    recurrence matches (or an explicit none/unavailable note), the discussion-thread summary
    (or empty/unavailable note), how they shape the
    hypotheses, at least two materially different hypotheses, and the
-   questions/observations that would discriminate them; no findings or verdicts. Scout also consults the service's curated/promoted prior knowledge (`failure-modes/` and any reviewed-promoted items) as orientation evidence — claims not authority, bounded by service/component/symptom; it never reads unreviewed run-local `7_knowledge` candidates or sibling run directories, and absence is a gap, not a block.
+   questions/observations that would discriminate them, plus a best-effort pre-declared discriminator table (per leading hypothesis: serious same-symptom rival, falsifiable predicate, expected favored vs rival observation, candidate authoritative source/key) — pre-registering the discriminator before any specialist checks it, with an explicit gap when no honest discriminator exists yet; no findings or verdicts. Scout also consults the service's curated/promoted prior knowledge (`failure-modes/` and any reviewed-promoted items) as orientation evidence — claims not authority, bounded by service/component/symptom; it never reads unreviewed run-local `7_knowledge` candidates or sibling run directories, and absence is a gap, not a block.
 3. **Specialists (`3_evidence`, `4_specialists`).** Dispatch one Specialist per
-   material hypothesis area. Each fetches and analyzes its own observations through the
+   material hypothesis area, and launch all independent specialists as a SINGLE
+   awaited parallel-sync batch (see Execution model: awaited parallel-sync
+   batch; max 5 concurrent, batch if more; never background/detached, never
+   one-at-a-time across turns). Serialize a specialist only on a genuine input
+   dependency. Each fetches and analyzes its own observations through the
    evidence sources and capabilities you pass it, cites what it saw, and proposes
-   theories with cause + mechanism. In later loop turns, re-dispatch focused
-   Specialists with the Grader's refinement obligations; append a `## pass_N` note to
-   their theory rather than overwriting it. Expected output: cited observations,
+   theories with cause + mechanism. Each specialist also carries the
+   pre-registered discriminator for its hypothesis (from Scout's discriminator
+   table, refined only from mechanism/source-shape fit and never from the
+   observed value) and, in its first pass,
+   states the expected favored/rival values BEFORE checking, then records the
+   observed value, gate status, and a compact claim-readiness ledger (see
+   `references/specialists/AGENTS.md` and the mechanism-discriminator gate in
+   `references/grading-rubric.md`) — so a lead arrives gate-ready rather than as
+   a post-hoc narrative the Grader must bounce back. In later loop turns,
+   re-dispatch focused Specialists with the Grader's refinement obligations;
+   append a `## pass_N` note to their theory rather than overwriting it. Expected output: cited observations,
    answered/unanswered questions, theories, and gaps. The coordinator merges their
    observations into the shared record.
 4. **Grader + pursuit loop (`5_grader`).** After Specialists and observation merge,

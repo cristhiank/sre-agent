@@ -35,12 +35,13 @@ Write `2_scout/scout-report.md` in plain prose. Include:
 - what is claimed versus unknown or assumed
 - at least two materially different hypotheses, each with what would support or weaken it
 - the questions or observations that would discriminate between those hypotheses
+- a best-effort pre-declared **discriminator table** — for each leading hypothesis: the serious same-symptom rival, a falsifiable discriminator predicate, the expected observation under the favored vs the rival mechanism, and the candidate authoritative source/key that would answer it. These are PRE-REGISTERED questions, not checked results: you declare the discriminator before any specialist observes its value (satisfying the pre-registration requirement of the mechanism-discriminator gate in [grading-rubric.md](../grading-rubric.md)) and stay neutral — assert no expected value as the answer. If a hypothesis has no honest falsifiable discriminator yet, record that as an explicit gap; never invent a weak one to fill the table.
 - useful specialist or capability hints when obvious, described naturally rather than as tags
 - any nearby parallel issue that could confuse the scoped RCA
 
 ## Boundaries
 
-- No findings, verdicts, fixes, or rankings.
+- No findings, verdicts, fixes, or rankings; the discriminator table holds pre-declared questions and expected-value hypotheses, never a verdict or an asserted answer.
 - Do not independently declare a capability blocked or unavailable; defer to the CAPABILITY MAP's ACCESS STATUS. A failed or misused probe is non-diagnostic.
 - Keep orientation light; deep collection and analysis belong to specialists.
 - Anti-anchoring is mandatory: if only one credible hypothesis appears, say that the missing alternative is a gap.

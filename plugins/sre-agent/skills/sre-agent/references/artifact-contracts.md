@@ -49,6 +49,11 @@ failing units and follow them (see the "Aggregate is not mechanism" invariant in
 [investigation-invariants.md](investigation-invariants.md)).
 Name at least two materially different hypotheses when possible.
 For each, note what observations or questions would distinguish it from the others.
+Also includes a best-effort pre-declared discriminator table: per leading hypothesis,
+the serious same-symptom rival, a falsifiable predicate, the expected favored vs rival
+observation, and a candidate authoritative source/key — pre-registered questions, not
+checked results, with an explicit gap when no honest discriminator exists yet
+(neutrality preserved: no expected value is asserted as the answer).
 Keep gaps visible. Scout stays neutral: no verdicts and no root-cause language.
 
 ## `3_evidence/` — observations
@@ -67,6 +72,11 @@ A theory note names a cause and mechanism, cites the observations it relies on, 
 or leaves open the scout questions it addressed, and lists gaps.
 It may include alternatives or negative evidence, but should not overstate beyond the
 observations it cites.
+A theory note also pre-registers its discriminator — predicate plus expected
+favored/rival stated and kept visibly separate before the checked value (with the OBS id
+when checked) — and ends with the compact claim-readiness ledger (failing-population
+bound / mechanism named / discriminator pre-registered / observed value checked / result
+/ confidence ceiling).
 
 ## `5_grader/` — judged assessment
 

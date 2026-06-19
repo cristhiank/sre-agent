@@ -14,9 +14,12 @@ Classify the verdict, refute the leading theory, keep the lead ledger with no si
 
 - `1_intake/incident-context.md` (the intent frame; esp. `rca_target`)
 - `4_specialists/<name>/theory.md`
+- the specialists' claim-readiness ledgers (failing-population bound / mechanism named / discriminator pre-registered / observed value checked / result / confidence ceiling)
 - merged observation ledger with stable `OBS###` ids
 - `2_scout/scout-report.md`
 - [grading-rubric.md](../grading-rubric.md)
+
+Use the claim-readiness ledgers to target your audit of completeness gaps, but STILL apply the full mechanism-discriminator and failing-unit enumeration gates yourself — the ledger informs adjudication, never substitutes for the gate. Treat a specialist's own first-pass pre-registration as the weaker form: accept it as pre-registered only when its predicate + expected favored/rival are visibly separate from the checked value and not result-shaped; Scout-table pre-registration is the strong form. When the separation is absent or the discriminator reads as result-shaped, treat it as post-hoc and keep the verdict capped per the gate.
 
 ## Output shape
 
