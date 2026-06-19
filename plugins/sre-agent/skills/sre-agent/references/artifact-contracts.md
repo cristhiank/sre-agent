@@ -114,7 +114,10 @@ Detailed judging rules live in `grading-rubric.md`.
 ## `6_report/` — bounded RCA
 
 Produces a concise external-facing report bounded by the grader verdict. No internal
-observation ids; cite material claims in plain source terms.
+observation ids; cite material claims in plain source terms. A material numeric/aggregate
+claim carries its source and a coverage caveat when the figure is partial, sampled, or
+measured differently by another source over the same window.
+<example>"N per <source A>; <source B> showed M, same window — unreconciled"</example>
 
 In iteration mode (`followup.md`), the report and any incident post are a delta/update —
 what changed since the last iteration plus the updated verdict (including honest
@@ -133,6 +136,7 @@ Always include content-bearing sections for:
 Conditional sections:
 - Add a highlighted **latent bug / important finding** callout when the run confirms a real code/config defect, even if not proven as this incident's trigger; label real-but-unproven when applicable.
 - Add **Why we couldn't pin the cause** for `Proximate-only` / `Inconclusive-blocked`, naming the missing evidence in plain terms.
+- Add a **Population coverage** line whenever the verdict rests on an aggregate/population signal — rendered from the grader's failing-unit enumeration result (the claim-readiness ledger / `5_grader` verdict, not re-derived): state whether the failing population is enumerated, partially enumerated (name the dimensions/keys resolved and those still missing), or not enumerated/blocked (name the missing dimensions). One line for a fully-enumerated cause.
 - Add **Closest known introduction / provenance** only for verified code/config causes, using the report-writer qualifier discipline.
 - Add an **Manual Investigation Kit** whenever a decisive discriminator needs a human-only or out-of-band capability the agent lacked — whether that leaves the verdict `Inconclusive-blocked` or caps it at `Likely-rooted` — and only after the honesty, access, and probe-fitness gates establish it genuinely unreachable (a reachable unchecked lead stays `open-answerable`, not a kit; a block unreachable to everyone, with no human-executable check, needs no kit). Derive it from the specialist-produced core manual check (target/capability, required access, action, predicate, expected→meaning, written to `4_specialists/<name>/theory.md`), grader-adjudicated in `5_grader/ranking.md` (discovery receipt) and report-assembled, plus `5_grader/refinement-obligations.md` when present; it is required, not optional, when it applies. The grader carries the decisive parts (decisive check, operator steps, mitigation, reply-back); the report frames the block reason + delegated capability and appends optional non-blocking rivals. Order:
   1. **Block reason + delegated capability** — one line: what is blocked and the capability the on-call engineer has that the agent lacked.

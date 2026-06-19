@@ -20,6 +20,7 @@ This floor is SUBORDINATE to the honesty floor (`investigation-invariants.md`): 
 - Do not re-read a static run/stage artifact already in context; this never licenses reusing a stale live-system read — re-fetch live state when correctness needs it.
 - "Evidence sufficient" means the live discriminator for the claim has been resolved — the source that would falsify the claim was checked or named as explicitly unchecked — not merely that nearby or plausible evidence exists.
 - Sufficiency only stops redundant READING. It never licenses recording causal absence, skipping the discriminator, or stopping before the source that would falsify the claim.
+- Enumeration is gap-closing, not momentum: the test is a NEW named gap the next record would close, not "more of the same evidence." Once the live discriminator is resolved AND the authoritative failing population is already bound to its producer, paginating more records of the same shape and scope changes no answer — stop and prefer a bounded sample (a resolved discriminator with no failing unit yet keyed to a producer is NOT a stop — keep enumerating). Enumeration still binding that population, or closing another open discriminator, IS gap-closing and continues; this never licenses substituting an aggregate for the failing-unit enumeration gate ([grading-rubric.md](grading-rubric.md)) or recording causal absence.
 
 ## Tooling / blocked capabilities
 
