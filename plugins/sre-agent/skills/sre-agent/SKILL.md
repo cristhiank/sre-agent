@@ -240,7 +240,7 @@ with a required dispatch pending.
    recurrence matches (or an explicit none/unavailable note), the discussion-thread summary
    (or empty/unavailable note), how they shape the
    hypotheses, at least two materially different hypotheses, and the
-   questions/observations that would discriminate them, plus a best-effort pre-declared discriminator table (per leading hypothesis: serious same-symptom rival, falsifiable predicate, expected favored vs rival observation, candidate authoritative source/key — citing the best-fit guidance asset when the curated guidance catalog names one) — pre-registering the discriminator before any specialist checks it, with an explicit gap when no honest discriminator exists yet; no findings or verdicts. Scout also consults the service's curated/promoted prior knowledge (`failure-modes/` and any reviewed-promoted items) as orientation evidence — claims not authority, bounded by service/component/symptom. It never reads unreviewed run-local `7_knowledge` candidates or sibling run directories; here too, missing prior knowledge is a gap, not a block.
+   questions/observations that would discriminate them, plus a best-effort pre-declared discriminator table (per leading hypothesis: serious same-symptom rival, falsifiable predicate, expected favored vs rival observation, candidate authoritative source/key — plus a coverage-map entry per hypothesis (best-fit orientation asset found by a bounded whole-KB scan, or `no-coverage`; see `references/subagents/scout.md`)) — pre-registering the discriminator before any specialist checks it, with an explicit gap when no honest discriminator exists yet; no findings or verdicts. Scout also consults the service's curated/promoted prior knowledge (`failure-modes/` and any reviewed-promoted items) as orientation evidence — claims not authority, bounded by service/component/symptom. It never reads unreviewed run-local `7_knowledge` candidates or sibling run directories; here too, missing prior knowledge is a gap, not a block.
 3. **Specialists (`3_evidence`, `4_specialists`).** Dispatch one Specialist per
    material hypothesis area, and launch all independent specialists as a SINGLE
    awaited parallel-sync batch (see Execution model: awaited parallel-sync
@@ -252,7 +252,10 @@ with a required dispatch pending.
    pre-registered discriminator for its hypothesis (from Scout's discriminator
    table, refined only from mechanism/source-shape fit and never from the
    observed value) and, in its first pass,
-   states the expected favored/rival values BEFORE checking, then records the
+   states the expected favored/rival values BEFORE checking (sourced from the
+   coverage map's cited orientation asset when one is named — open that asset to
+   seed the expectation rather than re-deriving from scratch; the checked observed
+   value still comes from authoritative live evidence), then records the
    observed value, gate status, and a compact claim-readiness ledger (see
    `references/specialists/AGENTS.md` and the mechanism-discriminator gate in
    `references/grading-rubric.md`) — so a lead arrives gate-ready rather than as
