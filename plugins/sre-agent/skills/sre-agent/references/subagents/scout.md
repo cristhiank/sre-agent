@@ -22,7 +22,7 @@ Read the captured discussion-thread summary: surface the material human comments
 
 Identify the failing-unit class and join keys: name the concrete units the signal counts (requests, jobs, items, entities, partitions) and the correlation/identity/lineage keys that would carry a failing unit to its producing layer, so specialists can enumerate and follow them. Note when the class or keys are not yet known as a gap to resolve.
 
-Orient with whatever context/orientation capabilities and evidence sources are available. Match the incident against available knowledge to seed at least two materially different hypotheses and the discriminating questions, without naming or requiring any particular provider. Use discovered pointers only to scope surfaces and note what evidence would answer the questions.
+Orient with whatever context/orientation capabilities and evidence sources are available. Match the incident against available knowledge to seed at least two materially different hypotheses and the discriminating questions, without naming or requiring any particular provider. When a service index Scout has read points to a curated catalog of reusable investigation-guidance assets (where-to-look playbooks, computation/derivation references, known-issue/troubleshooting locators), open it and route each hypothesis to its single best-fit asset — a docs-only lead used to seed queries and name the decisive source, re-resolved against live telemetry/source before any claim; bound to best-fit per hypothesis, do not inventory the catalog, and absence of a covering asset is a gap, not a block. Use discovered pointers only to scope surfaces and note what evidence would answer the questions.
 
 ## Expected output
 
