@@ -132,6 +132,8 @@ Anti-authority header required (verbatim): `docs-only lead, not authority; re-re
 
 Schema: `asset-ref(kb/<repo>/ai-assets.md anchor) | consumers(tags: incident|review|dev) | one-line-purpose | why-included(named materiality test) | trust(docs-only|suspected ⚠️) | freshness(repo SHA)`.
 
+**Human-guidance rows** additionally require a **symptom/trigger** field — carried either as a symptom-led `one-line-purpose` (lead with `Symptom: <non-generic trigger>` …) or an explicit column, matching the existing table style — and MUST be cross-linked from `00-index/telemetry-routing-card.md` (and/or `task-router.md`) under the matching symptom family so the runtime orientation scan can route symptom→doc.
+
 Pointer-only; inherits grounding via `asset-ref` pointer to the floor row. Non-normative: no ordering/precedence, no "use this first", no `evidence_required`, no `stop_conditions`. Grouping by primary consumer tag is presentation-only and encodes no precedence.
 
 ### `service/identity.md` (M)
@@ -263,11 +265,13 @@ Repo-local concept candidates feeding `service/concept-model.md`. Tag column: `p
 
 ### `kb/<repo>/ai-assets.md` (M)
 
-**Inventory row schema:** `path | kind(illustrative enum: agent_doc|instruction|skill|subagent|chatmode|prompt|shared-ref) | repo | title`.
+**Inventory row schema:** `path | kind(illustrative enum: agent_doc|instruction|skill|subagent|chatmode|prompt|shared-ref|human-guidance|runbook|troubleshooting-guide|known-issues|alert-response) | repo | title`.
 
 **Triaged-lead row schema:** `asset-ref | declared-purpose(sanitized) | consumer-relevance(incident|review|dev, multi-tag) | maps-to(unit/CORE-area or unmapped) | trust(docs-only|suspected ⚠️) | grounding(docs-only|manual-curated) | freshness(repo SHA) | verify-later`.
 
-Non-promotable. Sensitive values (cluster URLs, subscription IDs, GUIDs): pointer + sanitized purpose only; raw values not copied. Empty repo: write `none-found (searched scope: <globs/dirs>)`.
+**Human-guidance rows** additionally carry a **symptom/trigger** field — as a symptom-led `declared-purpose` or an explicit `symptom/trigger` column matching the existing table style — holding the non-generic symptom→this-doc phrase; the matching `00-index/telemetry-routing-card.md` (and/or `task-router.md`) cross-link is recorded so the catalog entry can route symptom→doc.
+
+Non-promotable; **pointer-only — never copy doc content or values**. Sensitive values (cluster URLs, subscription IDs, GUIDs): pointer + sanitized purpose only; raw values not copied. Empty repo: write `none-found (searched scope: <globs/dirs incl. widened human-guidance Stage A directories>)` — honest only after the widened human-guidance scope was searched too.
 
 ### `kb/<repo>/deep/contracts.toon` (P — mandatory iff P3=incident-material)
 

@@ -191,6 +191,7 @@ When `mode = incremental`, the input lock includes the prior KB state hash and o
 | concept/glossary sources | `concept` | `service/concept-model.md`; `service/glossary.md`; `kb/<repo>/concepts.md` |
 | docs (human docs only) | `failure-mode · concept · observability` (suspected ⚠️ cap) | `failure-knowledge/`; `service/`; `observability/` (with `docs-only` trust cap) |
 | AI-guidance assets | `ai-asset` | `kb/<repo>/ai-assets.md`; `00-index/ai-asset-catalog.md` |
+| incident-material human guidance (troubleshooting guides / runbooks / known-issues / alert-response) — re-render only, stays docs-only/non-promotable | `guidance-asset` (pointer-only; docs-only/suspected ⚠️ cap; no promotion) | `kb/<repo>/ai-assets.md`; `00-index/ai-asset-catalog.md` (+ matching `00-index/telemetry-routing-card.md` / `task-router.md` symptom cross-link) |
 
 **Preservation contract:** higher-grade ledger records are preserved unless the new run produces stronger evidence (see `references/kb-mutation.md` for evidence-strength comparison). Re-graded and superseded records carry a mutation status; they are never silently replaced.
 

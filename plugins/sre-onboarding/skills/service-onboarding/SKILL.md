@@ -69,7 +69,7 @@ Done/no-blocking-issues is invalid unless all hold:
 - Incident `telemetry-routing-card` produced from CORE observability; failure-knowledge is discriminator-first.
 - Freshness/provenance header exists; Clean Deliverable Packet is clean.
 - Independent completeness audit ran and sampled opposite-family for missing/falsely closed threads.
-- Per-repo `ai-assets.md` floor exists (discovery attempted); `none-found (searched scope)` plus capability-gap note recorded when unavailable.
+- Per-repo `ai-assets.md` floor exists (discovery attempted over both AI-guidance assets and incident-material human-written guidance); `none-found (searched scope)` is valid only after the widened human-guidance scope was searched too, plus capability-gap note recorded when unavailable; human-guidance catalog entries carry a symptom/trigger phrase + the matching `00-index/telemetry-routing-card.md` (and/or `task-router.md`) cross-link.
 </done_gates>
 
 <boundaries>
