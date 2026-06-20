@@ -117,7 +117,7 @@ Detailed judging rules live in `grading-rubric.md`.
 ## `6_report/` — bounded RCA
 
 Produces a concise external-facing report bounded by the grader verdict. No internal
-observation ids; cite material claims in plain source terms. A material numeric/aggregate
+observation ids; cite material claims in plain source terms. Never copy unredacted customer content that the run obtained by bypassing a source redaction (anything marked do-not-republish / enumerated by a run `pii-marker`) verbatim into the report — the report is projected into the incident post. Carry such content only as DE-IDENTIFIED facts (service/operation terms; customer-identifying values by category + count, never verbatim), per "Do not republish redacted customer content" in [investigation-invariants.md](investigation-invariants.md). A material numeric/aggregate
 claim carries its source and a coverage caveat when the figure is partial, sampled, or
 measured differently by another source over the same window.
 <example>"N per <source A>; <source B> showed M, same window — unreconciled"</example>
