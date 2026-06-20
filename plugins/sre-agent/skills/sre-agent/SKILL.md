@@ -121,7 +121,9 @@ or gap).
 Load and use every available capability whose description matches an immediate
 investigation obligation. If a material need has no matching capability, record an
 explicit gap. Do NOT proceed to Scout until the run exists, the CAPABILITY MAP is
-complete, AND the intake intent frame is set.
+complete, the intake intent frame is set, AND intake is verified-or-fetched (staged items
+reconciled against the manifest and every redacted/gapped item either fetched or recorded
+as an explicit gap).
 
 Do not mark a description-matching capability gap/skip from an unverified environment guess ("no data here", "wrong working dir").
 Availability is confirmed by invoking it and reading its self-report, not by guessing inputs exist; assumed-unavailable-from-environment-guess is non-diagnostic (see Access confirmation).
@@ -194,12 +196,28 @@ with a required dispatch pending.
 ## Six-stage flow
 
 1. **Bootstrap / capture (`1_intake`, intent frame).** Resolve the incident
-   identity, create the run, capture the incident record AND its discussion thread
+   identity, create the run, then capture the incident record AND its discussion thread
    (human comments, transfers, owner notes, prior RCA/mitigation, linked change/rollout
-   notes) as claims and pointers via an available read-only incident-record/discussion
-   capability — primary orientation evidence, still claims to corroborate, never
-   authority; record an intake gap when the thread is genuinely unavailable. Set
-   the intake intent frame, and build the CAPABILITY MAP. This stage captures the
+   notes) as claims and pointers — primary orientation evidence, still claims to
+   corroborate, never authority. One path, present-or-absent: if a pre-staged intake
+   bundle exists in the run work area, read its provenance manifest (per captured item:
+   source/provenance and whether it is complete, redacted, or gapped) and reconcile the
+   staged record + thread against it, capturing them as claims + pointers with who/when,
+   not verbatim copies; when no bundle is pre-staged, fetch the full record + thread via
+   an available read-only incident-record/discussion capability. Never treat the
+   pre-stage as complete or authoritative. A manifest entry marked redacted, gapped, or
+   absent is a FETCH TRIGGER: re-fetch that item the authorized way via the read-only
+   incident-record/discussion capability (redacted is NOT absent — a redaction means
+   "fetch it the authorized way," not "no context"; align with the redacted-is-not-absent
+   honesty floor in `references/investigation-invariants.md`); after that honest fetch
+   attempt, if the source still returns a redaction sentinel, record an ACCESS-BLOCKED
+   LEAD per that floor (name the redacted field and the richer-access surface that can
+   read it), never an absence gap — only when the item is genuinely unavailable or empty
+   do you record a plain intake gap.
+   Regardless of staging, still produce the agent's own reasoning products — set the
+   intake intent frame, and build the CAPABILITY MAP (a host stages DATA plus a
+   provenance manifest, never the intent frame, the capability map, or the recurrence
+   identity). This stage captures the
    literal trigger and measured/impacted failure target; it does not hypothesize
    causes. If `rca_target` resolves only to `clarification_required`, resolve the
    ambiguity (bounded clarification or the narrowest defensible failure target) before
@@ -208,8 +226,9 @@ with a required dispatch pending.
    incidents when available — signal or error signature, affected operation/component,
    affected entity/resource/cohort, scope boundary, and owning service/team. This is
    identity capture for later correlation, not a hypothesis or a cause. Do not dispatch
-   Scout until the run exists, the CAPABILITY MAP is complete, AND the intent frame is
-   set. Expected output: run pointer, captured claims, discussion-thread summary, intent
+   Scout until the run exists, the CAPABILITY MAP is complete, the intent frame is set,
+   AND intake is verified-or-fetched — staged items reconciled against the manifest and
+   every redacted/gapped item either fetched or recorded as an explicit gap. Expected output: run pointer, captured claims, discussion-thread summary, intent
    frame, recurrence identity, and capability map.
 2. **Scout (`2_scout`, sole analytic orienter).** Dispatch Scout to read the captured
    claims, do light bounded orientation, and produce a neutral map. Orientation includes
