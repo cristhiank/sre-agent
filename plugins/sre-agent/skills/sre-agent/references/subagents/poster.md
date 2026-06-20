@@ -52,10 +52,15 @@ Rendering:
 
 When the dispatch brief authorizes live posting AND a live incident-posting capability is available
 that is NOT in a dry-run/report-only mode, the Poster composes the incident update and delegates the
-mutation to that capability. Live posting requires BOTH explicit brief/user authorization AND a
-non-gated capability; never infer live mode from capability discovery alone. Otherwise the run is
+mutation to that capability. A CONCRETE capability handle the dispatch brief itself provides — a CLI
+path, an env signal, or any equivalent invocation handle the brief names AND signals is in live mode —
+IS that available capability: invoke it directly. Do NOT additionally require a separately loadable
+skill, and do NOT emit `report-only (no posting capability)` when the brief provides a working handle
+and signals live mode. Live posting still requires explicit brief/user authorization; never infer live
+mode from capability discovery alone when the brief gave no authorization. Otherwise the run is
 report-only — state which, none is a gap: `report-only (not authorized)`, `report-only (posting
-capability dry-run gated)`, or `report-only (no posting capability)`.
+capability dry-run gated)`, or `report-only (no posting capability)`. `report-only (no posting
+capability)` is correct ONLY when the brief provides no usable capability handle.
 
 Compose the post body for the incident system format supported by the capability, in this order:
 1. **AI-generated notice — required first line:** clearly identify the update as AI-generated / automated
