@@ -156,7 +156,7 @@ After a usage/parse, target/resource resolution, or auth/init failure, make at l
 
 Confirmation is per evidence source, not global: a capability confirmed against one target (e.g., the incident-record source) is not confirmed against a different source the lead needs. When the incident question requires the service's own telemetry, confirm or attempt that source as its own ACCESS STATUS line before recording a signal or table unknown (see the access invariant in `references/investigation-invariants.md` for the documentation-gap rule).
 
-Source navigation composes with ACCESS STATUS: for current-code investigation, prefer read-only local navigation of the code the service knowledge points to (search, read, follow references locally).
+Source navigation composes with ACCESS STATUS: for current-code investigation, prefer read-only local navigation of the code the service knowledge points to (search, read, follow references locally). When assigning current-code source-navigation work, prefer an available ranked source-navigation/code-lookup capability for symbol definitions and multi-term identifier hunts when it returns scoped, grouped candidate locations; use bounded line-oriented search for true regex, exhaustive text scans, or when no such capability is available.
 Use remote source-control capability for provenance a local checkout may lack: commits, pull requests, branches, history, and blame.
 Before code-dependent conclusions for a service-specific incident, resolve the local source location from service knowledge and record `source access: resolved-local|unavailable|not-needed`; if unavailable, state the gap rather than substituting remote current-code search or asserting code-level mechanism.
 
