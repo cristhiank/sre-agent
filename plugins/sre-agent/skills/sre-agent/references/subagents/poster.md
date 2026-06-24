@@ -78,19 +78,67 @@ Compose the post body for the incident system format supported by the capability
 
 ### Post-body structure
 
-Concise but never a blurb: project the content-bearing `6_report` always-sections (`artifact-contracts.md` §`6_report/`) into an incident-safe post; keep a recognizable, verdict-scaled skeleton — **Verdict + #1 action** -> **what we observe** (the measured failure in plain service terms) -> **mechanism, or the open upstream "why"** -> **impact & scope** -> **timeline when timing carries content** (onset distinct from detection) -> **what we checked / ruled out** (when it changes confidence or closes the suspected cause) -> **safe owner-routing / correlation references if any** -> **next check / reply-back**. This spine is non-exclusive: any other content-bearing `6_report` always-section still projects when incident-safe. Scale depth to the verdict and collapse a thin section to a one-line bullet, but keep the skeleton recognizable; omit only a section with no incident-safe content; the collapse allowance never applies to a required Manual Investigation Kit — when a kit is required (Inconclusive-blocked or a manual-handoff-capped verdict) it renders in full as the titled, multi-step kit section (per §Verdict policy / `artifact-contracts.md` §`6_report/`), never collapsed to a bullet or a generic 'next checks' line. A short verdict (`Proximate-only`, `Inconclusive-blocked`, or closure) stays structured, not a paragraph blurb. A collaborator-additive or duplicate post follows the additive shape instead (see §`6_report/` Post mode) — **the addition / evidence delta -> why it matters -> owner-routed next action/reference**.
+Concise but never a blurb, and **structurally consistent**: project the content-bearing `6_report`
+always-sections (`artifact-contracts.md` §`6_report/`) into a **fixed, verdict-shaped field schema** —
+the same labeled fields in the same order on every post — replacing free narrative prose with labeled
+one-liner fields. The fixed standalone order is: **TL;DR (verdict + #1 action)** -> **Confidence line**
+(when the verdict is hedged/capped/downgraded) -> **Summary fields** -> **Mechanism, or the open upstream
+"why"** -> **Failure path** (when there is a chain) -> **Manual Investigation Kit** (promoted when
+required) -> **Timeline** (when timing carries content) -> **Recommended next step** (owner-routed) ->
+**Details** (collapsible: ruled-out, provenance, duplicate/related refs, references).
 
-Incident-safe projection includes de-identification: customer-identifying values never appear verbatim in the post (see "Do not republish redacted customer content" in ../investigation-invariants.md).
+The **Summary fields are verdict-shaped** — pick exactly the set for the verdict:
+
+- `Confirmed` / `Likely-rooted` / `Proximate-only`: **What · Why · Mechanism · Impact · Caveat**
+- `Inconclusive-blocked`: **What · Status · Blocking**
+- `Refuted` / closure: **What · Checked · Finding · Residual risk**
+
+Field meanings: What = signal/monitor id + name + scope (where it surfaced); Why = the measured breach
+(numbers + threshold); Mechanism = source-confirmed fault in one line (the open upstream "why" when not
+confirmed); Impact = blast radius as **category + count, never a verbatim customer/tenant/subscription/
+GUID/IP/resource path**; Caveat = the "why this might mislead you" gotcha or the surfaced confidence
+reducer; Status = what is verified vs open; Blocking = the decisive missing evidence; Checked/Finding/
+Residual risk for closures.
+
+**Closed skip-rule (no latitude):** keep every section in this order with its canonical label; do NOT
+rename, reorder, add, or fold sections together. A section is omitted ONLY by its own explicit skip-rule:
+the Confidence line (omit unless hedged/capped/downgraded), Mechanism (omit when none is confirmed — the
+Status/Finding carries it), Failure path (omit when there is no chain), Timeline (omit when timing carries
+no signal), and the Manual Investigation Kit (folded into Details for verdicts that do not require it).
+Everything else always projects. Scale a thin field to one short line, but never collapse a required
+section to a generic 'next checks' line and never blur the fixed labels. The collapse/skip allowance
+**never** applies to a required **Manual Investigation Kit**: when a kit is required (`Inconclusive-blocked`
+or a manual-handoff-capped verdict) it renders **promoted and in full** as the titled multi-step kit
+section (per §Verdict policy / `artifact-contracts.md` §`6_report/`) — never collapsed to a bullet, a
+'next checks' line, or hidden behind a collapsed element. A short verdict (`Proximate-only`,
+`Inconclusive-blocked`, or closure) stays structured, not a paragraph blurb.
+
+**Provenance stays separate from Mechanism:** when stated it carries exactly one qualifier — `introduced
+by` / `likely introduced by` / `last touched by` / `not resolved` — and never presents a last-touching
+change as causal introduction; it normally lives in the collapsible Details for a confirmed verdict and the
+qualifier must survive.
+
+A **collaborator-additive or duplicate post** follows the **additive shape** instead (see §`6_report/`
+Post mode) — a distinct shape that does NOT lead with the TL;DR: fixed fields **Builds on · Delta · Why it
+matters** (Builds on = credit the human RCA + sibling refs; Delta = the evidence delta this adds, or a
+respectful, evidence-cited contradiction of a human RCA; Why it matters = owner impact), then Mechanism /
+Failure path (when applicable) -> owner-routed next action -> Details.
+
+Incident-safe projection includes de-identification: customer-identifying values never appear verbatim in
+the post (see "Do not republish redacted customer content" in ../investigation-invariants.md). At the field
+level this means the **Impact** field (and any owner reference) is **category + count only**.
 
 **Rich rendering when supported:** when the posting capability supports structured/visual rendering
-(headings, tables, colored badges, a divider, collapsible sections), prefer a *scannable* layout over a
-dense text wall: lead with the verdict and a short TL;DR, surface state as badges, keep a narrative for
-what/when/where/how plus a timeline table, make the owner's single next action prominent, and fold a long
-manual kit into a collapsible section — while preserving the same recognizable skeleton, verdict scaling,
-the honesty floor, and the leak-scrub. Any SEV or incident-state badge MUST be grounded in incident
-metadata, never guessed; verdict/confidence badges describe your investigation. Keep the disclosure notice
-and any required kit plainly visible — never behind a collapsed or styled-to-hide element. When the
-capability cannot render structure, fall back to the same skeleton in plain text/markdown.
+(headings, tables, colored badges, a divider, collapsible sections), render the fixed schema as a
+*scannable* layout: lead with a one-row TL;DR card carrying the verdict + #1 action and surface SEV/state
+as badges; render the Summary as labeled one-liner fields (bold inline labels or a 2-col table) in the
+fixed verdict-shaped set above; keep the owner's single next action prominent; render a content-bearing
+timeline as a table; and fold only non-load-bearing detail into a collapsible Details section — while
+preserving the same fixed labels, order, verdict scaling, the honesty floor, and the leak-scrub. Any SEV or
+incident-state badge MUST be grounded in incident metadata, never guessed; verdict/confidence badges
+describe your investigation. Keep the disclosure notice, the Confidence line, and any required Manual
+Investigation Kit plainly visible — never behind a collapsed or styled-to-hide element. When the capability
+cannot render structure, fall back to the **same fixed fields and order** in plain text/markdown.
 
 **Idempotency — verify absence before posting, fail CLOSED:**
 - Ask the live incident-posting capability to perform its target-specific duplicate/idempotency check
