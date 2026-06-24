@@ -27,6 +27,7 @@ Answer: **when did the incident actually start, and what changed at or just befo
 - **Ring / region / node skew.** Compare symptom arrival with rollout arrival. Staggered onset can support rollout causality; simultaneous onset can point to a shared trigger.
 - **Timeline coherence.** Check whether events form a plausible causal order or contradict the proposed story.
 - **Cause-not-effect ordering.** A changepoint is not a root cause by itself; connect it to a specific trigger and mechanism.
+- **Composition at onset (decoupled saturation).** When a resource/saturation signal is decoupled from inbound demand and the consuming path is unknown, compare the producer's per-component/per-operation log composition at a peak window vs a pre-onset baseline — a component/operation that appears or surges at onset names a candidate path and dates an app-level changepoint for the Manual Kit, even when process-level attribution and deployment records stay out-of-band.
 
 ## Useful data to request
 
