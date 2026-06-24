@@ -40,6 +40,7 @@ services/<service>/
     endpoints-ports-catalog.md              M
     deployable-unit-coverage.md             M
     per-deployable-units.md                 M
+    data-flow-handoffs.md                   M
   observability/
     README.md                               M
     source-catalog.md                       M
@@ -88,11 +89,15 @@ YAML fields: `name`, `aliases[]`, `repos[]` (each entry: `name | path | url | br
 
 Schema: `symptom-family | CORE-area | file-anchor | notes`. One row per major symptom class; covers all four CORE areas. Built after all CORE areas are rendered.
 
+**Required cross-link:** for stale-output / missing-data symptom families (a proximate cause bottoms out on a stale or missing data entity), route the responder to `topology/data-flow-handoffs.md` to walk upstream. Static pointer to the artifact only — never enumerate individual handoff rows (avoids re-render churn).
+
 ### `00-index/telemetry-routing-card.md` (M)
 
 Schema: `symptom-family | first-source-catalog-ref | join-key | canonical-signal-ref | discriminator | restricted-source-note | empty-result-warning | freshness/trust | method-gates | next-owner/escalation-ref`.
 
 Required method-gate pointer lines per row: `probe-before-proximate` · `empty-is-not-absent` · `detection-vs-onset` · `provenance-strength`. Produced during this onboarding run as a route view over CORE observability.
+
+**Required cross-link:** for stale-output / missing-data symptom families (a proximate cause bottoms out on a stale or missing data entity), carry a static pointer to `topology/data-flow-handoffs.md` for the upstream-walk view — point at the artifact, never enumerate individual handoffs (avoids re-render churn).
 
 ### `00-index/core-map.md` (M)
 
@@ -193,6 +198,25 @@ Audit matrix: `unit | service/ | topology/ | observability/ | failure-knowledge/
 ### `topology/per-deployable-units.md` (M)
 
 Schema: `unit | hosting-model | deployment/runtime-scope | scale/routing-dimension | owner/team | on-call/escalation | evidence(kb/<repo>/...:line) | trust | grounding_type`. One row per material unit/plane.
+
+### `topology/data-flow-handoffs.md` (M)
+
+Entity-indexed, symptom-agnostic artifact-mediated data-flow handoff view: enables walking UPSTREAM when a proximate cause bottoms out on a stale/missing data entity.
+
+Schema: `handoff-id | producer | consumer | entity/artifact | freshness-anchor | upstream-owner | fk-xref | guidance-xref | traversal-probe | evidence(kb/<repo>/...:line) | trust | grounding_type`. One row per producer→entity→consumer handoff.
+
+**Hard-required cells (promoted row):** producer, consumer, entity/artifact, traversal-probe, evidence, trust, grounding_type. **Degradable cells:** freshness-anchor, upstream-owner → `unknown (searched scope)`; fk-xref, guidance-xref → `none`.
+
+**What this is NOT** — `data-flow-handoffs.md` is DISTINCT from three look-alikes; it never duplicates them:
+- **vs `service-graph.md`** — service-graph holds SYNCHRONOUS request/response edges (failure = immediate call error). data-flow-handoffs holds ASYNC artifact-mediated edges (failure = silent staleness). A handoff is NOT re-listed as a service-graph edge; service-graph may carry a pointer, never a duplicate row.
+- **vs `cross-service.md` / `(EXTERNAL; cross-service: <slug>; service-kb: ../../<slug>/)` marker** — that is KB FEDERATION (which sibling owns the far end). data-flow-handoffs is intra-service DATA FLOW (producer→entity→consumer). A handoff that crosses a service edge cites the federation pointer for the far side and owns only its side.
+- **vs `failure-knowledge` discriminators** — failure-knowledge is SYMPTOM-indexed (found only if you already suspect the symptom). data-flow-handoffs is ENTITY-indexed / symptom-agnostic (found by walking upstream from a stale entity). They cross-reference via `fk-xref`; mechanisms are never duplicated.
+
+**Gating:** P8 (`references/reproducibility-contract.md`). **Promoted-only render:** only `promoted` P8 rows appear here; non-promoted edges (one-sided `open:escalated`, hypothesis `suspected ⚠️`, searched) stay in the evidence ledger, never inline. An all-reject service renders a single ledger-derived `none-found (searched scope)` note. Status M for every service; emptiness is evidenced, never skipped.
+
+**Cross-service composition:** a handoff crossing a sibling-service edge cites the federation pointer for the far side and owns only its own side; do not duplicate provider internals.
+
+**Stable ID:** `topo.handoff.<producer-slug>.<entity-slug>.<consumer-slug>` — slug rules in `references/reproducibility-contract.md`. Enums (`trust`, `grounding_type`, `status`): `references/reproducibility-contract.md §Canonical enums`.
 
 ### `observability/README.md` (M)
 
@@ -340,6 +364,7 @@ Within any artifact table, apply in priority order:
 | `kb/<repo>/concepts.md` (all repos) | `service/concept-model.md` | floor concept candidates → service-higher promotion |
 | `topology/per-deployable-units.md` | `topology/deployable-unit-coverage.md` | unit enumeration seeds coverage matrix |
 | `topology/service-graph.md` + `topology/dependencies.md` | `topology/blast-radius.md` | graph data grounds blast-radius analysis |
+| `kb/<repo>/deep/contracts.toon` + `kb/<repo>/concepts.md` + `failure-knowledge` discriminators + `observability/join-keys.md` | `topology/data-flow-handoffs.md` | floor+CORE → artifact-mediated handoff lineage promote-up (P8) |
 | `observability/source-catalog.md` | `observability/canonical-signals.md` | canonical signals is a routing index over source-catalog rows |
 | `observability/source-catalog.md` + `observability/join-keys.md` | `00-index/telemetry-routing-card.md` | CORE observability grounds the incident routing card |
 | `kb/<repo>/ai-assets.md` (all repos) | `00-index/ai-asset-catalog.md` | floor rows aggregate into multi-consumer catalog (pointer-only) |

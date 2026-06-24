@@ -80,7 +80,7 @@ Terminal states:
 - Classify every candidate edge: observed-runtime-call | deploy/config reference | test-only | docs-only | generated/unused-candidate. Emit one ledger record per classified edge.
 - Distinguish embedded-library from runtime service-to-service calls.
 - Enumerate outbound, ops-managed, runtime-injected, out-of-app-repo, scheduled, and webhook/plugin edges as hard as inbound.
-- Discover seams beyond direct calls: shared identity, ops-managed/out-of-app-repo edges, secret-injection, shared infrastructure, and consequence-ownership. If a change in A can break B, it is a seam even without direct call topology.
+- Discover seams beyond direct calls: shared identity, ops-managed/out-of-app-repo edges, secret-injection, shared infrastructure, consequence-ownership, and artifact-mediated data-flow handoffs (a producer writes a durable entity — table, ingestion/state/terminal record, materialized view, blob, queue/topic message, checkpoint, generated config/script, precomputed dataset — that a decoupled consumer reads later, so a STALE-BUT-PRESENT entity silently degrades the consumer with no call-site error). Evaluate P8 to route artifact-mediated handoffs to `topology/data-flow-handoffs.md`; synchronous request/response edges and pure triggers stay in `service-graph.md`. If a change in A can break B, it is a seam even without direct call topology.
 - Join via stable surface identifiers and deployment-manifest verification; never by name matching alone.
 
 ## Phase 4 — Artifact rendering from manifest
@@ -89,7 +89,7 @@ Terminal states:
 
 Build repo-lower first, then derive service-higher CORE:
 - `service/`: identity, ownership, access/escalation, support boundaries, concept-model/glossary.
-- `topology/`: service-graph, endpoints/ports catalog, dependencies, blast-radius, deployable-unit coverage matrix, per-deployable-units.
+- `topology/`: service-graph, endpoints/ports catalog, dependencies, blast-radius, deployable-unit coverage matrix, per-deployable-units, data-flow-handoffs.
 - `observability/`: source-catalog, join-keys, canonical-signals, restricted-sources.
 - `failure-knowledge/`: discriminator-first signatures rendered by P6 three-way routing — promoted variable-slot files, `secondary-signatures.md`, and `candidate-signatures.md`.
 

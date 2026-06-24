@@ -11,7 +11,7 @@ Preserve the four survivor questions while using these canonical areas:
 | CORE area | Survivor question | Required content |
 |---|---|---|
 | `service/` | identity, ownership, access/escalation, support boundaries, concept-model/glossary | service identity, owner/on-call, escalation/access, support boundaries, concept model, glossary |
-| `topology/` | where it runs + who calls whom | service-graph, endpoints/ports catalog, dependencies, blast-radius, deployable-unit coverage matrix, per-deployable-units |
+| `topology/` | where it runs + who calls whom | service-graph, endpoints/ports catalog, dependencies, blast-radius, deployable-unit coverage matrix, per-deployable-units, data-flow-handoffs (artifact-mediated handoffs) |
 | `observability/` | how to observe | source-catalog, join-keys, canonical-signals, restricted-sources |
 | `failure-knowledge/` | what breaks and why | signatures and mechanisms, discriminator-first |
 
@@ -34,6 +34,8 @@ File schemas for all `kb/<repo>/` slots: `references/artifact-manifest.md`.
 `topology/per-deployable-units.md`: One row per material unit/plane. Schema: `references/artifact-manifest.md`.
 
 `topology/endpoints-ports-catalog.md`: One row per exposed surface. Schema: `references/artifact-manifest.md`.
+
+`topology/data-flow-handoffs.md`: P8-gated, promoted-only; status M with `none-found (searched scope)` degradation when no edge promotes. ENTITY-indexed and symptom-agnostic (found by walking upstream from a stale entity), distinct from symptom-indexed `failure-knowledge`. Single canonical home: `topology/service-graph.md` points, never duplicates a handoff row. What this is NOT: see the `topology/data-flow-handoffs.md` schema block in `references/artifact-manifest.md`.
 
 **Promote-up record:** For every promoted floor fact: `source_cell (kb/<repo>/...:line) → destination_cell (CORE file:line) → payload`, or a cited drop/gap using canonical ledger statuses: `duplicate · stale · non-material · sensitive-unsafe · superseded · open:escalated · rejected`. Missing or mismatched destination payload is not promoted.
 

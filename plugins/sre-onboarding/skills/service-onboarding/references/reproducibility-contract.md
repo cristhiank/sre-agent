@@ -111,6 +111,7 @@ IDs are assigned to subjects before rendering. Assignment is deterministic: deri
 | `repo.<slug>` | per-repo floor root | repo name (normalized) |
 | `topo.unit.<unit-slug>` | deployable unit or operational plane | normalized unit name from deployment manifest |
 | `topo.edge.<caller>.<callee>` | topology edge | `<caller-unit-slug>.<callee-unit-slug>.<kind>` |
+| `topo.handoff.<producer-slug>.<entity-slug>.<consumer-slug>` | artifact-mediated handoff edge | `<producer-unit-slug>.<entity-slug>.<consumer-unit-slug>` |
 | `obs.source.<source-slug>` | observability source / telemetry table | normalized source name from discovery source |
 | `obs.signal.<symptom>.<source>` | canonical signal | `<symptom-family-slug>.<source-slug>` |
 | `fk.<symptom-family>.<mechanism>` | failure-knowledge signature family | `<symptom-slug>.<mechanism-slug>` |
@@ -168,6 +169,22 @@ The routing decision is recorded in `failure-knowledge/README.md` and in the evi
 
 `open:escalated` is valid iff: (a) the decisive evidence is genuinely unreachable in this run (not just inconvenient); (b) the exact gap is named; (c) a concrete verify-later action is recorded; (d) reachable static paths were tried first; (e) three required proof fields are present: `reachable-static-probes-tried` (list of static probe paths attempted), `attempted-source-classes` (classes of evidence attempted), `why-unreachable` (exact reason decisive evidence is not reachable). `open:escalated` is invalid if same-subject reachable static evidence exists — such rows must be promoted or rejected instead. Naming unverified scope without trying reachable paths does not discharge a row.
 
+### P8 — Artifact-mediated data-flow handoff
+
+Routes an edge to `topology/data-flow-handoffs.md` iff ALL hold:
+- (a) **durable producer write** — the producer emits a named durable entity/artifact (table, ingestion/state/terminal record, materialized view, blob, queue/topic message, checkpoint, generated config/script, precomputed dataset), not a synchronous response payload;
+- (b) **decoupled consumer read** — a distinct consumer (different unit/repo/scheduled job/process) reads it asynchronously / later;
+- (c) **silent-staleness risk** — the consumer reads the entity for DATA/STATE such that a STALE-BUT-PRESENT entity silently produces degraded output with no call-site error. This is DISTINCT from a pure TRIGGER/signal whose ABSENCE halts the consumer observably (no run). Decidability: ✅ a durable blob / ingestion-or-terminal record / materialized view / pipeline-metadata record / precomputed dataset read for data (stale-but-present degrades silently) qualifies; ❌ a completion-queue/event that only TRIGGERS the next stage (absence = observable non-run), a read-through cache resolved within the request, a row written and read inside the SAME request, or a config flag resolved synchronously do NOT (they stay in `service-graph.md`); borderline (a completion message that ALSO carries consumed state, or a compute-enqueue) qualifies ONLY if a stale-but-present payload silently degrades output — static proxy: qualifies iff the cited consumer read consumes the payload's DATA fields into its output with no freshness/validity guard at the read site; if the cited read only acks/dispatches on arrival, reject; if neither is citable, reject with searched scope. A freshness anchor exists or is required to detect the staleness;
+- (d) **two-sided evidence ≥ docs-only** — both the producing write and the consuming read are cited; cross-repo name-match alone is insufficient.
+
+Outcomes (decidable, reproducible — mirrors P1–P7):
+- (a)–(d) hold and a concrete `traversal-probe` is statically derivable → `promoted` row in `topology/data-flow-handoffs.md`.
+- Only one side evidenced (producer XOR consumer) → `open:escalated` under P7 discipline: name the missing side as the gap and carry P7's three proof fields. If P7's "invalid if same-subject reachable static evidence exists" clause fires (the missing side was reachable but unsearched), PROMOTE or REJECT instead — never leave it escalated. Not a promoted row; not rendered in the artifact.
+- (a)–(d) hold but no concrete `traversal-probe` is statically derivable → `open:escalated` under the same P7 discipline (named gap: `traversal-probe`; searched scope; verify-later). Not a promoted row. `traversal-probe` stays hard-required; never invent a probe to satisfy the cell.
+- No edge passes P8 → the file carries a ledger-derived `none-found (searched scope)` note citing the rejected/searched edges. The file is mandatory (M); emptiness is evidenced, never skipped.
+
+`claim-class` reuses existing `edge/dependency` (no enum churn); destination + `predicate-inputs=P8` distinguish artifact-mediated handoffs from synchronous service-graph edges.
+
 ## Render-from-ledger contract
 
 1. **No direct page drafting from exploration.** Scouts produce normalized candidate records. Builders classify records, evaluate predicates, and assign ledger statuses. Only then do builders render artifact tables by projecting `promoted` rows into their declared `destination` using the manifest schema.
@@ -183,8 +200,8 @@ When `mode = incremental`, the input lock includes the prior KB state hash and o
 
 | Changed surface | Re-mine record classes | Destination artifacts to re-render |
 |---|---|---|
-| repo source (entry-points, modules, contracts, invariants) | `edge/dependency · control/auth · observability · concept · failure-mode` | `kb/<repo>/` floor; `topology/`; `failure-knowledge/`; `observability/source-catalog.md` |
-| deployment/runtime manifests | `edge/dependency · config/secret · ownership/escalation` | `topology/per-deployable-units.md`; `topology/service-graph.md`; `topology/endpoints-ports-catalog.md` |
+| repo source (entry-points, modules, contracts, invariants) | `edge/dependency · control/auth · observability · concept · failure-mode` | `kb/<repo>/` floor; `topology/`; `topology/data-flow-handoffs.md`; `failure-knowledge/`; `observability/source-catalog.md` (+ matching `00-index/telemetry-routing-card.md` / `task-router.md` symptom cross-link) |
+| deployment/runtime manifests | `edge/dependency · config/secret · ownership/escalation` | `topology/per-deployable-units.md`; `topology/service-graph.md`; `topology/endpoints-ports-catalog.md`; `topology/data-flow-handoffs.md` (+ matching `00-index/telemetry-routing-card.md` / `task-router.md` symptom cross-link) |
 | telemetry/observability config | `observability` | `observability/source-catalog.md`; `observability/canonical-signals.md`; `observability/join-keys.md` |
 | ownership/escalation config | `ownership/escalation` | `service/ownership.md`; `service/access-escalation.md`; `00-index/ownership.toon` |
 | incident overlay source (new window) | `overlay` | `overlays/incidents/`; `00-index/incident-clusters.toon` |
