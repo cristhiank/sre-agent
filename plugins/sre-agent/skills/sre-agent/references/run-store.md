@@ -55,12 +55,25 @@ Do not rename the stage directories.
 completion, artifact pointers, open questions, and gaps.
 
 `run.md` also carries a compact `model_tiering` record — the single canonical schema
-home for tiering. Recorded per dispatch: role · chosen tier · the role's default tier ·
-the model actually used · whether the preferred tier was available · escalation reason
-when above the role default (claim-gated reasoning | synthesis | high-ambiguity) ·
-fallback reason + selector (harness-limited | coordinator-choice | model-unavailable |
-override) when they differ. This makes silent fallback and above-default escalation
-visible; it does not imply the coordinator can use a tier the host does not expose.
+home for tiering. Recorded per dispatch: role · chosen capability class · the role's
+default class · the advertised models seen at resolution + the resolved model actually
+used and the basis (`latest-in-advertised-list` | `host-default-fallback` |
+`capability-step-down`) · context-window tier
+(`standard` | `large-context` | `no-override-exposed`) · whether the preferred tier was
+available · escalation reason when above the role default (claim-gated reasoning |
+synthesis | high-ambiguity) · fallback reason + selector (harness-limited |
+coordinator-choice | model-unavailable | override) when they differ. The model is
+selected by capability class and newest-stable-generation-within-one-family from the
+dispatch tool's advertised list, never a hardcoded name; resolve once and set it on the
+actual dispatch call. This makes silent fallback, above-default escalation, and
+stale-generation or standard-window subagent picks visible; it does not imply the
+coordinator can use a tier the host does not expose.
+
+<bad-example>
+The dispatch tool advertises `claude-sonnet-4.6` and `claude-sonnet-4.5`; the coordinator dispatches Scout on `claude-sonnet-4.5`.
+Wrong: 4.5 is not the newest generation in the fast/economical class that the list advertises — selecting it is name-from-memory anchoring, not list resolution.
+Correct: resolve from the advertised list and pick the newest stable Sonnet it advertises (`claude-sonnet-4.6` for THIS list; pick a newer Sonnet if one is advertised later), record `basis=latest-in-advertised-list`. Likewise, a heavy-read Scout left on the standard window when the host exposes a large-context tier is a defaulted-window miss — set the large-context parameter on that dispatch, not just in the record.
+</bad-example>
 
 The coordinator tracks open questions and gaps there in whatever compact form is clear. When a known-issue acceleration path is taken or considered (per the Grader's known-issue decision rule in [grading-rubric.md](grading-rubric.md)), `run.md` records a compact line: the leading candidate's source asset/capability, the dispositive `OBS###` id(s) that closed its discriminator, and the settle-or-fail-open reason — so the acceleration is auditable and a wrong shortcut is visible.
 A CAPABILITY MAP lives in `run.md` or `1_intake/capability-map.md`; per capability,

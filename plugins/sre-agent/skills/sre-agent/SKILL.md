@@ -167,18 +167,41 @@ Before code-dependent conclusions for a service-specific incident, resolve the l
 
 ## Dispatch routing
 
-Each dispatch declares two independent dimensions:
-- Model tier: choose by capability tier first, exact name second. Set on the
-  subagent dispatch model parameter when available. DEFAULTS, not soft preferences:
-  Scout and breadth-first orientation DEFAULT to the fast/economical tier
-  (e.g. Haiku-/Sonnet-class); reserve the reasoning-heavy tier (e.g. GPT-5.5-high/
-  Opus-class) for Specialists, Grader, Report, and synthesis.
-  Every dispatch records a Tier Record in `run.md`'s `model_tiering` (schema home:
-  `references/run-store.md`): role · chosen tier · default tier · escalation reason
-  when above default · fallback when the preferred tier is unavailable.
+Each dispatch declares three independent dimensions:
+- Model tier: choose by capability CLASS, not a fixed model name. Scout and
+  breadth-first orientation DEFAULT to the fast/economical class; reserve the
+  reasoning-heavy class for Specialists, Grader, Report, and synthesis. Within the
+  chosen class, select the newest STABLE generation the dispatch tool advertises:
+  resolve from that live model list at run time (never a remembered or hardcoded
+  name), compare versions only WITHIN one family lineage (a sonnet-4.6 supersedes
+  sonnet-4.5) and never version-rank across unrelated families; keep the class's
+  default family and step to another only when the default lacks a required capability
+  (effort level, toolset). Skip preview/unsupported models; if class/family metadata or
+  version ordering is absent, use the host default for the class and record the
+  fallback. Resolve once during the CAPABILITY MAP — recording the advertised models
+  seen and the per-class choice — then USE that resolved model in the actual dispatch
+  parameter on every dispatch when the dispatch tool exposes one (else record
+  `harness-limited`): a model written into the Tier Record but not set on an available
+  dispatch parameter is an incomplete handoff.
+  Every dispatch records a Tier Record: role · chosen class · resolved model + basis ·
+  default class · escalation reason when above default · fallback when the preferred
+  class or model is unavailable.
   A non-economical Scout/orientation dispatch REQUIRES a named escalation reason
   (claim-gated reasoning, synthesis, or high ambiguity); a missing Tier Record is an
   incomplete handoff. Efficiency detail: `references/operational-discipline.md`.
+- Context-window tier: a large/long-context tier on the top-level session does NOT
+  propagate to dispatched subagents — each defaults to the standard window. A heavy-read
+  worker DEFAULTS to the large-context tier — Scout whenever it receives
+  KB/history/documentation/search orientation capabilities, and evidence specialists
+  enumerating telemetry or source. When the dispatch tool exposes a context/window
+  parameter, the dispatch call MUST set it (recording the intent without setting the
+  parameter is incomplete), so the worker does not exhaust its window and force mid-run
+  compaction. This is independent of the model-class escalation above — large context on
+  the economical model class is NOT a model escalation; record a separate context reason.
+  Use the standard window only with an explicit bounded-input reason; when the host
+  exposes no override for an over-budget heavy reader, bound or stage the worker's reads
+  (or record a visible context-capability gap) rather than silently dispatching over
+  budget. Record the chosen window tier in the Tier Record.
 - Worker toolset class: `full-evidence` = worker context inherits the session's
   evidence toolset; `reasoning-only` = restricted/fast worker for tasks that
   invoke NO evidence tools.
