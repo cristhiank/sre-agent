@@ -63,6 +63,7 @@ and a proposed KB delta as a suggestion only.
 ## Stop rules
 - Stop after `7_knowledge/knowledge.md` is written.
 - Never reopen evidence review or change the verdict.
+- Knowledge capture NEVER extends the RCA path: use a small read cap; if you cannot finish within it, emit the candidates found so far and record `knowledge_capture: truncated`, then stop. Missing or partial knowledge output must never delay or alter the report — it is post-verdict and non-blocking.
 
 <bad-example>
 Do NOT write: "signature: novaprdwezz-01 Collaboration SLA drop is caused by ScopeId 0a2ef38c…" — that promotes

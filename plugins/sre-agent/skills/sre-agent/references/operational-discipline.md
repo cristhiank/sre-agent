@@ -6,6 +6,20 @@ This floor is SUBORDINATE to the honesty floor (`investigation-invariants.md`): 
 
 - Before each search, read, or dispatch, name the claim, discriminator, or routing decision it will close. Probes are gap-closing, not exploratory momentum: no probe without a named target it would resolve or falsify.
 
+## Cost budget & stop rule
+
+Precedence: **honesty floor > budget > efficiency.** A budget may stop additional source-hunting, but it NEVER converts missing, empty, unavailable, or weak evidence into evidence of absence. To state that a candidate cause did not occur, did not contribute, or is ruled out, you MUST have a fit-for-purpose authoritative probe for that specific claim, with scope/time/entity alignment sufficient for the claim. If the budget is exhausted before that standard is met, the ONLY allowed output is a named-unchecked / unknown gap — never "no evidence of", "ruled out", or causal-absence wording. One extra probe beyond budget is REQUIRED when it is the smallest probe needed to avoid recording false causal absence OR to satisfy the failing-unit gate; name that reason locally.
+
+Default per-specialist budget for one assigned discriminator (defaults, tuned by telemetry — make the tripwire visible, do not treat as advisory):
+- **≤ 12 evidence probes** (live queries/reads that could close the discriminator) to resolve it; stop when it is resolved, when a claim-safe unknown is reached, or when budget+escape is exhausted.
+- **Empty/negative path: 1 primary fit-for-purpose probe + at most 2 meaningful retries (3 attempts total).** A retry MUST change the failure mode — re-scope, re-lens, or re-source — not a cosmetic query variant; you may move to ONE alternate source family when the first is known incomplete. If all retries hit the same source-family limit, stop and record source-family exhaustion — do not keep pivoting across sources for confidence.
+- **Escape: at most +3 probes beyond the budget**, each allowed only under the honesty-floor exception above (avoid false absence / failing-unit gate) and each justified locally.
+- Do not add probes for confidence, wording, adjacent questions, or provenance.
+
+You run in a parallel wave; spend probes only while they can MATERIALLY resolve your assigned discriminator, because over-spending gates every sibling. If the next probe would likely close the discriminator or prevent a false-absence claim, take it and name why; otherwise stop. Minimizing sibling wait never licenses weakening evidence.
+
+When you stop with the discriminator unresolved, hand off a compact unresolved-discriminator receipt (the unresolved-lead extension of your claim-readiness ledger, not a separate artifact, and not a vague gap) so the Grader can adjudicate it: assigned discriminator · why it matters to the verdict · probes attempted (source / scope / time / key filters → observed result) · why the result is not absence · best next probe if refinement chooses to spend · verdict-risk (high | medium | low) as the specialist's PRIOR · claim cap = unknown only. The specialist's `verdict-risk` only prioritizes WITHIN the Grader's follow-up budget; it never gates a lead out — the Grader re-rates materiality independently and runs its follow-up round on any receipt IT judges material and reachable, so a `low` self-rating can never silently drop a lead the Grader judges material (no material lead is silently dropped — see the lead ledger in [grading-rubric.md](grading-rubric.md) and the coordinator follow-up round).
+
 ## Search discipline
 
 - Prefer a structured search capability that returns empty gracefully over broad shell text-search.
