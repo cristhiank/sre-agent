@@ -62,7 +62,7 @@ fallback reason + selector (harness-limited | coordinator-choice | model-unavail
 override) when they differ. This makes silent fallback and above-default escalation
 visible; it does not imply the coordinator can use a tier the host does not expose.
 
-The coordinator tracks open questions and gaps there in whatever compact form is clear.
+The coordinator tracks open questions and gaps there in whatever compact form is clear. When a known-issue acceleration path is taken or considered (per the Grader's known-issue decision rule in [grading-rubric.md](grading-rubric.md)), `run.md` records a compact line: the leading candidate's source asset/capability, the dispositive `OBS###` id(s) that closed its discriminator, and the settle-or-fail-open reason — so the acceleration is auditable and a wrong shortcut is visible.
 A CAPABILITY MAP lives in `run.md` or `1_intake/capability-map.md`; per capability,
 record capability, match, stage, and action-or-gap. Keep it small.
 Stable `OBS###` ids are the citation key. Once assigned, do not reuse or silently rewrite

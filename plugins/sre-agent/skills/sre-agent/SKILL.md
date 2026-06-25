@@ -116,7 +116,9 @@ Before Scout, inspect the host's available skill/capability metadata by name and
 description. Build a compact CAPABILITY MAP for this run recording, per capability:
 capability (what it does), match or mismatch to this incident, stage served
 (intake/scout/specialist/grader/report), and action-or-gap (load/dispatch/use-later,
-or gap).
+or gap). Flag every read-only orientation/knowledge/history/documentation/search capability so
+Scout's known-issue discovery pass is dispatched with ALL matching ones, never only the most
+obvious knowledge source.
 
 Load and use every available capability whose description matches an immediate
 investigation obligation. If a material need has no matching capability, record an
@@ -236,17 +238,30 @@ with a required dispatch pending.
    look for prior or concurrent incidents whose identity matches or overlaps the
    recurrence identity over a recent window, and let any matches shape — never decide —
    the hypotheses; when such a capability is available, dispatch Scout `full-evidence`
-   with it, otherwise record recurrence as an explicit gap. Expected output: surfaces,
+   with it, otherwise record recurrence as an explicit gap. Orientation also includes a
+   bounded known/ongoing-issue discovery pass across whatever read-only knowledge,
+   orientation, and documentation capabilities the run exposes — discovered by description
+   from the CAPABILITY MAP (service knowledge, failure knowledge, AI assets, TSGs, runbooks,
+   wiki/doc search, and the like), never a single hardcoded knowledge source; dispatch Scout
+   `full-evidence` with the ones it must search, and record an explicit gap when none is
+   available. Expected output: surfaces,
    recurrence matches (or an explicit none/unavailable note), the discussion-thread summary
    (or empty/unavailable note), how they shape the
    hypotheses, at least two materially different hypotheses, and the
-   questions/observations that would discriminate them, plus a best-effort pre-declared discriminator table (per leading hypothesis: serious same-symptom rival, falsifiable predicate, expected favored vs rival observation, candidate authoritative source/key — plus a coverage-map entry per hypothesis (best-fit orientation asset found by a bounded whole-KB scan, or `no-coverage`; see `references/subagents/scout.md`)) — pre-registering the discriminator before any specialist checks it, with an explicit gap when no honest discriminator exists yet; no findings or verdicts. Scout also consults the service's curated/promoted prior knowledge (`failure-modes/` and any reviewed-promoted items) as orientation evidence — claims not authority, bounded by service/component/symptom. It never reads unreviewed run-local `7_knowledge` candidates or sibling run directories; here too, missing prior knowledge is a gap, not a block.
+   questions/observations that would discriminate them, plus a best-effort pre-declared discriminator table (per leading hypothesis: serious same-symptom rival, falsifiable predicate, expected favored vs rival observation, candidate authoritative source/key — plus a coverage-map entry per hypothesis (best-fit orientation/known-issue asset found by a bounded scan across the discovered read-only knowledge capabilities — not a single hardcoded knowledge source — or `no-coverage`; see `references/subagents/scout.md`)) — pre-registering the discriminator before any specialist checks it, with an explicit gap when no honest discriminator exists yet; no findings or verdicts. Scout also consults whatever curated/promoted prior knowledge the discovered capabilities expose (failure knowledge and any reviewed-promoted items among them) as orientation evidence — claims not authority, bounded by service/component/symptom. When a discovered asset describes a known or ongoing issue whose signature matches this incident AND supplies (or lets Scout derive) a falsifiable discriminator, Scout names it the leading candidate to test first — recorded as an inherited/open rung, never a settled answer — so the first specialist wave checks it before broad fanout; a weaker symptom-only match stays a non-leading orientation lead. It never reads unreviewed run-local `7_knowledge` candidates or sibling run directories; here too, missing prior knowledge is a gap, not a block.
 3. **Specialists (`3_evidence`, `4_specialists`).** Dispatch one Specialist per
    material hypothesis area, and launch all independent specialists as a SINGLE
    awaited parallel-sync batch (see Execution model: awaited parallel-sync
    batch; max 5 concurrent, batch if more; never background/detached, never
    one-at-a-time across turns). Serialize a specialist only on a genuine input
-   dependency. Each fetches and analyzes its own observations through the
+   dependency. Known-issue-first staged dispatch (decision rule): when Scout designates a
+   leading known/ongoing-issue candidate carrying a falsifiable discriminator, the first wave
+   MAY be narrowed to the specialist(s) that check that discriminator, its serious same-symptom
+   rival, and the failing-population enumeration — recording the other material hypotheses in the
+   lead ledger as `deferred-by-known-issue-first` (held, not dropped), dispatched as the normal one-per-hypothesis
+   wave the moment any fail-open trigger fires or the candidate is refuted/unverified (see the
+   known-issue acceleration settle rule in `references/grading-rubric.md`). Absent such a
+   candidate, dispatch the normal one-Specialist-per-hypothesis wave. Each fetches and analyzes its own observations through the
    evidence sources and capabilities you pass it, cites what it saw, and proposes
    theories with cause + mechanism. Each specialist also carries the
    pre-registered discriminator for its hypothesis (from Scout's discriminator
@@ -294,6 +309,10 @@ with a required dispatch pending.
    material evidence. Stop if two consecutive turns add nothing material. Do not spin
    on evidence paths that cannot answer the lead: record a `blocked-unreachable`
    dead-end.
+   When the run took the known-issue-first staged path, the Grader applies the known-issue
+   acceleration settle rule (`references/grading-rubric.md`): settle in fewer rounds once the
+   candidate's discriminator passes the full gates on this incident's live evidence, or fail open
+   to the deferred normal fanout — never a lower verdict bar.
    If the final verdict is `Confirmed` or `Likely-rooted` and the verified cause is tied to a code/config/schema/artifact/service-owned location, run ONE bounded introduction-provenance pass before Report, seeded with the verified repo/source, branch/ref when known, implicated path, symbol/line/config key, and known owner/area. It is broad over time but narrow over scope. Use a read-only source-control history capability that can search commits, pull requests, file history, diffs, and line/symbol history for that exact path/symbol across available history — not the incident/onset window. Prefer the earliest semantically relevant change that introduced the defective behavior (the missing guard, the defective branch, the config/schema/artifact shape); if introduction cannot be determined, report the closest semantically relevant last-touching change and label it `last-touch, not proven introduction`. Only if the history capability cannot answer AND a local source checkout is available, perform a bounded, authorized history deepen of the implicated repo/ref/path when cheap, then use line-level history/blame on the exact symbol/lines; if that needs unavailable auth, excessive history, or broad whole-repo fetches, do not block — record a provenance gap plus the one concrete query a human should run. Stop after a high-confidence introducing candidate, a labeled last-touch candidate, or an explicit gap. Merge as an actionability add-on (commit, pull request, date, author, fix handle, owner when known); this never changes or gates the verdict.
 5. **Report (`6_report`).** Dispatch Report to write the concise RCA, bounded by the
    Grader's verdict, provenance add-on when required, and open gaps. When the dispatch brief

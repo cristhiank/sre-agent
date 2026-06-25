@@ -55,7 +55,7 @@ observation, and a candidate authoritative source/key — pre-registered questio
 checked results, with an explicit gap when no honest discriminator exists yet
 (neutrality preserved: no expected value is asserted as the answer).
 Also instantiates the discriminator ladder: bind the incident's signature to its
-canonical ladder (the KB signature template) or bootstrap one from the service's
+canonical ladder (a known-issue signature template discovered from any available read-only knowledge capability — service/failure knowledge, AI assets, TSGs, runbooks, wiki/doc search, not only the local KB) or bootstrap one from the service's
 pipeline/capability map when the family is novel (consumer→producer→upstream lineage),
 pre-registering each rung's `claim` / `favored_value` / `rival_values` / `evidence_shape`
 / `dispositive` and hanging the rungs on the coverage map above; any prior AI- or
