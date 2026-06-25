@@ -118,7 +118,10 @@ capability (what it does), match or mismatch to this incident, stage served
 (intake/scout/specialist/grader/report), and action-or-gap (load/dispatch/use-later,
 or gap). Flag every read-only orientation/knowledge/history/documentation/search capability so
 Scout's known-issue discovery pass is dispatched with ALL matching ones, never only the most
-obvious knowledge source.
+obvious knowledge source. A ranked code/knowledge-search capability counts here: classify its
+find/rank use as a Scout orientation capability AND its deep-read use as a specialist
+source-verification capability, and pass the find/rank use to Scout (full-evidence) for fast
+discovery over the KB/docs/repo text while specialists retain deep code mechanism verification.
 
 Load and use every available capability whose description matches an immediate
 investigation obligation. If a material need has no matching capability, record an
