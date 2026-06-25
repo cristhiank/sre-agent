@@ -169,8 +169,11 @@ Before code-dependent conclusions for a service-specific incident, resolve the l
 
 Each dispatch declares three independent dimensions:
 - Model tier: choose by capability CLASS, not a fixed model name. Scout and
-  breadth-first orientation DEFAULT to the fast/economical class; reserve the
-  reasoning-heavy class for Specialists, Grader, Report, and synthesis. Within the
+  breadth-first orientation DEFAULT to the fast/economical class; Grader, Report,
+  and synthesis DEFAULT to the reasoning-heavy class. Specialists take NO blanket
+  class — each specialist's class is resolved per dispatch from its declared
+  `model_affinity` contract combined with the Scout's per-hypothesis demand (see
+  Specialist model resolution below). Within the
   chosen class, select the newest STABLE generation the dispatch tool advertises:
   resolve from that live model list at run time (never a remembered or hardcoded
   name), compare versions only WITHIN one family lineage (a sonnet-4.6 supersedes
@@ -189,6 +192,30 @@ Each dispatch declares three independent dimensions:
   A non-economical Scout/orientation dispatch REQUIRES a named escalation reason
   (claim-gated reasoning, synthesis, or high ambiguity); a missing Tier Record is an
   incomplete handoff. Efficiency detail: `references/operational-discipline.md`.
+  **Specialist model resolution (two-layer, adaptive).** A specialist's class is
+  resolved from two layers, never a fixed default. Layer 1 is the specialist
+  skill's `model_affinity` frontmatter contract: `default_class` (the
+  eval-calibrated baseline), `minimum_allowed_class` (a hard floor), and the
+  skill-authored `escalate_when` signals. Layer 2 is the Scout's per-hypothesis
+  `model_demand` tag (`low` | `high`); the Scout raises it to `high` exactly when
+  it observes one of the owning skill's `escalate_when` conditions for that
+  hypothesis. All three operands resolve onto the single
+  `{economical | mid | reasoning-heavy}` lattice before combining: `default_class`
+  as declared; `model_demand` projects as `high` → the reasoning-heavy class and
+  `low`/absent → the `default_class` (no raise); and `coordinator_risk_override` is
+  an OPTIONAL, upward-only class the coordinator may name from its own risk read
+  (recorded with basis `coordinator-escalated`), never a downward move and omitted
+  by default. Resolve `effective_class = max(default_class, model_demand→class,
+  coordinator_risk_override)`; the result is never below `minimum_allowed_class`
+  and never below `default_class` — escalation is the ONLY permitted movement
+  (Scout demand, coordinator, or a Grader re-dispatch may RAISE the class above the
+  default; nothing lowers it below the declared default). A missing, malformed,
+  stale, or invalid `model_affinity` (e.g. `default_class` below
+  `minimum_allowed_class`, an unknown class) FAILS SAFE to the reasoning-heavy
+  class and records the contract fault in the Tier Record. Lowering a skill's
+  `default_class` or `minimum_allowed_class` is a doctrine change requiring eval
+  evidence, never a per-run choice. The resolved class then follows the same
+  newest-stable-within-family resolution above.
 - Context-window tier: a large/long-context tier on the top-level session does NOT
   propagate to dispatched subagents — each defaults to the standard window. A heavy-read
   worker DEFAULTS to the large-context tier — Scout whenever it receives

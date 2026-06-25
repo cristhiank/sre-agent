@@ -12,6 +12,8 @@ This file is not a registry. A specialist description should be enough for routi
 
 The coordinator routes from descriptions; it does not load specialist bodies for routing, and children do not load the coordinator skill.
 
+Each specialist also declares a `model_affinity` contract in its frontmatter — `default_class` (the eval-calibrated baseline class for this hypothesis class: `economical` | `mid` | `reasoning-heavy`), `minimum_allowed_class` (a hard floor the coordinator never routes below), and optional `escalate_when` signals plus a one-line `rationale`. This lets a structurally simple hypothesis class default to a faster/cheaper model while a code-semantics or otherwise reasoning-bound class pins itself to `reasoning-heavy` (`default_class` == `minimum_allowed_class`). The coordinator resolves the effective class per dispatch by combining this contract with the Scout's per-hypothesis `model_demand` (coordinator skill → Dispatch routing → Specialist model resolution); `default_class` must be at least `minimum_allowed_class`, and a missing, malformed, stale, or invalid contract fails safe to `reasoning-heavy`. Lowering a declared `default_class`/`minimum_allowed_class` requires eval evidence, not a per-run choice.
+
 ## Worker guidance
 
 Use [../run-store.md](../run-store.md), [../artifact-contracts.md](../artifact-contracts.md), and [../grading-rubric.md](../grading-rubric.md) as needed. Keep the local role simple:

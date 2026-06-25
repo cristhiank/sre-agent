@@ -8,6 +8,11 @@ description: >-
   cause-before-effect/cause-not-effect ordering. Boundary: operates on an investigation
   context (run directory, assigned scope, evidence sources) supplied to it; it runs the
   analysis, not its own intake, and fetches only through the evidence sources provided.
+model_affinity:
+  default_class: mid
+  minimum_allowed_class: mid
+  escalate_when: [staggered multi-ring/region rollout, symptom precedes the apparent change, multi-source timestamp skew]
+  rationale: chronological assembly and changepoint ID; a clean single-onset trace stays at mid, non-obvious causal ordering escalates to reasoning-heavy.
 ---
 
 # Specialist: Timeline / Changepoint

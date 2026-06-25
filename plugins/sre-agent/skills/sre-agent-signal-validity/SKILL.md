@@ -13,6 +13,11 @@ description: >-
   own intake; fetches only through provided evidence; evaluates signal validity only and
   never declares the incident false-alarm/noise/all-clear (the grader owns that), always
   surfacing any coexisting real failures.
+model_affinity:
+  default_class: mid
+  minimum_allowed_class: mid
+  escalate_when: [raw signal and rule definition disagree, aggregation or pipeline-semantics ambiguity, source/dimension reconciliation conflict]
+  rationale: alert/monitor measurement semantics, deceptively hard when sources disagree; floored at mid (never economical), escalates on cross-source conflict.
 ---
 
 # Specialist: Signal Validity / Alert Semantics

@@ -9,6 +9,11 @@ description: >-
   cause-before-effect ordering. Boundary: operates on an investigation context (run
   directory, assigned scope, evidence sources) supplied to it; it runs the analysis,
   not its own intake, and fetches only through the evidence sources provided.
+model_affinity:
+  default_class: mid
+  minimum_allowed_class: mid
+  escalate_when: [unstable or contested failing-population, causal attribution required (cause vs effect/proxy/sampling), independent telemetry sources contradict]
+  rationale: structured telemetry discrimination against a Scout-pre-registered discriminator; causal or contradictory evidence escalates to reasoning-heavy.
 ---
 
 # Specialist: Dependency / Downstream

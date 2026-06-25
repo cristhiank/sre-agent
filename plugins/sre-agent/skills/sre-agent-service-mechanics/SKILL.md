@@ -11,6 +11,10 @@ description: >-
   to it (run directory, assigned scope, evidence sources, and the specific discriminator
   to check); it runs the analysis, not its own intake, and fetches only through the
   evidence sources provided.
+model_affinity:
+  default_class: reasoning-heavy
+  minimum_allowed_class: reasoning-heavy
+  rationale: code/control-flow/lifecycle semantics (exception-type hierarchy, guard and ordering divergence, retry/onError wiring) — mandatory heavy; default equals minimum, never downgraded.
 ---
 
 # Specialist: Service Mechanics
