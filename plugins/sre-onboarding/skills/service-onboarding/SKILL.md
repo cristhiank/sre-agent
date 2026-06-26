@@ -48,7 +48,7 @@ Every promoted claim records `class | evidence | trust-label | grounding_type | 
 </evidence>
 
 <output_contract>
-Build the repo-lower `kb/<repo>/` floor first, then derive `service/`, `topology/`, `observability/`, `failure-knowledge/`, `00-index/` (including committed `evidence-ledger.toon`), `overlays/incidents/` (capability-gated), and `contributions/` shape. Incident is the only authored workflow lens. Full artifact tree, file statuses, per-file schemas, and dependency edges: `references/artifact-manifest.md`.
+Build the repo-lower `kb/<repo>/` floor first, then derive `service/`, `topology/`, `observability/` (including `dependency-sources.md` when P-dep-telemetry requires it), `failure-knowledge/`, `00-index/` (including committed `evidence-ledger.toon`), `overlays/incidents/` (capability-gated), and `contributions/` shape. Incident is the only authored workflow lens. Full artifact tree, file statuses, per-file schemas, and dependency edges: `references/artifact-manifest.md`.
 </output_contract>
 
 <workflow_summary>
@@ -62,10 +62,11 @@ Done/no-blocking-issues is invalid unless all hold:
 - All mandatory artifacts from `references/artifact-manifest.md` present; variable-slots iff predicate passed; capability-gated artifacts present or gap noted; P-status artifacts present for true predicate outcomes, with the manifest-declared alternate artifact or evidence-ledger gap for false/inconclusive outcomes.
 - Normalized evidence ledger complete; every material thread is `promoted`, `rejected`, or `open:escalated`; every promoted claim has rule_status, trust-label, grounding_type, confidence, and re-resolved evidence.
 - Closed-world ban honored; no absence/independence claim without named searched + unverified scope.
-- Mechanical reproducibility audit (A–K) passed per `references/verification-and-evidence.md §Mechanical reproducibility audit`: artifact presence, schema arity, enum+rule_status conformance, promote-up coverage, escalation proof, canonical-home consistency, global sanitization, run-trail/audit/dispatch-decision, live-mode honesty, predicate inputs, canonical ordering+stable IDs.
+- Mechanical reproducibility audit (A–L) passed per `references/verification-and-evidence.md §Mechanical reproducibility audit`: artifact presence, schema arity, enum+rule_status conformance, promote-up coverage, escalation proof, canonical-home consistency, global sanitization, run-trail/audit/dispatch-decision, live-mode honesty, predicate inputs, canonical ordering+stable IDs.
 - Cross-layer grounding holds for service-higher implementation facts.
 - Incident-material deep/ populated (P3) or `open:escalated` gap in evidence-ledger; non-material repos have `deep/not-material.md`.
 - Observability source-catalog CONSUMER WARNINGs complete with concrete source and join key.
+- `observability/dependency-sources.md` present per P-dep-telemetry; dependency-routed symptom families in `telemetry-routing-card.md` cross-link the dependency-sources row; freshness/provenance headers conform to the manifest format.
 - Incident `telemetry-routing-card` produced from CORE observability; failure-knowledge is discriminator-first.
 - Freshness/provenance header exists; Clean Deliverable Packet is clean.
 - Independent completeness audit ran and sampled opposite-family for missing/falsely closed threads.

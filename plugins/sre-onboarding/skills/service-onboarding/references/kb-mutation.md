@@ -68,7 +68,7 @@ Map old -> new before incremental mutation. Literal runs must not orphan old-hom
 | `state-and-config/` or equivalent | split by fact: ownership/access to `service/`, deployment/runtime/config topology to `topology/`, telemetry/config signals to `observability/`, failure signatures to `failure-knowledge/`, repo-local facts to `kb/<repo>/` |
 | old `infra/` | `topology/` for runtime/deployment rows; `service/` for ownership, escalation, access, support boundaries |
 | old `service-graph/` | `topology/` |
-| old `observability/` | `observability/` with source-catalog, join-keys, canonical-signals, restricted-sources, dashboards/recipes |
+| old `observability/` | `observability/` with source-catalog, dependency-sources, join-keys, canonical-signals, restricted-sources, dashboards/recipes |
 | old `failure-modes/` | `failure-knowledge/` |
 | old `incident-knowledge/` | `overlays/incidents/` |
 | old per-repo READMEs | `kb/<repo>/entry-points.md`, `modules.md`, `concepts.md`; `deep/` follows P3: incident-material repos get populated `deep/contracts.toon` and `deep/invariants.toon`, non-material repos get `deep/not-material.md`, and inconclusive materiality is recorded as an `open:escalated` evidence-ledger gap |

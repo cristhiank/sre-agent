@@ -1,6 +1,6 @@
 # Artifact Manifest
 
-Manifest version: 1.0. Canonical home for the committed KB artifact tree, per-artifact schemas, row-ordering rules, and dependency edges. Consumers derive file structure and column schemas from here; `references/kb-layout.md` covers layout principles; `references/reproducibility-contract.md` covers run contracts, stable-ID algorithm, and decidable predicates.
+Manifest version: 1.1. Delta: adds `observability/dependency-sources.md` (P), `P-dep-telemetry`, telemetry-routing-card dependency pivots, freshness-format audit item, and source-catalog `under-mined` extensions. Canonical home for the committed KB artifact tree, per-artifact schemas, row-ordering rules, and dependency edges. Consumers derive file structure and column schemas from here; `references/kb-layout.md` covers layout principles; `references/reproducibility-contract.md` covers run contracts, stable-ID algorithm, and decidable predicates.
 
 ## Status codes
 
@@ -44,6 +44,7 @@ services/<service>/
   observability/
     README.md                               M
     source-catalog.md                       M
+    dependency-sources.md                   P  (P-dep-telemetry=promoted-or-escalated)
     join-keys.md                            M
     canonical-signals.md                    M
     restricted-sources.md                   M
@@ -89,15 +90,15 @@ YAML fields: `name`, `aliases[]`, `repos[]` (each entry: `name | path | url | br
 
 Schema: `symptom-family | CORE-area | file-anchor | notes`. One row per major symptom class; covers all four CORE areas. Built after all CORE areas are rendered.
 
-**Required cross-link:** for stale-output / missing-data symptom families (a proximate cause bottoms out on a stale or missing data entity), route the responder to `topology/data-flow-handoffs.md` to walk upstream. Static pointer to the artifact only — never enumerate individual handoff rows (avoids re-render churn).
+**Required cross-link:** for stale-output / missing-data symptom families (a proximate cause bottoms out on a stale or missing data entity), route the responder to `topology/data-flow-handoffs.md` to walk upstream. When the proximate route is an external dependency, `file-anchor` MAY point at a `observability/dependency-sources.md` row so the responder pivots into dependency telemetry. Static pointer to the artifact/row only — never enumerate individual handoff rows or restate dependency edges (avoids re-render churn).
 
 ### `00-index/telemetry-routing-card.md` (M)
 
 Schema: `symptom-family | first-source-catalog-ref | join-key | canonical-signal-ref | discriminator | restricted-source-note | empty-result-warning | freshness/trust | method-gates | next-owner/escalation-ref`.
 
-Required method-gate pointer lines per row: `probe-before-proximate` · `empty-is-not-absent` · `detection-vs-onset` · `provenance-strength`. Produced during this onboarding run as a route view over CORE observability.
+Required method-gate pointer lines per row: `probe-before-proximate` · `empty-is-not-absent` · `detection-vs-onset` · `provenance-strength`. Produced during this onboarding run as a route view over CORE observability. `next-owner/escalation-ref` MAY point at a `observability/dependency-sources.md` row when the next safe move is querying a dependency's telemetry coordinate rather than cross-owner handoff.
 
-**Required cross-link:** for stale-output / missing-data symptom families (a proximate cause bottoms out on a stale or missing data entity), carry a static pointer to `topology/data-flow-handoffs.md` for the upstream-walk view — point at the artifact, never enumerate individual handoffs (avoids re-render churn).
+**Required cross-link:** for stale-output / missing-data symptom families (a proximate cause bottoms out on a stale or missing data entity), carry a static pointer to `topology/data-flow-handoffs.md` for the upstream-walk view — point at the artifact, never enumerate individual handoffs (avoids re-render churn). For dependency-routed symptom families, carry a static pointer to the matching `observability/dependency-sources.md` row.
 
 ### `00-index/core-map.md` (M)
 
@@ -232,8 +233,16 @@ Hard rules (gating done):
 - Any source-inferred row: `last-live-verification = NEVER` + CONSUMER WARNING containing `do not conclude absence or a block without live-checking <source> via <join key>` with concrete source and join key filled (literal placeholders fail).
 - `recipe/query-pointer` → path to recipe file; no copied query sprawl in this catalog.
 - `exact-verify-later-action` names source class, join key, and expected proof to collect.
-- `dimensions` records the source's ATTRIBUTION SCHEMA, not just a couple of example fields: capture the fields that enable (1) binding to the failing/among population (identity/scope keys), (2) per-COMPONENT / per-OPERATION attribution (the component/logger/category and the operation/action a row belongs to), and (3) baseline/composition comparison (the dimension you would group by to see WHICH component or operation is active at a peak vs a quiet baseline). When the source carries a structured-properties field, name the attribution keys inside it. When the source CAN carry per-component/per-operation attribution, a row that captured only request/inbound dimensions is under-mined — a decoupled resource/saturation symptom cannot be attributed from request fields alone; a source that STRUCTURALLY emits only request/inbound fields (a pure ingress/proxy/access log) records that limit with a short rationale and is not thereby under-mined.
+- `dimensions` records the source's ATTRIBUTION SCHEMA, not just a couple of example fields: capture the fields that enable (1) binding to the failing/among population (identity/scope keys), (2) per-COMPONENT / per-OPERATION attribution (the component/logger/category and the operation/action a row belongs to), and (3) baseline/composition comparison (the dimension you would group by to see WHICH component or operation is active at a peak vs a quiet baseline). When the source carries a structured-properties field, name the attribution keys inside it. When the source CAN carry per-component/per-operation attribution, a row that captured only request/inbound dimensions is under-mined — a decoupled resource/saturation symptom cannot be attributed from request fields alone. A promoted row is also under-mined when it omits a correlation/trace key the source structurally carries, or when `service/concept-model.md` category `identity/tenancy/partition-key` does not resolve which concrete principal denotes the service-under-onboarding versus callers. A source that STRUCTURALLY emits only request/inbound fields (a pure ingress/proxy/access log) records that limit with a short rationale and is not thereby under-mined.
 - `recipe/query-pointer` covers the attribution shapes, not only a total/by-path count: include (or point to) a verified recipe for the per-component/per-operation COMPOSITION at a window (which component/operation dominates), and the technique for a true full-window per-group count when the source caps returned rows. One example aggregate query is insufficient if the source supports component/operation attribution.
+
+### `observability/dependency-sources.md` (P — mandatory iff P-dep-telemetry=promoted-or-escalated)
+
+Predicate-conditional external dependency telemetry catalog. Promoted rows reuse the exact `observability/source-catalog.md` schema: `signal | source-kind | table/metric/log-name | join-keys | dimensions | recipe/query-pointer | discovery-source | last-live-verification(date or NEVER) | trust | grounding_type | restricted? | exact-verify-later-action | CONSUMER WARNING`.
+
+It catalogs EXTERNAL DEPENDENCY telemetry: caller-side metric/log-filter, server-side table/db/cluster coordinate, access/eligibility note, and the join-keys carried across the boundary. Each row MUST cite, pointer-only and federation-style, the dependency's `topology/dependencies.md` row in the existing `discovery-source` column (alongside repo-path citations) and owns ONLY its telemetry side; it MUST NOT restate the edge or ownership (that stays in topology).
+
+**Gating:** `P-dep-telemetry` (`references/reproducibility-contract.md`). A `promoted` outcome renders rows with the schema above. A one-sided `open:escalated` outcome makes the file present with a ledger-derived gap note naming the missing side and P7 proof fields. A `none-found (searched scope)` outcome is evidenced in `00-index/evidence-ledger.toon`; no row is rendered.
 
 ### `observability/join-keys.md` (M)
 
@@ -336,6 +345,8 @@ Required fields:
 - `stale-risk markers` (if any)
 - `overlay window + roll-off date + sanitization statement` (when overlays exist)
 
+Fixed line format (field order is audited): `_Freshness: scan date=<...>; live-verification posture=<verified-live|source-inferred|NEVER>; repo table=<repo | branch | SHA rows or pointer>; last live verification=<date|NEVER>; independent-audit verdict=<...>; open/escalated thread summary=<...>; verification-queue pointer=<...>; stale-risk markers=<...>; overlay window + roll-off date + sanitization statement=<...|N/A>_`
+
 ## Row ordering rules
 
 Within any artifact table, apply in priority order:
@@ -352,6 +363,7 @@ Within any artifact table, apply in priority order:
 - Service-higher implementation facts trace to repo-lower cells (cross-layer grounding); CORE artifacts are distilled destinations, not duplicates.
 - `00-index/ai-asset-catalog` is pointer-only over `kb/<repo>/ai-assets.md` floor rows; it carries no additional grounding.
 - `observability/canonical-signals.md` is a routing index over `observability/source-catalog.md`; it adds routing metadata but introduces no new telemetry facts.
+- `observability/dependency-sources.md` is pointer-only over `topology/dependencies.md` dependency rows for edge identity and owns only external dependency telemetry coordinates.
 - **Anchor-ID stability invariant.** Stable IDs survive moves/renames; never recycled for a different fact. If a fact moves, update `00-index/core-map.md`; if a fact splits, mint scoped new IDs and retain a supersession pointer.
 
 ## Artifact dependency edges
@@ -366,9 +378,10 @@ Within any artifact table, apply in priority order:
 | `kb/<repo>/concepts.md` (all repos) | `service/concept-model.md` | floor concept candidates → service-higher promotion |
 | `topology/per-deployable-units.md` | `topology/deployable-unit-coverage.md` | unit enumeration seeds coverage matrix |
 | `topology/service-graph.md` + `topology/dependencies.md` | `topology/blast-radius.md` | graph data grounds blast-radius analysis |
+| `topology/dependencies.md` + repo-source telemetry evidence | `observability/dependency-sources.md` | dependency telemetry federates from the dependency edge (P-dep-telemetry) |
 | `kb/<repo>/deep/contracts.toon` + `kb/<repo>/concepts.md` + `failure-knowledge` discriminators + `observability/join-keys.md` | `topology/data-flow-handoffs.md` | floor+CORE → artifact-mediated handoff lineage promote-up (P8) |
 | `observability/source-catalog.md` | `observability/canonical-signals.md` | canonical signals is a routing index over source-catalog rows |
-| `observability/source-catalog.md` + `observability/join-keys.md` | `00-index/telemetry-routing-card.md` | CORE observability grounds the incident routing card |
+| `observability/source-catalog.md` + `observability/join-keys.md` + `observability/dependency-sources.md` | `00-index/telemetry-routing-card.md` | CORE observability grounds the incident routing card |
 | `kb/<repo>/ai-assets.md` (all repos) | `00-index/ai-asset-catalog.md` | floor rows aggregate into multi-consumer catalog (pointer-only) |
 | `overlays/incidents/ownership-90d.*` | `00-index/ownership.toon` | overlay grounds machine-readable ownership catalog |
 | `overlays/incidents/incident-clusters-90d.*` | `00-index/incident-clusters.toon` | overlay grounds machine-readable cluster catalog |

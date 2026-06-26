@@ -91,7 +91,7 @@ Terminal states:
 Build repo-lower first, then derive service-higher CORE:
 - `service/`: identity, ownership, access/escalation, support boundaries, concept-model/glossary.
 - `topology/`: service-graph, endpoints/ports catalog, dependencies, blast-radius, deployable-unit coverage matrix, per-deployable-units, data-flow-handoffs.
-- `observability/`: source-catalog, join-keys, canonical-signals, restricted-sources.
+- `observability/`: source-catalog, dependency-sources, join-keys, canonical-signals, restricted-sources.
 - `failure-knowledge/`: discriminator-first signatures rendered by P6 three-way routing — promoted variable-slot files, `secondary-signatures.md`, and `candidate-signatures.md`.
 
 Cross-layer grounding is mandatory for implementation claims. Facts discovered while drafting service-higher land in repo-lower first, then promote up. Narratives summarize and cite canonical ledger record IDs.
@@ -104,7 +104,7 @@ Apply `verification-and-evidence.md` rulebook. Re-resolve citations. Verify tele
 
 Fold in sanitized 90-day `overlays/incidents/` priors when reachable. Priors influence suspicion and routing; they do not redefine CORE truth. Priors older than the window roll off unless re-verified by a refreshing source change.
 
-**Mechanical reproducibility audit** (runs before done, distinct from the independent completeness audit): execute decidable checklist A–I from `references/verification-and-evidence.md §Mechanical reproducibility audit`. All items must PASS before proceeding.
+**Mechanical reproducibility audit** (runs before done, distinct from the independent completeness audit): execute decidable checklist A–L from `references/verification-and-evidence.md §Mechanical reproducibility audit`. All items must PASS before proceeding.
 
 Write concise, cited, versioned CORE artifacts, the produced-now incident `telemetry-routing-card`, and index/seam files. Initialize `contributions/` shape only. Avoid empty ceremonial folders; incident-material repo `deep/` contracts/invariants must be populated per P3, or gap records (`open:escalated`) recorded in `00-index/evidence-ledger.toon` when evidence is unreachable.
 

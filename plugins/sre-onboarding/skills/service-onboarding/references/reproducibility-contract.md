@@ -23,7 +23,7 @@ Record before scouting begins. Store as `_run-lock.yaml` in the transient run-ro
 | Field | Type | Notes |
 |---|---|---|
 | `service-identity` | string | canonical service slug; matches `service.yaml:name` |
-| `manifest-version` | string | artifact-manifest version this run targets (e.g., `1.0`) |
+| `manifest-version` | string | artifact-manifest version this run targets (e.g., `1.1`) |
 | `source-roots[]` | path list | local roots where repos are checked out |
 | `repo-names[]` | string list | names matching `service.yaml:repos[].name` |
 | `repo-branches[]` | string list | one per repo, same order |
@@ -185,6 +185,17 @@ Outcomes (decidable, reproducible — mirrors P1–P7):
 
 `claim-class` reuses existing `edge/dependency` (no enum churn); destination + `predicate-inputs=P8` distinguish artifact-mediated handoffs from synchronous service-graph edges.
 
+### P-dep-telemetry — Dependency telemetry catalog
+
+A dependency D requires a `observability/dependency-sources.md` row iff (a) D is a promoted row in `topology/dependencies.md` AND (b) ≥1 telemetry coordinate for D — {a server-side table/db/cluster name, a caller-side metric/log emission, or a documented telemetry coordinate} — was discovered in repo source / manifests / docs / dashboards.
+
+Outcomes (decidable, reproducible):
+- Both caller-side and server-side coordinates discovered → `promoted` row in `observability/dependency-sources.md`.
+- Exactly one side discovered → `open:escalated` ledger row under P7 discipline: name the missing side (`caller-side emission` or `server-side coordinate`) plus P7's three proof fields (`reachable-static-probes-tried`, `attempted-source-classes`, `why-unreachable`). This degrades on cross-owner-unreachable; it does not block the KB.
+- No coordinate after searched scope → terminal ledger record with status `rejected` and note `none-found (searched scope)`; no `dependency-sources.md` row.
+
+The artifact is predicate-conditional mandatory: present iff at least one dependency reaches `promoted` or `open:escalated` under this predicate; absent only when all dependencies have terminal `rejected` ledger records carrying `none-found (searched scope)`. Emptiness must be evidenced.
+
 ## Render-from-ledger contract
 
 1. **No direct page drafting from exploration.** Scouts produce normalized candidate records. Builders classify records, evaluate predicates, and assign ledger statuses. Only then do builders render artifact tables by projecting `promoted` rows into their declared `destination` using the manifest schema.
@@ -200,13 +211,13 @@ When `mode = incremental`, the input lock includes the prior KB state hash and o
 
 | Changed surface | Re-mine record classes | Destination artifacts to re-render |
 |---|---|---|
-| repo source (entry-points, modules, contracts, invariants) | `edge/dependency · control/auth · observability · concept · failure-mode` | `kb/<repo>/` floor; `topology/`; `topology/data-flow-handoffs.md`; `failure-knowledge/`; `observability/source-catalog.md` (+ matching `00-index/telemetry-routing-card.md` / `task-router.md` symptom cross-link) |
-| deployment/runtime manifests | `edge/dependency · config/secret · ownership/escalation` | `topology/per-deployable-units.md`; `topology/service-graph.md`; `topology/endpoints-ports-catalog.md`; `topology/data-flow-handoffs.md` (+ matching `00-index/telemetry-routing-card.md` / `task-router.md` symptom cross-link) |
-| telemetry/observability config | `observability` | `observability/source-catalog.md`; `observability/canonical-signals.md`; `observability/join-keys.md` |
+| repo source (entry-points, modules, contracts, invariants) | `edge/dependency · control/auth · observability · concept · failure-mode` | `kb/<repo>/` floor; `topology/`; `topology/data-flow-handoffs.md`; `failure-knowledge/`; `observability/source-catalog.md`; `observability/dependency-sources.md` (+ matching `00-index/telemetry-routing-card.md` / `task-router.md` symptom cross-link) |
+| deployment/runtime manifests | `edge/dependency · config/secret · ownership/escalation` | `topology/per-deployable-units.md`; `topology/service-graph.md`; `topology/endpoints-ports-catalog.md`; `topology/data-flow-handoffs.md`; `observability/dependency-sources.md` (+ matching `00-index/telemetry-routing-card.md` / `task-router.md` symptom cross-link) |
+| telemetry/observability config | `observability` | `observability/source-catalog.md`; `observability/dependency-sources.md`; `observability/canonical-signals.md`; `observability/join-keys.md` |
 | ownership/escalation config | `ownership/escalation` | `service/ownership.md`; `service/access-escalation.md`; `00-index/ownership.toon` |
 | incident overlay source (new window) | `overlay` | `overlays/incidents/`; `00-index/incident-clusters.toon` |
 | concept/glossary sources | `concept` | `service/concept-model.md`; `service/glossary.md`; `kb/<repo>/concepts.md` |
-| docs (human docs only) | `failure-mode · concept · observability` (suspected ⚠️ cap) | `failure-knowledge/`; `service/`; `observability/` (with `docs-only` trust cap) |
+| docs (human docs only) | `failure-mode · concept · observability` (suspected ⚠️ cap) | `failure-knowledge/`; `service/`; `observability/` incl `observability/dependency-sources.md` (with `docs-only` trust cap) |
 | AI-guidance assets | `ai-asset` | `kb/<repo>/ai-assets.md`; `00-index/ai-asset-catalog.md` |
 | incident-material human guidance (troubleshooting guides / runbooks / known-issues / alert-response) — re-render only, stays docs-only/non-promotable | `guidance-asset` (pointer-only; docs-only/suspected ⚠️ cap; no promotion) | `kb/<repo>/ai-assets.md`; `00-index/ai-asset-catalog.md` (+ matching `00-index/telemetry-routing-card.md` / `task-router.md` symptom cross-link) |
 

@@ -12,7 +12,7 @@ Preserve the four survivor questions while using these canonical areas:
 |---|---|---|
 | `service/` | identity, ownership, access/escalation, support boundaries, concept-model/glossary | service identity, owner/on-call, escalation/access, support boundaries, concept model, glossary |
 | `topology/` | where it runs + who calls whom | service-graph, endpoints/ports catalog, dependencies, blast-radius, deployable-unit coverage matrix, per-deployable-units, data-flow-handoffs (artifact-mediated handoffs) |
-| `observability/` | how to observe | source-catalog, join-keys, canonical-signals, restricted-sources |
+| `observability/` | how to observe | source-catalog, dependency-sources, join-keys, canonical-signals, restricted-sources |
 | `failure-knowledge/` | what breaks and why | signatures and mechanisms, discriminator-first |
 
 Completeness is outcome-based: collectively, without leaving the KB, a responder can route symptom → signal/source → owner → likely mechanism → next discriminator. Gaps use canonical ledger statuses (`open:escalated`, `rejected`, `non-material`, or `sensitive-unsafe`) with searched scope and verify-later action; never invent fields.
