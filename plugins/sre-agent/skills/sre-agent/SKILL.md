@@ -25,6 +25,10 @@ record, and Report artifact — or an explicit abort/degraded-mode reason in `ru
 General path: changed/affected surfaces -> questions -> observations/gaps -> judged
 verdict -> report.
 
+Local user responses (not incident posts): lead with 3 sentences — verdict, the one fact that proves it, and
+the owner-routed next step. Offer the full report or deeper evidence on request instead of dumping it.
+Keep the same honesty floor: disclose confidence caps, blockers, and required manual handoffs.
+
 ## Coordinator contract
 
 The coordinator is orchestration-only. It may ONLY create/own the run, inventory

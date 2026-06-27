@@ -28,6 +28,7 @@ Write `5_grader/ranking.md` as compact markdown:
 ```markdown
 Verdict: Confirmed | Likely-rooted | Proximate-only | Inconclusive-blocked | Refuted
 Primary RCA target: <rca_target> -> primary finding addresses it? yes/no (if no, discovery receipt required)
+Contested surface (omit or `none` when uncontested): <surface name> | failing population/scope: <authoritative bound> | evidence: <OBS ids> | owner/action effect: <component + impact> | disposition: selected | separate | less-material | unproven
 Duplicate classification: canonical | duplicate-of <incident> | none (siblings sharing the recurrence identity, from the recurrence check; see grading-rubric.md)
 Known-issue acceleration (only when the run took the known-issue-first staged path): candidate source asset/capability | checked-discriminator OBS ids | failing-unit gate status | rival status | envelope status | decision (settle | fail-open-normal-fanout) | reason (see grading-rubric.md § Known-issue acceleration settle)
 Leading theory: claim / support (OBS ids) / symptom-vs-cause assessment

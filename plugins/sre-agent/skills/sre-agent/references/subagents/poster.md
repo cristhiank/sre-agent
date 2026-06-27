@@ -80,66 +80,80 @@ Compose the post body for the incident system format supported by the capability
 ### Post-body structure
 
 Concise but never a blurb, and **structurally consistent**: project the content-bearing `6_report`
-always-sections (`artifact-contracts.md` §`6_report/`) into a **fixed, verdict-shaped field schema** —
-the same labeled fields in the same order on every post — replacing free narrative prose with labeled
-one-liner fields. The fixed standalone order is: **TL;DR (verdict + #1 action)** -> **Confidence line**
-(when the verdict is hedged/capped/downgraded) -> **Summary fields** -> **Mechanism, or the open upstream
-"why"** -> **Failure path** (when there is a chain) -> **Manual Investigation Kit** (promoted when
-required) -> **Timeline** (when timing carries content) -> **Recommended next step** (owner-routed) ->
-**Details** (collapsible: ruled-out, provenance, duplicate/related refs, references).
+always-sections (`artifact-contracts.md` §`6_report/`) into a **fixed Hybrid section set** — the same
+canonical sections in the same order on every post, with labels shaped by verdict. The fixed standalone
+order is:
+1. **TL;DR / verdict band** — verdict badge(s) plus ONE plain-language sentence: what happened and the
+   #1 owner-routed action, <=40 words.
+2. **Confidence line** — only when the verdict is hedged, capped, or downgraded; when present it is visible
+   and never collapsed.
+3. **Facts header** — 2-3 labeled one-liners. Verdict stays in the band; do not repeat it here. Pick
+   exactly the set for the verdict:
+   - `Confirmed` / `Likely-rooted` / `Proximate-only`: **Impact** · **Fix**
+   - `Inconclusive-blocked`: **Impact** · **Blocked** · **Do next**
+   - `Refuted` / closure: **Checked** · **Finding** · **Residual risk**
+4. **Failure path** — the indented causal tree is the single mechanism representation. Put evidence links
+   on the nodes they prove and mark the terminal node plainly. Skip only when no chain exists.
+5. **Manual Investigation Kit** — promoted and visible for `Inconclusive-blocked` or any manual-handoff-capped
+   verdict; otherwise fold kit-like continuation notes into Details.
+6. **Details** — timeline, ruled-out, provenance, duplicate/related, references, and raw-query fallback text.
 
-The **Summary fields are verdict-shaped** — pick exactly the set for the verdict:
-
-- `Confirmed` / `Likely-rooted` / `Proximate-only`: **What · Why · Mechanism · Impact · Caveat**
-- `Inconclusive-blocked`: **What · Status · Blocking**
-- `Refuted` / closure: **What · Checked · Finding · Residual risk**
-
-Field meanings: What = signal/monitor id + name + scope (where it surfaced); Why = the measured breach
-(numbers + threshold); Mechanism = source-confirmed fault in one line (the open upstream "why" when not
-confirmed); Impact = blast radius as **category + count, never a verbatim customer/tenant/subscription/
-GUID/IP/resource path**; Caveat = the "why this might mislead you" gotcha or the surfaced confidence
-reducer; Status = what is verified vs open; Blocking = the decisive missing evidence; Checked/Finding/
-Residual risk for closures.
+Field meanings: Impact = blast radius as **category + count, never a verbatim customer/tenant/subscription/
+GUID/IP/resource path**; Fix = owner-routed single action plus hyperlinked related incident ids when known;
+Blocked = decisive missing evidence or inaccessible discriminator; Do next = the human-executable next
+check or owner handoff; Checked/Finding/Residual risk for closures.
 
 **Closed skip-rule (no latitude):** keep every section in this order with its canonical label; do NOT
 rename, reorder, add, or fold sections together. A section is omitted ONLY by its own explicit skip-rule:
-the Confidence line (omit unless hedged/capped/downgraded), Mechanism (omit when none is confirmed — the
-Status/Finding carries it), Failure path (omit when there is no chain), Timeline (omit when timing carries
-no signal), and the Manual Investigation Kit (folded into Details for verdicts that do not require it).
-Everything else always projects. Scale a thin field to one short line, but never collapse a required
-section to a generic 'next checks' line and never blur the fixed labels. The collapse/skip allowance
-**never** applies to a required **Manual Investigation Kit**: when a kit is required (`Inconclusive-blocked`
-or a manual-handoff-capped verdict) it renders **promoted and in full** as the titled multi-step kit
-section (per §Verdict policy / `artifact-contracts.md` §`6_report/`) — never collapsed to a bullet, a
-'next checks' line, or hidden behind a collapsed element. A short verdict (`Proximate-only`,
+the Confidence line (omit unless hedged/capped/downgraded), Failure path (omit when there is no chain), and
+the Manual Investigation Kit (folded into Details for verdicts that do not require it). Everything else
+projects when it carries content. Scale a thin field to one short line, but never collapse a required section
+to a generic 'next checks' line and never blur the fixed labels. The collapse/skip allowance **never** applies
+to a required **Manual Investigation Kit**: when a kit is required it renders **promoted and in full** as the
+titled multi-step kit section (per §Verdict policy / `artifact-contracts.md` §`6_report/`) — never collapsed
+to a bullet, a 'next checks' line, or hidden behind a collapsed element. A short verdict (`Proximate-only`,
 `Inconclusive-blocked`, or closure) stays structured, not a paragraph blurb.
 
-**Provenance stays separate from Mechanism:** when stated it carries exactly one qualifier — `introduced
-by` / `likely introduced by` / `last touched by` / `not resolved` — and never presents a last-touching
-change as causal introduction; it normally lives in the collapsible Details for a confirmed verdict and the
-qualifier must survive.
+**Evidence and deep-links:** surface clickable evidence by reusing the shareable deep-link that the
+telemetry-query capability persisted alongside each executed query. The Poster does not construct, encode,
+or guess these links. Place links on the Failure path nodes they prove and/or in a compact validate line. If
+no persisted deep-link exists, put the raw query text in Details instead; never fabricate a link. Do not
+attach a deep-link when its underlying query embeds restricted identifiers (customer id, tenant,
+subscription, GUID, IP, or resource path): query text travels inside the link and would bypass
+de-identification, so surface de-identified raw query text in Details instead. The posting capability also
+scans deep-link queries as a backstop and refuses links carrying restricted identifiers; compose the
+de-identified evidence up front. Surface `TSG/KB consulted` with links only when the investigation actually
+used those sources; omit the line when none were used. Hyperlink incident ids whenever an owner-resolvable
+incident URL is available.
+
+**Provenance stays separate from the Failure path:** when stated it carries exactly one qualifier —
+`introduced by` / `likely introduced by` / `last touched by` / `not resolved` — and never presents a
+last-touching change as causal introduction; it normally lives in the collapsible Details for a confirmed
+verdict and the qualifier must survive.
+
+**Why this surface (competing surface framing):** when the report carries a **Why this surface** line (per `artifact-contracts.md` §`6_report/` conditional sections), fold it into the **Band answer / TL;DR verdict band** when it is verdict-shaping, or into the ruled-out block inside Details when it is a secondary framing note. Do not add a Facts-header label for it — the Facts-header label set is closed and admits no new labels — and do not render it as a standalone Hybrid section. If a human named the competing surface, handle it in Post mode as corroboration/contradiction/additive context, not as a standalone verdict element.
 
 A **collaborator-additive or duplicate post** follows the **additive shape** instead (see §`6_report/`
 Post mode) — a distinct shape that does NOT lead with the TL;DR: fixed fields **Builds on · Delta · Why it
 matters** (Builds on = credit the human RCA + sibling refs; Delta = the evidence delta this adds, or a
-respectful, evidence-cited contradiction of a human RCA; Why it matters = owner impact), then Mechanism /
-Failure path (when applicable) -> owner-routed next action -> Details.
+respectful, evidence-cited contradiction of a human RCA; Why it matters = owner impact), then Failure path
+(when applicable) -> owner-routed next action -> Details.
 
 Incident-safe projection includes de-identification: customer-identifying values never appear verbatim in
 the post (see "Do not republish redacted customer content" in ../investigation-invariants.md). At the field
 level this means the **Impact** field (and any owner reference) is **category + count only**.
 
 **Rich rendering when supported:** when the posting capability supports structured/visual rendering
-(headings, tables, colored badges, a divider, collapsible sections), render the fixed schema as a
-*scannable* layout: lead with a one-row TL;DR card carrying the verdict + #1 action and surface SEV/state
-as badges; render the Summary as labeled one-liner fields (bold inline labels or a 2-col table) in the
-fixed verdict-shaped set above; keep the owner's single next action prominent; render a content-bearing
-timeline as a table; and fold only non-load-bearing detail into a collapsible Details section — while
-preserving the same fixed labels, order, verdict scaling, the honesty floor, and the leak-scrub. Any SEV or
-incident-state badge MUST be grounded in incident metadata, never guessed; verdict/confidence badges
-describe your investigation. Keep the disclosure notice, the Confidence line, and any required Manual
-Investigation Kit plainly visible — never behind a collapsed or styled-to-hide element. When the capability
-cannot render structure, fall back to the **same fixed fields and order** in plain text/markdown.
+(headings, tables, colored badges, a divider, collapsible sections), render the Hybrid layout as a
+*scannable* layout: lead with a one-row TL;DR / verdict band carrying metadata badge(s), verdict badge(s),
+and the <=40-word answer; render the Facts header as bold inline labeled one-liners using the exact
+verdict-shaped set above; render the Failure path as an indented tree with evidence deep-links on proving
+nodes; keep the owner's single Fix / Do next action prominent; and fold timeline, ruled-out, provenance,
+duplicate/related, references, and raw-query fallback text into Details. Any severity or incident-state
+badge MUST be grounded in incident metadata, never guessed; verdict/confidence badges describe your
+investigation. Keep the disclosure notice, the Confidence line, and any required Manual Investigation Kit
+plainly visible — never behind a collapsed or styled-to-hide element. When the capability cannot render
+structure, fall back to the **same fixed fields and order** in plain text/markdown.
 
 **Idempotency — verify absence before posting, fail CLOSED:**
 - Ask the live incident-posting capability to perform its target-specific duplicate/idempotency check
@@ -155,19 +169,19 @@ cannot render structure, fall back to the **same fixed fields and order** in pla
 - The scan-then-post may not be atomic; assume same-iteration runs are single-flight unless the
   capability explicitly provides a stronger concurrency guarantee.
 
-Before posting, reconcile the post against the internal report (`6_report/investigation-report.md`): every content-bearing report section is projected — any **Manual Investigation Kit** section rendered in full (§Post-body structure), the verified facts + open "why"/blocker stated (§Verdict policy), and a content-bearing timeline kept — and bulk identifiers no on-call-engineer action uses are summarized (count + 1–3 examples, or folded into the kit step that consumes them), never displacing the kit, known/unknown, or timeline. **Exception — customer-identifying or pii-marker-covered fields** (customer emails, tenant/account/subscription ids, GUIDs, IPs, hostnames, resource paths, or any field a `pii-marker`/`manifest.pii` covers) are referenced by **category + count only**, NEVER with verbatim examples — the "1–3 examples" allowance does not apply to them. If the post drops or flattens any non-PII section versus the report, re-render before posting; report-only is the fallback only for an un-rewritable leak, never a license to drop sections.
+Before posting, reconcile the post against the internal report (`6_report/investigation-report.md`): every content-bearing report section is projected into the Hybrid layout — band answer, Facts header, Failure path, any required **Manual Investigation Kit** rendered in full (§Post-body structure), and Details carrying timeline, ruled-out, provenance, duplicate/related, references, and raw-query fallback text. Bulk identifiers no on-call-engineer action uses are summarized (count + 1–3 examples, or folded into the kit step that consumes them), never displacing the kit, known/unknown, or Details. **Exception — customer-identifying or pii-marker-covered fields** (customer emails, tenant/account/subscription ids, GUIDs, IPs, hostnames, resource paths, or any field a `pii-marker`/`manifest.pii` covers) are referenced by **category + count only**, NEVER with verbatim examples — the "1–3 examples" allowance does not apply to them. If the post drops or flattens any non-PII section versus the report, re-render before posting; report-only is the fallback only for an un-rewritable leak, never a license to drop sections.
 
 <bad-example>
 Verdict Inconclusive-blocked; the internal report has a 4-step Manual Investigation Kit + timeline + ruled-outs.
-Wrong: a ~2KB post that flattens the kit into one "manual next checks" bullet, drops the timeline/ruled-outs, and spends a paragraph listing a long list of raw failing-unit identifiers.
+Wrong: a ~2KB post that flattens the kit into one "manual next checks" bullet, drops Details timeline/ruled-outs, and spends a paragraph listing a long list of raw failing-unit identifiers.
 Why wrong: the kit is the on-call engineer's primary payload for a blocked post; flattening it and dumping non-action identifiers leaves them unable to continue, while the report had everything.
-Correct: render the kit as a titled multi-step section, state what's verified and what's open/blocked, and summarize the failing-unit identifiers as a count + 1–3 examples.
+Correct: render the kit as a titled multi-step section, state Impact / Blocked / Do next, keep Details for timeline/ruled-outs, and summarize the failing-unit identifiers as a count + 1–3 examples.
 </bad-example>
 
 **Post:**
 - Target ONLY the provided incident record. The post target and any confirm-binding returned by the
   capability must both match that incident record.
-- When the run pulled any unredacted customer content via the IcM context capability (a `pii-marker.json`/`manifest.pii` with non-null `pii` exists under the run-root), pass its path to the post command as `--pii-marker <path>` so the poster's do-not-republish guard (`E_ICM_PII`) runs as a mutation-time backstop. If the guard refuses, the post body still contains restricted customer content — re-render it in de-identified service terms (do not strip-and-retry blindly), then re-post. When the post is an AI-generated RCA going out live, the PII decision must be **explicit**: pass `--pii-marker <path>` when a marker exists, ELSE pass `--no-pii-marker` to assert the run pulled no unredacted content — never leave it unstated, as a live AI-RCA post with no PII decision is refused (`E_ICM_PII`).
+- When the run has any marker indicating unredacted restricted customer content, pass that marker through exactly as the live incident-posting capability requires so its do-not-republish guard runs as a mutation-time backstop. If the guard refuses, the post body still contains restricted customer content — re-render it in de-identified service terms (do not strip-and-retry blindly), then re-post. When an AI-generated RCA goes out live, the restricted-content decision must be **explicit**: provide the marker when one exists, or explicitly assert that the run pulled no unredacted restricted content when the capability requires that assertion; never leave the decision unstated.
 - Preview/dry-run first, inspect the rendered external payload, then post live only if authorization,
   target binding, idempotency, and leak-scrub checks all pass.
 - Verification outcomes are capability-owned. Treat `verified` / `already-present` as done;
