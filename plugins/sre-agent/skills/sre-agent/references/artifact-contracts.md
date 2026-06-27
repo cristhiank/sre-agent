@@ -70,6 +70,13 @@ Produces normalized observations, usually under `3_evidence/observations/`, plus
 small index or timeline that helps later readers.
 Each observation is one factual statement with a stable `OBS###` id, a source or
 provenance pointer, and what entity/time/surface it is about.
+Observation/evidence rows include the observation id, factual statement, source/provenance
+pointer, entity/time/surface, and optional `evidence_link`. For telemetry-query-backed
+observations, specialists capture `evidence_link` from the shareable deep-link the
+telemetry-query capability surfaced for the query that produced this observation (its
+`DeepLink:` output / run-manifest `deepLink`). Omit `evidence_link` when no shareable
+link was surfaced or when the underlying query embeds restricted identifiers; carry
+de-identified raw query text in Details instead.
 Describe the observation's kind in prose when useful; do not force a fixed taxonomy.
 Keep raw rows or bulky artifacts behind pointers.
 
@@ -155,11 +162,12 @@ full depth, but its shape maps to:
    `approximate`, or `unknown`), ruled-out items, provenance, duplicate/related incidents, sources/references,
    and raw-query fallback text.
 
-Evidence pointers use owner-resolvable source terms. For telemetry-query evidence, reuse the persisted
-shareable deep-link recorded alongside the executed query; the report/post never constructs or encodes that
-link. If no persisted deep-link exists, carry the raw query text in Details instead and never fabricate a
-link. Surface `TSG/KB consulted` with links only when those sources were actually used; omit the line when
-none were used. Hyperlink related incident ids when an owner-resolvable incident URL is available.
+Evidence pointers use owner-resolvable source terms. For telemetry-query evidence, reuse the `evidence_link`
+that rode on the proving OBS/evidence row; the report/post never constructs or encodes that link and never
+hunts query manifests to recover it. If the proving OBS has no safe `evidence_link`, carry de-identified raw
+query text in Details instead and never fabricate a link. Surface `TSG/KB consulted` with links only when
+those sources were actually used; omit the line when none were used. Hyperlink related incident ids when an
+owner-resolvable incident URL is available.
 
 Conditional sections:
 - Add a highlighted **latent bug / important finding** callout when the run confirms a real code/config defect, even if not proven as this incident's trigger; label real-but-unproven when applicable.

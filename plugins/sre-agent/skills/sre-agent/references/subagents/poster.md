@@ -114,17 +114,21 @@ titled multi-step kit section (per §Verdict policy / `artifact-contracts.md` §
 to a bullet, a 'next checks' line, or hidden behind a collapsed element. A short verdict (`Proximate-only`,
 `Inconclusive-blocked`, or closure) stays structured, not a paragraph blurb.
 
-**Evidence and deep-links:** surface clickable evidence by reusing the shareable deep-link that the
-telemetry-query capability persisted alongside each executed query. The Poster does not construct, encode,
-or guess these links. Place links on the Failure path nodes they prove and/or in a compact validate line. If
-no persisted deep-link exists, put the raw query text in Details instead; never fabricate a link. Do not
-attach a deep-link when its underlying query embeds restricted identifiers (customer id, tenant,
-subscription, GUID, IP, or resource path): query text travels inside the link and would bypass
-de-identification, so surface de-identified raw query text in Details instead. The posting capability also
-scans deep-link queries as a backstop and refuses links carrying restricted identifiers; compose the
-de-identified evidence up front. Surface `TSG/KB consulted` with links only when the investigation actually
-used those sources; omit the line when none were used. Hyperlink incident ids whenever an owner-resolvable
-incident URL is available.
+**Evidence and deep-links:** surface clickable evidence only from the OBS/evidence row that proves the claim.
+For each Failure path node or proof line, identify the proving OBS; when that OBS carries a safe
+`evidence_link`, attach that link to the node/claim. The link is the shareable deep-link the telemetry-query
+capability surfaced for the query that produced the observation (its `DeepLink:` output / run-manifest
+`deepLink`). The Poster reuses the OBS-carried link; it does not construct, encode, guess, or recover links
+from query manifests. If the proving OBS has no `evidence_link`, put de-identified raw query text in Details
+instead; never fabricate a link. Do not attach a deep-link when its underlying query embeds restricted
+identifiers (customer id, tenant, subscription, GUID, IP, or resource path): query text travels inside the
+link and would bypass de-identification, so surface de-identified raw query text in Details instead. The
+posting capability also scans deep-link queries as a backstop and refuses links carrying restricted
+identifiers; compose the de-identified evidence up front. This applies to both structured HTML and
+report-only/additive markdown drafts: HTML uses `<a href>` on the proving tree node/proof line, and markdown
+uses `[label](evidence_link)` on the proving node/claim. Surface `TSG/KB consulted` with links only when the
+investigation actually used those sources; omit the line when none were used. Hyperlink incident ids whenever
+an owner-resolvable incident URL is available.
 
 **Provenance stays separate from the Failure path:** when stated it carries exactly one qualifier —
 `introduced by` / `likely introduced by` / `last touched by` / `not resolved` — and never presents a
@@ -153,7 +157,8 @@ duplicate/related, references, and raw-query fallback text into Details. Any sev
 badge MUST be grounded in incident metadata, never guessed; verdict/confidence badges describe your
 investigation. Keep the disclosure notice, the Confidence line, and any required Manual Investigation Kit
 plainly visible — never behind a collapsed or styled-to-hide element. When the capability cannot render
-structure, fall back to the **same fixed fields and order** in plain text/markdown.
+structure, fall back to the **same fixed fields and order** in plain text/markdown, preserving OBS-carried
+evidence links as markdown links and incident ids as owner-resolvable incident links rather than plain prose.
 
 **Idempotency — verify absence before posting, fail CLOSED:**
 - Ask the live incident-posting capability to perform its target-specific duplicate/idempotency check
