@@ -17,7 +17,7 @@ Manifest version: 1.1. Delta: adds `observability/dependency-sources.md` (P), `P
 ```
 services/<service>/
   README.md                                 M
-  service.yaml                              M
+  sources.yaml                              M
   00-index/
     task-router.md                          M
     telemetry-routing-card.md               M
@@ -60,7 +60,7 @@ services/<service>/
     incident-clusters-90d.md               G
     incident-clusters-90d.toon             G
     monitors-90d.md                         G
-  kb/<repo>/                                M  (one set per service repo)
+  kb/<repo>/                                M  (one set per owned git-repo source; non-repo sources use kb/<source>/)
     README.md                               M
     entry-points.md                         M
     modules.md                              M
@@ -82,9 +82,11 @@ services/<service>/
 
 Sections: service overview; 4-area mental model table (`Area | Folder | Answers`); incident decision tree (numbered steps); area index (links to all folders); freshness/provenance footer. Must contain the untrusted-distilled-context disclaimer.
 
-### `service.yaml` (root, M)
+For `kb/<repo>/` paths, `<repo>` is the output namespace for an owned git-repo source. Owned non-repo sources use the same floor shape under `kb/<source>/`.
 
-YAML fields: `name`, `aliases[]`, `repos[]` (each entry: `name | path | url | branch | sha`). All fields mandatory; `sha` at scan date. This file is the committed service/repo source snapshot — it records repo names, branches, and SHAs but does not carry the full run-lock fields (live-evidence mode, capability map, overlay window, prior KB hash). Full provenance lock summary is in the `@meta` block of `00-index/evidence-ledger.toon`.
+### `sources.yaml` (root, M)
+
+YAML fields: `service`, `owns[]` (source IDs), and `subscribes[]` (each entry: `id | trust`). `owns[]` is the committed service/source binding snapshot and matches `owned-source-ids[]` in the input/run lock. Exact SHAs/versions and worktree roots live in the `@meta` block of `00-index/evidence-ledger.toon`.
 
 ### `00-index/task-router.md` (M)
 
@@ -108,7 +110,7 @@ Schema: `stable-id | kind | canonical-home | aliases | superseded-by | notes`. C
 
 Committed replay surface for all terminal ledger records from the most recent run. Required for incremental determinism: subsequent runs read this artifact to establish prior record statuses and avoid overwriting higher-grade facts.
 
-**`@meta` block (provenance lock summary — all replay-relevant fields):** `manifest-version | scan-date | live-evidence-mode | overlay-window | prior-kb-state-hash | capability-map-summary`. `capability-map-summary` embeds each capability's reachability result using the canonical vocabulary from `references/reproducibility-contract.md §Live-capability vocabulary` (`disabled-by-scope | attempted-unreachable | reachable-snapshot` + probe-result summary) rather than pointing to a transient file. This block is the authoritative committed provenance lock; `service.yaml` carries repo/SHA only.
+**`@meta` block (provenance lock summary — all replay-relevant fields):** `manifest-version | scan-date | owned-source-ids | source-kinds | source-refs | source-SHAs | source-worktree-roots | live-evidence-mode | overlay-window | prior-kb-state-hash | capability-map-summary`. `capability-map-summary` embeds each capability's reachability result using the canonical vocabulary from `references/reproducibility-contract.md §Live-capability vocabulary` (`disabled-by-scope | attempted-unreachable | reachable-snapshot` + probe-result summary) rather than pointing to a transient file. This block is the authoritative committed provenance lock; `sources.yaml` carries source bindings.
 
 **`@run-trail` block (mandatory):** records how the run was orchestrated. Contains:
 - **dispatch-decision sub-record (one per run):** `dispatch-available | dispatch-required | used | packet-evidence | degraded-reason`. `single-pass` or `degraded` dispatch-mode is valid ONLY when `dispatch-available=no` or `dispatch-required=no`; if `dispatch-available=yes AND dispatch-required=yes AND used=no`, the run must ABORT.
@@ -136,7 +138,7 @@ TOON format: `@meta` block + `@schema` + data rows. Machine-readable, non-author
 
 Anti-authority header required (verbatim): `docs-only lead, not authority; re-resolve before use.`
 
-Schema: `asset-ref(kb/<repo>/ai-assets.md anchor) | consumers(tags: incident|review|dev) | one-line-purpose | why-included(named materiality test) | trust(docs-only|suspected ⚠️) | freshness(repo SHA)`.
+Schema: `asset-ref(kb/<repo>/ai-assets.md or kb/<source>/ai-assets.md anchor) | consumers(tags: incident|review|dev) | one-line-purpose | why-included(named materiality test) | trust(docs-only|suspected ⚠️) | freshness(source SHA/version)`.
 
 **Human-guidance rows** additionally require a **symptom/trigger** field — carried either as a symptom-led `one-line-purpose` (lead with `Symptom: <non-generic trigger>` …) or an explicit column, matching the existing table style — and MUST be cross-linked from `00-index/telemetry-routing-card.md` (and/or `task-router.md`) under the matching symptom family so the runtime orientation scan can route symptom→doc.
 
@@ -284,7 +286,7 @@ Same schema. Produced only for P6-secondary families (one reusable key plus acti
 
 ### `kb/<repo>/README.md` (M)
 
-Sections: repo name + SHA at scan; deployable-binary vs library classification; materiality verdict; key source paths. Freshness pointer to root provenance.
+Sections: source/output namespace + SHA/version at scan; deployable-binary vs library classification; materiality verdict; key source paths. Freshness pointer to root provenance.
 
 ### `kb/<repo>/entry-points.md` (M)
 
@@ -337,7 +339,7 @@ Required in: root `README.md`, each `kb/<repo>/README.md`, `observability/source
 Required fields:
 - `scan date`
 - `live-verification posture` (verified-live | source-inferred | NEVER)
-- repo table: `repo | branch | SHA`
+- source table: `source-id | kind | ref | SHA/version | worktree-root`
 - `last live verification` (date or NEVER)
 - `independent-audit verdict` (summary line)
 - `open/escalated thread summary` with exact verify-later actions
@@ -345,7 +347,7 @@ Required fields:
 - `stale-risk markers` (if any)
 - `overlay window + roll-off date + sanitization statement` (when overlays exist)
 
-Fixed line format (field order is audited): `_Freshness: scan date=<...>; live-verification posture=<verified-live|source-inferred|NEVER>; repo table=<repo | branch | SHA rows or pointer>; last live verification=<date|NEVER>; independent-audit verdict=<...>; open/escalated thread summary=<...>; verification-queue pointer=<...>; stale-risk markers=<...>; overlay window + roll-off date + sanitization statement=<...|N/A>_`
+Fixed line format (field order is audited): `_Freshness: scan date=<...>; live-verification posture=<verified-live|source-inferred|NEVER>; source table=<source-id | kind | ref | SHA/version | worktree-root rows or pointer>; last live verification=<date|NEVER>; independent-audit verdict=<...>; open/escalated thread summary=<...>; verification-queue pointer=<...>; stale-risk markers=<...>; overlay window + roll-off date + sanitization statement=<...|N/A>_`
 
 ## Row ordering rules
 

@@ -22,19 +22,21 @@ Record before scouting begins. Store as `_run-lock.yaml` in the transient run-ro
 
 | Field | Type | Notes |
 |---|---|---|
-| `service-identity` | string | canonical service slug; matches `service.yaml:name` |
+| `service-identity` | string | canonical service slug; matches `sources.yaml:service` |
 | `manifest-version` | string | artifact-manifest version this run targets (e.g., `1.1`) |
-| `source-roots[]` | path list | local roots where repos are checked out |
-| `repo-names[]` | string list | names matching `service.yaml:repos[].name` |
-| `repo-branches[]` | string list | one per repo, same order |
-| `repo-SHAs[]` | string list | one per repo at scan date; must be exact, not approximate |
+| `source-plane-root` | path | local `catalog/sources` root used for this run |
+| `owned-source-ids[]` | string list | source IDs matching `sources.yaml:owns[]`; order is canonical input-lock order |
+| `source-kinds[]` | string list | one per owned source, from `catalog/sources/<id>/source.yaml:kind` |
+| `source-refs[]` | string list | branch/ref per owned source, same order |
+| `source-SHAs[]` | string list | exact locked SHA/version per owned source at scan date; must be exact, not approximate |
+| `source-worktree-roots[]` | path list | exact root per owned source, `catalog/sources/<id>/worktrees/<sha>/` for git-repo sources |
 | `live-evidence-mode` | enum | `disabled` / `attempted` / `snapshot` |
 | `overlay-window` | string | e.g., `90d` or `none`; must be explicit |
 | `capability-map[]` | record list | `capability \| reachable(yes/no/partial) \| probe-result` |
 | `prior-kb-state-hash` | string | SHA of prior committed KB root, or `none` for first-time |
 | `scan-date` | ISO date | date the run was initiated |
 
-A run is only reproducible relative to its locked input set. Changing any field (even adding one new repo) produces a new distinct run; do not compare outputs across different input locks.
+A run is only reproducible relative to its locked input set. Changing any field (even adding one new owned source) produces a new distinct run; do not compare outputs across different input locks.
 
 ## Live-capability vocabulary
 
@@ -108,14 +110,15 @@ IDs are assigned to subjects before rendering. Assignment is deterministic: deri
 | ID pattern | Subject | Source key |
 |---|---|---|
 | `svc.<slug>` | service identity anchor | normalized service name |
-| `repo.<slug>` | per-repo floor root | repo name (normalized) |
+| `repo.<slug>` | per-repo floor root for owned git-repo sources | owned git-repo source output name (normalized) |
+| `source.<slug>` | per-source floor root for non-repo sources | owned non-repo source ID/name (normalized) |
 | `topo.unit.<unit-slug>` | deployable unit or operational plane | normalized unit name from deployment manifest |
 | `topo.edge.<caller>.<callee>` | topology edge | `<caller-unit-slug>.<callee-unit-slug>.<kind>` |
 | `topo.handoff.<producer-slug>.<entity-slug>.<consumer-slug>` | artifact-mediated handoff edge | `<producer-unit-slug>.<entity-slug>.<consumer-unit-slug>` |
 | `obs.source.<source-slug>` | observability source / telemetry table | normalized source name from discovery source |
 | `obs.signal.<symptom>.<source>` | canonical signal | `<symptom-family-slug>.<source-slug>` |
 | `fk.<symptom-family>.<mechanism>` | failure-knowledge signature family | `<symptom-slug>.<mechanism-slug>` |
-| `asset.<repo>.<path-hash>` | AI-guidance asset | `<repo-slug>.<first-6-of-path-sha>` |
+| `asset.<source-namespace>.<path-hash>` | AI-guidance asset | `<repo-or-source-slug>.<first-6-of-path-sha>` |
 
 **Slug rules:** lowercase alphanumeric + hyphens only; strip punctuation; collapse whitespace to hyphen; max 48 chars; truncate at last hyphen boundary. Example: `"Query Engine Web App"` → `query-engine-web-app`.
 
@@ -143,13 +146,13 @@ A unit is enumerated iff ≥1 of: (a) has a deployment/runtime manifest (contain
 
 A concept is included in `service/concept-model.md` iff ≥2 of 4 hold: (a) appears in telemetry/log/query dimensions; (b) drives routing/partitioning/ownership/blast-radius; (c) encodes lifecycle/state/process order; (d) is needed to map symptom to root cause/mitigation/owner. Component/repo/deployable names alone do not qualify.
 
-### P3 — Incident-material repo
+### P3 — Incident-material source
 
-A repo is incident-material iff ≥1 mined fact meets a trigger: incident-routing | blast-radius | failure-discrimination | ownership/escalation | high-risk operational change. A repo with zero qualifying facts is `not-material` with searched scope. Each `deep/` row cites its `materiality-category`.
+A source is incident-material iff ≥1 mined fact meets a trigger: incident-routing | blast-radius | failure-discrimination | ownership/escalation | high-risk operational change. A source with zero qualifying facts is `not-material` with searched scope. Each `deep/` row cites its `materiality-category`.
 
 ### P4 — AI-asset catalog inclusion
 
-An asset is included in `00-index/ai-asset-catalog.md` iff it maps to ≥1 named test from the routing set: `incident-routing | ownership/escalation | observability | failure-discrimination | review-guidance`. Dev-relevant assets are included ONLY when they map to one of the four incident-flavored tests; `review-guidance` alone does not include a dev-relevant asset. Everything else stays floor-only (`kb/<repo>/ai-assets.md`).
+An asset is included in `00-index/ai-asset-catalog.md` iff it maps to ≥1 named test from the routing set: `incident-routing | ownership/escalation | observability | failure-discrimination | review-guidance`. Dev-relevant assets are included ONLY when they map to one of the four incident-flavored tests; `review-guidance` alone does not include a dev-relevant asset. Everything else stays floor-only (`kb/<repo>/ai-assets.md` for git-repo sources, `kb/<source>/ai-assets.md` for non-repo sources).
 
 ### P5 — Source-catalog inclusion
 
@@ -205,21 +208,21 @@ The artifact is predicate-conditional mandatory: present iff at least one depend
 
 ## Incremental changed-surface closure
 
-When `mode = incremental`, the input lock includes the prior KB state hash and old repo SHAs. The closure rule determines which records must be re-mined.
+When `mode = incremental`, the input lock includes the prior KB state hash and old source SHAs/versions. The closure rule determines which records must be re-mined.
 
 ### Changed-surface → affected record classes → destination artifacts
 
 | Changed surface | Re-mine record classes | Destination artifacts to re-render |
 |---|---|---|
-| repo source (entry-points, modules, contracts, invariants) | `edge/dependency · control/auth · observability · concept · failure-mode` | `kb/<repo>/` floor; `topology/`; `topology/data-flow-handoffs.md`; `failure-knowledge/`; `observability/source-catalog.md`; `observability/dependency-sources.md` (+ matching `00-index/telemetry-routing-card.md` / `task-router.md` symptom cross-link) |
+| owned source tree (entry-points, modules, contracts, invariants) | `edge/dependency · control/auth · observability · concept · failure-mode` | `kb/<repo>/` or `kb/<source>/` floor; `topology/`; `topology/data-flow-handoffs.md`; `failure-knowledge/`; `observability/source-catalog.md`; `observability/dependency-sources.md` (+ matching `00-index/telemetry-routing-card.md` / `task-router.md` symptom cross-link) |
 | deployment/runtime manifests | `edge/dependency · config/secret · ownership/escalation` | `topology/per-deployable-units.md`; `topology/service-graph.md`; `topology/endpoints-ports-catalog.md`; `topology/data-flow-handoffs.md`; `observability/dependency-sources.md` (+ matching `00-index/telemetry-routing-card.md` / `task-router.md` symptom cross-link) |
 | telemetry/observability config | `observability` | `observability/source-catalog.md`; `observability/dependency-sources.md`; `observability/canonical-signals.md`; `observability/join-keys.md` |
 | ownership/escalation config | `ownership/escalation` | `service/ownership.md`; `service/access-escalation.md`; `00-index/ownership.toon` |
 | incident overlay source (new window) | `overlay` | `overlays/incidents/`; `00-index/incident-clusters.toon` |
-| concept/glossary sources | `concept` | `service/concept-model.md`; `service/glossary.md`; `kb/<repo>/concepts.md` |
+| concept/glossary sources | `concept` | `service/concept-model.md`; `service/glossary.md`; `kb/<repo>/concepts.md` or `kb/<source>/concepts.md` |
 | docs (human docs only) | `failure-mode · concept · observability` (suspected ⚠️ cap) | `failure-knowledge/`; `service/`; `observability/` incl `observability/dependency-sources.md` (with `docs-only` trust cap) |
-| AI-guidance assets | `ai-asset` | `kb/<repo>/ai-assets.md`; `00-index/ai-asset-catalog.md` |
-| incident-material human guidance (troubleshooting guides / runbooks / known-issues / alert-response) — re-render only, stays docs-only/non-promotable | `guidance-asset` (pointer-only; docs-only/suspected ⚠️ cap; no promotion) | `kb/<repo>/ai-assets.md`; `00-index/ai-asset-catalog.md` (+ matching `00-index/telemetry-routing-card.md` / `task-router.md` symptom cross-link) |
+| AI-guidance assets | `ai-asset` | `kb/<repo>/ai-assets.md` or `kb/<source>/ai-assets.md`; `00-index/ai-asset-catalog.md` |
+| incident-material human guidance (troubleshooting guides / runbooks / known-issues / alert-response) — re-render only, stays docs-only/non-promotable | `guidance-asset` (pointer-only; docs-only/suspected ⚠️ cap; no promotion) | `kb/<repo>/ai-assets.md` or `kb/<source>/ai-assets.md`; `00-index/ai-asset-catalog.md` (+ matching `00-index/telemetry-routing-card.md` / `task-router.md` symptom cross-link) |
 
 **Preservation contract:** higher-grade ledger records are preserved unless the new run produces stronger evidence (see `references/kb-mutation.md` for evidence-strength comparison). Re-graded and superseded records carry a mutation status; they are never silently replaced.
 

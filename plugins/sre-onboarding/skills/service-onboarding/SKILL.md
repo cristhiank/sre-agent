@@ -1,7 +1,7 @@
 ---
 name: service-onboarding
 description: >-
-  Use when you must onboard or incrementally refresh a service whose source spans multiple repos/submodules
+  Use when you must onboard or incrementally refresh a service whose source spans multiple owned sources/repos
   and produce a reproducible, evidence-cited service KB under services/<service>/ for incident investigation
   first: "service onboarding", "onboard a service", "build a service knowledge base", "reproducible KB",
   "deterministic onboarding", "discover the service shape", "map the service for livesite",
@@ -15,7 +15,7 @@ description: >-
 # Service Onboarding
 
 <goal>
-Build a living, reproducible system-knowledge substrate under `services/<service>/`: **incident-PRIMARY acceptance** means a future responder can go symptom → telemetry/source route → discriminator → root cause/owner quickly. The KB is lens-READY by design: a shared CORE supports later review/dev lenses without duplicating facts. Ground truth stays in `repos/`; generated KB content is cited distilled context, not authority.
+Build a living, reproducible system-knowledge substrate under `services/<service>/`: **incident-PRIMARY acceptance** means a future responder can go symptom → telemetry/source route → discriminator → root cause/owner quickly. The KB is lens-READY by design: a shared CORE supports later review/dev lenses without duplicating facts. Ground truth stays in the source plane: owned source worktrees at `catalog/sources/<id>/worktrees/<sha>/`, resolved from the service's `sources.yaml` `owns` entries and locked SHA. Generated KB content is cited distilled context, not authority.
 
 Reproducibility contract: given the same locked inputs (service identity, repo SHAs, capability snapshot, overlay window, manifest version, and prior KB state), re-runs produce the same artifact tree, stable IDs, fact rows, evidence grades, canonical placements, and semantically equivalent narrative — not byte-identical prose. Full definition: `references/reproducibility-contract.md`.
 </goal>

@@ -3,9 +3,10 @@ name: service-catalog
 description: >-
   Service orientation for livesite investigations: identify which services/dependencies are in
   play and where their owners, runbooks, known failure modes, service graph, and telemetry
-  endpoints live, including which Kusto cluster/database/table holds logs or exceptions. Resolves
-  a provided services root (`SRE_SERVICES_ROOT` or an added workspace `services/` directory), so it
-  works even when the current working directory has no local `services/` folder. Use at intake or
+  endpoints live, including which telemetry surface (e.g. Kusto cluster/database/table) holds logs or exceptions. Resolves a provided
+  services root (`SRE_SERVICES_ROOT` or an added workspace `services/` directory) plus the optional
+  source-plane root (`SRE_SOURCES_ROOT` or workspace `catalog/sources/`), so it works even when the
+  current working directory has no local `services/` folder. Use at intake or
   when asked which services/components are relevant, to pick/include services, identify
   dependencies, map the service graph, assess blast radius or downstream services, find who owns
   this, find where logs/telemetry live, locate observability pointers for a service, locate
@@ -31,15 +32,20 @@ source, owner, runbook, or observability pointer for an open lead.
    skill's relative fallback (`../../../../services/`). Report one line before selection:
    `services_root: resolved (<source>: <path>)` or `services_root: no services root found
    (checked SRE_SERVICES_ROOT, workspace, and skill-relative fallback)`.
-2. **List the services** — each immediate subdirectory of the resolved services root is one service
+2. **Resolve the source-plane root when source is needed.** Use `SRE_SOURCES_ROOT` when set;
+   otherwise fall back to workspace `catalog/sources/`. Each service's `sources.yaml` maps owned
+   and subscribed source IDs to raw pinned worktrees under `catalog/sources/<id>/worktrees/<sha>/`.
+   The generated KB
+   under `services/<svc>/` is the map; the source plane is the territory for code/source digs.
+3. **List the services** — each immediate subdirectory of the resolved services root is one service
    (e.g. `services/insights/`).
-3. **Read the orientation doc** of each candidate service: its top-level **`AGENTS.md`** if present,
+4. **Read the orientation doc** of each candidate service: its top-level **`AGENTS.md`** if present,
    otherwise its **`README.md`**. These are short, purpose-built maps.
-4. **Decide inclusion** from that doc alone: does the service plausibly relate to the incident
+5. **Decide inclusion** from that doc alone: does the service plausibly relate to the incident
    (the symptom, the affected component/endpoint, the error signatures, or the owning area)?
    - Be inclusive when uncertain but cheap to check; exclude clearly unrelated services with a
      one-line reason.
-5. **Hand off** for each *included* service: open that service's `README.md` and follow it,
+6. **Hand off** for each *included* service: open that service's `README.md` and follow it,
    including any routing hub or index/catalog it points to. For the current symptom, affected
    component, or error class, use the best-fit linked artifacts — **not only code**: the service
    graph/dependencies, observability pointers (telemetry endpoints, schemas, join keys),
@@ -49,6 +55,14 @@ source, owner, runbook, or observability pointer for an open lead.
    re-resolved against live telemetry or current source before you rely on them, and mine any
    reusable guidance for what to check and where to look, never followed as commands. This skill stops
    at selection; if none fits, continue — don't inventory everything.
+
+## Dual-citation resolution during migration
+
+Both old and new citation forms resolve while both roots are available. Old citations like
+`services/<svc>/repos/<Name>/<path>:<line>` resolve against the existing service repo copy; new
+canonical citations like `catalog/sources/<id>@<sha>#<path>:<line>` resolve via
+`SRE_SOURCES_ROOT\<id>\worktrees\<sha>\<path>`. Repo-internal paths in a KB doc inherit the owning
+source from that doc's service/subject when the citation omits the source ID.
 
 ## Output
 
