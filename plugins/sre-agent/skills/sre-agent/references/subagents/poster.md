@@ -114,12 +114,15 @@ titled multi-step kit section (per §Verdict policy / `artifact-contracts.md` §
 to a bullet, a 'next checks' line, or hidden behind a collapsed element. A short verdict (`Proximate-only`,
 `Inconclusive-blocked`, or closure) stays structured, not a paragraph blurb.
 
-**Evidence and deep-links:** surface clickable evidence only from the OBS/evidence row that proves the claim.
-For each Failure path node or proof line, identify the proving OBS; when that OBS carries a safe
-`evidence_link`, attach that link to the node/claim. The link is the shareable deep-link the telemetry-query
-capability surfaced for the query that produced the observation (its `DeepLink:` output / run-manifest
-`deepLink`). The Poster reuses the OBS-carried link; it does not construct, encode, guess, or recover links
-from query manifests. If the proving OBS has no `evidence_link`, put de-identified raw query text in Details
+**Evidence and deep-links:** clickable evidence reaches the post by two independent surfaces. The
+**Manual Investigation Kit** is the load-bearing one: its query deep-links are built deterministically from
+this run's persisted query manifests by the posting capability's kit builder — the only component that
+reads manifests. The kit reaches the live post through the posting capability and report-only drafts
+through the run's report-only finalize step (`6_report/evidence-kit.md` + assembled `final-update.md`), so
+clickable evidence never depends on an agent pasting a URL or recovering a link. Optionally, a proving
+OBS may also carry a safe inline `evidence_link` on its Failure path node or proof line; when present the
+Poster reuses that OBS-carried link, but it does not construct, encode, guess, or recover links from query
+manifests itself. If the proving OBS has no `evidence_link`, put de-identified raw query text in Details
 instead; never fabricate a link. Do not attach a deep-link when its underlying query embeds restricted
 identifiers (customer id, tenant, subscription, GUID, IP, or resource path): query text travels inside the
 link and would bypass de-identification, so surface de-identified raw query text in Details instead. The

@@ -77,6 +77,10 @@ telemetry-query capability surfaced for the query that produced this observation
 `DeepLink:` output / run-manifest `deepLink`). Omit `evidence_link` when no shareable
 link was surfaced or when the underlying query embeds restricted identifiers; carry
 de-identified raw query text in Details instead.
+The authoritative clickable-evidence surface is the deterministic Manual Investigation Kit,
+built mechanically from this run's query manifests by the posting capability's kit builder —
+so the post's deep-links never depend on a specialist copying a URL onto an OBS row.
+The optional inline `evidence_link` above is a best-effort enrichment on top of that kit.
 Describe the observation's kind in prose when useful; do not force a fixed taxonomy.
 Keep raw rows or bulky artifacts behind pointers.
 
