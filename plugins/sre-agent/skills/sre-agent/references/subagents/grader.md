@@ -55,4 +55,4 @@ From the candidate evidence-query menu in your brief, pick the **1-3 queries tha
 
 - Reference queries **only** by their menu `runId`. Never paste or construct a URL — the link is resolved deterministically downstream from the runId.
 - Choose the **load-bearing proof** queries — the ones behind "the single fact that proves it" — not schema or exploration queries.
-- This is a **required deliverable** whenever the menu is non-empty and the verdict rests on query evidence. Pick fewer than 3 (or write an empty file) when fewer are truly decisive — an omitted kit is correct, a padded one is not.
+- This is a **required deliverable** whenever the menu is non-empty and the verdict rests on query evidence. Pick fewer than 3 when fewer are truly decisive. **Always write the file** when the verdict rests on query evidence: when no single query is decisive, write it with one `# none decisive: <reason>` line and no selections. (So an absent file signals a wiring break, while a present file with no selections is your explicit "nothing decisive" decision — and the kit is correctly omitted either way.)

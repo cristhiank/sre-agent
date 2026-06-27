@@ -81,7 +81,9 @@ The post's clickable-evidence surface is the **curated Manual Investigation Kit*
 1-3 decisive verification queries by `runId` (from a deterministic candidate menu) into
 `5_grader/decisive-queries.toon`, and the posting capability resolves those runIds to deep-links mechanically
 — so the links never depend on a specialist copying a URL onto an OBS row, and the kit is the decisive few,
-not every query. The optional inline `evidence_link` above is a best-effort enrichment on top of that kit.
+not every query. `6_report/evidence-kit.md` and `6_report/incident-update-with-kit.md` are **reserved** for
+the report-only finalize output (the assembled concise draft + kit); the report agent must not author files
+with those names. The optional inline `evidence_link` above is a best-effort enrichment on top of that kit.
 Describe the observation's kind in prose when useful; do not force a fixed taxonomy.
 Keep raw rows or bulky artifacts behind pointers.
 
