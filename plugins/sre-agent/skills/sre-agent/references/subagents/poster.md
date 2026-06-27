@@ -114,15 +114,18 @@ titled multi-step kit section (per §Verdict policy / `artifact-contracts.md` §
 to a bullet, a 'next checks' line, or hidden behind a collapsed element. A short verdict (`Proximate-only`,
 `Inconclusive-blocked`, or closure) stays structured, not a paragraph blurb.
 
-**Evidence and deep-links:** clickable evidence reaches the post by two independent surfaces. The
-**Manual Investigation Kit** is the load-bearing one: its query deep-links are built deterministically from
-this run's persisted query manifests by the posting capability's kit builder — the only component that
-reads manifests. The kit reaches the live post through the posting capability and report-only drafts
-through the run's report-only finalize step (`6_report/evidence-kit.md` + assembled `final-update.md`), so
-clickable evidence never depends on an agent pasting a URL or recovering a link. Optionally, a proving
-OBS may also carry a safe inline `evidence_link` on its Failure path node or proof line; when present the
-Poster reuses that OBS-carried link, but it does not construct, encode, guess, or recover links from query
-manifests itself. If the proving OBS has no `evidence_link`, put de-identified raw query text in Details
+**Evidence and deep-links:** the **Manual Investigation Kit** is a curated set of **1-3 decisive verification
+queries** — the queries an OCE would run to confirm the root cause — NOT a dump of every query. The **Grader
+selects** them (by `runId`, from the candidate menu in its brief) and records them in `5_grader/decisive-queries.toon`;
+the kit's deep-links are then resolved **deterministically** from those runIds by the posting capability — the
+only component that reads manifests. So clickable evidence never depends on an agent pasting or recovering a
+URL: the agent's only judgment is WHICH queries, by short runId. The kit reaches the live post through the
+posting capability and report-only drafts through the run's report-only finalize step (`6_report/evidence-kit.md`
+plus an assembled `incident-update-with-kit.md` = the concise additive draft + kit). When the Grader selects no
+decisive query, the kit is **omitted** — an empty kit beats a noisy one. Optionally, a proving OBS may also
+carry a safe inline `evidence_link` on its Failure path node or proof line; when present the Poster reuses that
+OBS-carried link, but it does not construct, encode, guess, or recover links from query manifests itself. If the
+proving OBS has no `evidence_link`, put de-identified raw query text in Details
 instead; never fabricate a link. Do not attach a deep-link when its underlying query embeds restricted
 identifiers (customer id, tenant, subscription, GUID, IP, or resource path): query text travels inside the
 link and would bypass de-identification, so surface de-identified raw query text in Details instead. The

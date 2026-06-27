@@ -76,6 +76,7 @@ Mandatory dispatch points:
 - At least one Specialist is dispatched per material hypothesis area from Scout, or
   an explicit gap is recorded when no matching capability or host support exists.
 - Grader is always dispatched after the Specialist observation merge.
+- Before dispatching the Grader, generate this run's **candidate evidence-query menu** — the executed query manifests filtered to evidence queries, listed by `runId` — using the incident-posting capability's evidence-menu function over the run's query-manifest store, and include the menu in the Grader brief. The Grader selects the 1-3 decisive verification queries by `runId` (it never runs queries or handles URLs); the Manual Investigation Kit's deep-links are resolved deterministically from those runIds. If no such menu capability is available, record a gap and proceed without the kit.
 - Report is dispatched after the final Grader verdict and any required bounded
   introduction-provenance pass.
 
