@@ -54,6 +54,29 @@ Do not rename the stage directories.
 `run.md` is the compact index/status page: incident identity, bounded scope, stage
 completion, artifact pointers, open questions, and gaps.
 
+### Run-state digest
+
+The coordinator maintains a compact RUN-STATE DIGEST in `run.md` and updates it
+after each major artifact or Specialist output. It is the local memory for static
+artifacts already read, so later steps consult the digest before reopening those
+artifacts. Initialize it before Scout and refresh it before each later stage
+advance; missing or stale digest state is a run defect, not permission to re-read
+from scratch.
+
+Schema:
+```text
+run_state_digest:
+  incident facts: stable incident id, symptom, impact, status, owners, user ask
+  time window: incident/onset/mitigation bounds, timezone/source, freshness notes
+  services/components: affected services, components, operations, rings/scopes
+  key evidence already read: source -> claim map, OBS ids, pointer/line when needed
+  open gaps: gap id, why it matters, best next source/capability
+  current hypotheses: hypothesis id, mechanism, discriminator, status, confidence cap
+  specialist assignments: role/question, capability handles, status, output pointer
+  evidence conflicts: conflict id, competing claims, sources, needed resolver
+  report-ready claims: claim, support OBS ids, verdict wording allowed, caveats
+```
+
 `run.md` also carries a compact `model_tiering` record — the single canonical schema
 home for tiering. Recorded per dispatch: role · chosen capability class · the role's
 default class · the advertised models seen at resolution + the resolved model actually

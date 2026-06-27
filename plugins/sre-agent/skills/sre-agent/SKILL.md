@@ -19,8 +19,9 @@ claims, keeps gaps visible, and says what would confirm or disprove the theory.
 Working style: evidence-led investigator. Leverage the skills, tools, access, and knowledge the harness provides — discover and use available capabilities rather than a fixed toolset; when an orientation/knowledge capability is available, work it early as the case file. Treat every material claim as trial evidence: cited, corroborated, and mechanism-verified before promotion to cause.
 
 A valid run is observable: run pointer, captured claims, CAPABILITY MAP, Scout
-dispatch, material Specialist dispatches, Grader verdict, the `model_tiering`
-record, and Report artifact — or an explicit abort/degraded-mode reason in `run.md`.
+dispatch, material Specialist dispatches, Grader verdict, RUN-STATE DIGEST, the
+`model_tiering` record, and Report artifact — or an explicit abort/degraded-mode
+reason in `run.md`.
 
 General path: changed/affected surfaces -> questions -> observations/gaps -> judged
 verdict -> report.
@@ -39,6 +40,36 @@ handoff/Report dispatch.
 The coordinator MUST NOT perform deep evidence collection, file/log/code searching,
 or hypothesis analysis inline in the main context. Dispatch that work; keep inline
 work to mechanical intake, status, merge, and handoff.
+
+Coordinator action taxonomy (local receipt before action): every coordinator tool
+call fits one allowed class: (a) intake/run-artifact read, (b) dispatch a
+subagent, (c) await/read a subagent's output, (d) update the run-state digest, (e)
+merge/adjudicate/synthesize cited observations, (f) assemble the handoff/Report,
+or (g) inventory capability metadata from host-provided handles, or (h)
+target-independent capability access-confirmation — the cheapest
+capability-level health/list/schema/status check per § Access confirmation (no
+guessed incident-specific target). Anything else — live telemetry query,
+code/log/source search or read, recursive filesystem search, or independent
+hypothesis evidence collection — is Specialist work: dispatch it instead of
+running it inline. Before any coordinator query/search/source-read, confirm it is
+one of (a)-(h); if not, dispatch.
+
+Synthesis stays owned by the coordinator: it may compare Specialist claims, build
+the cited timeline, spot gaps/conflicts, dispatch targeted follow-up, and do
+bounded validation that claim support actually exists. That is synthesis, not
+primary collection. The direct evidence-probe budget is 0 by default. Use at most
+2 direct probes per run, total, only to unblock dispatch routing or adjudicate a
+Specialist conflict whose resolution changes the verdict/severity; each probe
+records one line in `run.md`: purpose · why dispatch is invalid/too-slow ·
+source · how the result changes routing/verdict · remaining probe budget. Class
+(h) target-independent access-confirmation is outside this evidence-probe budget.
+Do not spend probes for corroboration, confidence, or provenance; assign those.
+
+Maintain a compact RUN-STATE DIGEST in `run.md`, initialized before Scout and
+updated after each major artifact or Specialist output and before each later
+stage advance, so static artifacts need not be reopened to recover context. A
+missing or stale digest is a run defect. The schema lives in
+`references/run-store.md#run-state-digest`.
 
 Mandatory dispatch points:
 - Scout is always dispatched after intake and the completed CAPABILITY MAP.
@@ -97,6 +128,14 @@ example, run a common prerequisite pass first when several downstream
 specialists would otherwise each rediscover the same unresolved failing-unit
 enumeration, join key, authoritative source, or producer path.
 
+Keep batch membership tight: include only verdict-relevant Specialists in the
+awaited batch. When the host requires explicit collection, minimize poll count:
+prefer one long awaited read per agent/batch over many short polls. Use in-turn
+wait time only for non-evidence work such as updating the RUN-STATE DIGEST or
+preparing the merge/contradiction matrix; do not start new dependent
+investigations during a wait, because their inputs may be invalidated by the
+pending batch.
+
 Bound the wait so "never yield" cannot become "hang forever": keep the whole
 run within the host/lease time budget. If an awaited dispatch cannot complete
 within the remaining budget, stop waiting and write an explicit
@@ -127,15 +166,21 @@ find/rank use as a Scout orientation capability AND its deep-read use as a speci
 source-verification capability, and pass the find/rank use to Scout (full-evidence) for fast
 discovery over the KB/docs/repo text while specialists retain deep code mechanism verification.
 
+Inventory concrete entrypoints from host-provided tool handles and capability
+descriptions (for example, environment variables or metadata that name the
+telemetry-query, code-search, or incident-posting CLI handles). Do not recursively
+search the filesystem to locate tool binaries; absence from a guessed path is not
+a capability result.
+
 Load and use every available capability whose description matches an immediate
 investigation obligation. If a material need has no matching capability, record an
 explicit gap. Do NOT proceed to Scout until the run exists, the CAPABILITY MAP is
-complete, the intake intent frame is set, AND intake is verified-or-fetched (staged items
+complete, the intake intent frame is set, intake is verified-or-fetched (staged items
 reconciled against the manifest and every redacted/gapped item either fetched or recorded
-as an explicit gap).
+as an explicit gap), AND the RUN-STATE DIGEST is initialized.
 
 Do not mark a description-matching capability gap/skip from an unverified environment guess ("no data here", "wrong working dir").
-Availability is confirmed by invoking it and reading its self-report, not by guessing inputs exist; assumed-unavailable-from-environment-guess is non-diagnostic (see Access confirmation).
+Availability is confirmed by invoking it and reading its self-report, not by guessing inputs exist; coordinator confirmation uses class (h) when it is target-independent. Assumed-unavailable-from-environment-guess is non-diagnostic (see Access confirmation).
 If the description matches an obligation, use it; otherwise it is irrelevant by description.
 
 Keep it eager-but-budgeted: inventory ALL available capability metadata, but only
@@ -153,7 +198,7 @@ availability surface over trial-and-error (see `references/operational-disciplin
 
 After the map, runtime-confirm access only for capabilities on the CRITICAL EVIDENCE PATH: a capability the incident question cannot be answered without, or one intake metadata marks as primary evidence. All others stay `unconfirmed / not-probed`.
 
-A capability appearing absent inside a `reasoning-only`/restricted worker is non-diagnostic about availability and MUST NOT change a capability's ACCESS STATUS; re-confirm from a `full-evidence` context (or coordinator context) before recording it absent or blocked.
+A capability appearing absent inside a `reasoning-only`/restricted worker is non-diagnostic about availability and MUST NOT change a capability's ACCESS STATUS; re-confirm from a `full-evidence` context before recording it absent or blocked. Use coordinator context only as class (h) target-independent capability access-confirmation.
 
 Read the capability's own help, metadata, or error guidance first. Confirm through its canonical invocation, starting with the cheapest capability-level health/list/schema/status check that does not depend on a guessed incident-specific target; do not first-probe by firing a guessed incident-specific query.
 
@@ -165,8 +210,8 @@ After a usage/parse, target/resource resolution, or auth/init failure, make at l
 
 Confirmation is per evidence source, not global: a capability confirmed against one target (e.g., the incident-record source) is not confirmed against a different source the lead needs. When the incident question requires the service's own telemetry, confirm or attempt that source as its own ACCESS STATUS line before recording a signal or table unknown (see the access invariant in `references/investigation-invariants.md` for the documentation-gap rule).
 
-Source navigation composes with ACCESS STATUS: for current-code investigation, prefer read-only local navigation of the code the service knowledge points to (search, read, follow references locally). When assigning current-code source-navigation work, prefer an available ranked source-navigation/code-lookup capability for symbol definitions and multi-term identifier hunts when it returns scoped, grouped candidate locations; use bounded line-oriented search for true regex, exhaustive text scans, or when no such capability is available.
-Use remote source-control capability for provenance a local checkout may lack: commits, pull requests, branches, history, and blame.
+Source navigation composes with ACCESS STATUS: when assigning current-code navigation, specialists prefer read-only local navigation of the code the service knowledge points to (search, read, follow references locally). When assigning current-code source-navigation work, prefer an available ranked source-navigation/code-lookup capability for symbol definitions and multi-term identifier hunts when it returns scoped, grouped candidate locations; use bounded line-oriented search for true regex, exhaustive text scans, or when no such capability is available.
+Assign remote source-control capability for provenance a local checkout may lack: commits, pull requests, branches, history, and blame.
 Before code-dependent conclusions for a service-specific incident, resolve the local source location from service knowledge and record `source access: resolved-local|unavailable|not-needed`; if unavailable, state the gap rather than substituting remote current-code search or asserting code-level mechanism.
 
 ## Dispatch routing
@@ -251,6 +296,14 @@ evidence capabilities, never a restricted/fast type for evidence-using work.
 Every dispatch is also an AWAITED step in unattended runs: see Coordinator
 contract → Execution model (single-turn, awaited). Do not yield the turn
 with a required dispatch pending.
+
+Scout/Specialist brief contract: each dispatch carries a compact orientation
+packet with what the coordinator already established — incident facts, candidate
+known-issue/KB hits with pointers, and resolved cluster/db/join-key targets when
+known — so the worker verifies rather than rediscovers them. Pass compact facts
+plus pointers, not raw bulk context. The brief also names the exact single
+question, evidence budget, capability handles to use, and asks for partial
+findings plus named gaps rather than a long-running sweep.
 
 ## Six-stage flow
 
