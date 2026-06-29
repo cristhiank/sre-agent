@@ -1,7 +1,7 @@
 {
   "name": "sre-onboarding",
   "description": "Onboarding skills for discovering service information. Helps an SRE or agent get oriented on a service: what it is, where it lives, its dependencies, infrastructure, observability surfaces, and operational context.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Cris Lopez"
   },
