@@ -42,7 +42,8 @@ or hypothesis analysis inline in the main context. Dispatch that work; keep inli
 work to mechanical intake, status, merge, and handoff.
 
 Coordinator action taxonomy (local receipt before action): every coordinator tool
-call fits one allowed class: (a) intake/run-artifact read, (b) dispatch a
+call fits one allowed class: (a) intake/run-artifact read (including the curated
+known-recurrence registry read at intake), (b) dispatch a
 subagent, (c) await/read a subagent's output, (d) update the run-state digest, (e)
 merge/adjudicate/synthesize cited observations, (f) assemble the handoff/Report,
 or (g) inventory capability metadata from host-provided handles, or (h)
@@ -52,7 +53,11 @@ guessed incident-specific target). Anything else — live telemetry query,
 code/log/source search or read, recursive filesystem search, or independent
 hypothesis evidence collection — is Specialist work: dispatch it instead of
 running it inline. Before any coordinator query/search/source-read, confirm it is
-one of (a)-(h); if not, dispatch.
+one of (a)-(h); if not, dispatch. The intake fast-lane (§ Intake fast-lane) composes
+with these classes and adds no new inline-evidence license: its lane decision is a registry
+read (a), its confirming probe an awaited dispatch (b), and its disposition a
+handoff/Report (f) routed through the existing poster — the probe collects the
+confirming evidence, never the coordinator.
 
 Synthesis stays owned by the coordinator: it may compare Specialist claims, build
 the cited timeline, spot gaps/conflicts, dispatch targeted follow-up, and do
@@ -72,7 +77,9 @@ missing or stale digest is a run defect. The schema lives in
 `references/run-store.md#run-state-digest`.
 
 Mandatory dispatch points:
-- Scout is always dispatched after intake and the completed CAPABILITY MAP.
+- Scout is always dispatched after intake and the completed CAPABILITY MAP, unless the
+  coordinator steers to the intake fast-lane (see § Intake fast-lane), which defers Scout
+  and fails open to it on any uncertainty.
 - At least one Specialist is dispatched per material hypothesis area from Scout, or
   an explicit gap is recorded when no matching capability or host support exists.
 - Grader is always dispatched after the Specialist observation merge.
@@ -80,9 +87,14 @@ Mandatory dispatch points:
 - Report is dispatched after the final Grader verdict and any required bounded
   introduction-provenance pass.
 
-These mandatory dispatch points have ONE exception: a recorded iteration early-exit
+These mandatory dispatch points have two exceptions: (1) a recorded iteration early-exit
 (see § Iteration mode) — when an iteration carries no genuine new information, the run
-terminates report-only with an `early_exit` note in `run.md` and dispatches nothing.
+terminates report-only with an `early_exit` note in `run.md` and dispatches nothing; and
+(2) the coordinator's intake fast-lane decision (see § Intake fast-lane), which substitutes
+one awaited
+confirming probe + a disposition/Report for the Scout→Grader deep-lane on a confirmed
+curated-recurrence match, and still fails open to the full deep-lane (Scout, Specialists,
+Grader, Report) on any probe disagreement or uncertainty.
 
 If the host genuinely lacks subagent support — or lacks any
 synchronous/awaitable completion mechanism for dispatches — record a
@@ -98,8 +110,8 @@ drive the investigation to its terminal state — Report dispatched, then the
 knowledge-value triage completed (the Knowledge Curator awaited in-turn when the
 triage dispatches it), or an explicit abort/degraded note in `run.md` — within
 one continuous working turn. It MUST NOT end or yield its turn while any required
-Scout, Specialist, Grader, Report, or dispatched Knowledge Curator step is still
-incomplete.
+Scout, Specialist, the intake fast-lane confirming probe, Grader, Report, or
+dispatched Knowledge Curator step is still incomplete.
 
 A dispatch is complete ONLY after the coordinator has received the subagent's
 finished output and merged it into the run state. If a dispatch returns only
@@ -110,7 +122,8 @@ waiting — it ends the turn and orphans the work.
 
 Therefore, in unattended runs, fire-and-forget / background / detached
 dispatch is FORBIDDEN for the required pipeline stages (Scout, Specialist,
-Grader, Report, and a dispatched Knowledge Curator). Dispatch is blocking:
+the intake fast-lane confirming probe, Grader, Report, and a dispatched
+Knowledge Curator). Dispatch is blocking:
 every dispatched stage must be awaited and its output collected before the
 run advances. For a SET of independent same-stage dispatches (specialists
 for different hypotheses, or independent Grader-loop follow-up passes), the
@@ -239,6 +252,10 @@ Each dispatch declares three independent dimensions:
   Every dispatch records a Tier Record: role · chosen class · resolved model + basis ·
   default class · escalation reason when above default · fallback when the preferred
   class or model is unavailable.
+  The intake fast-lane's confirming probe and its disposition/Report DEFAULT to the
+  economical/mid class and record a Tier Record like any dispatch; the deep-lane is
+  unchanged (reasoning-heavy Grader/Report). An escalation from the fast-lane runs the
+  deep-lane at its normal classes.
   A non-economical Scout/orientation dispatch REQUIRES a named escalation reason
   (claim-gated reasoning, synthesis, or high ambiguity); a missing Tier Record is an
   incomplete handoff. Efficiency detail: `references/operational-discipline.md`.
@@ -341,8 +358,28 @@ findings plus named gaps rather than a long-running sweep.
    identity capture for later correlation, not a hypothesis or a cause. Do not dispatch
    Scout until the run exists, the CAPABILITY MAP is complete, the intent frame is set,
    AND intake is verified-or-fetched — staged items reconciled against the manifest and
-   every redacted/gapped item either fetched or recorded as an explicit gap. Expected output: run pointer, captured claims, discussion-thread summary, intent
-   frame, recurrence identity, and capability map.
+   every redacted/gapped item either fetched or recorded as an explicit gap.
+   **FAST-LANE DECISION (coordinator self-governs the lane at intake, with judgment).**
+   With intake complete, before dispatching Scout, the coordinator reasons over the cheap
+   orientation it already holds — the captured recurrence identity plus the curated/promoted
+   known-recurrence registry the CAPABILITY MAP exposes as service knowledge (an
+   intake-artifact read, action class (a)). It treats those entries as curated orientation
+   evidence — claims, not authority, bounded by service/component/signature, the same status
+   and honesty floor as failure-knowledge grounding and Scout's known-issue consultation;
+   never run-local `7_knowledge` candidates or sibling run dirs (the same isolation rule as
+   Scout) — and judges whether this is a recognized, low-consequence recurrence worth a
+   bounded confirming probe rather than the full investigation. Steer to the fast-lane only
+   when the coordinator can affirm ALL of: the recurrence identity matches the declared
+   match-predicate of exactly ONE curated entry carrying a falsifiable discriminator + a
+   disposition template; Sev ∈ {3,4} and within the entry's `sev_applicability`; and the
+   incident's blast radius is within the entry's `blast_radius_bound`. When it does, take the
+   fast-lane (§ Intake fast-lane) and defer Scout. On no confident single match, an
+   ambiguous/multiple match, an out-of-bound Sev/blast-radius, a discriminator-less entry, or
+   any doubt, proceed to Scout exactly as below — the decision lives in the coordinator's
+   judgment and fails open to the deep-lane rather than guessing. Full contract:
+   `references/fast-lane.md`. Expected output: run pointer, captured claims, discussion-thread summary, intent
+   frame, recurrence identity, the capability map, and the fast-lane decision
+   (`fast-lane: admitted <registry-id>` | `deep-lane: <reason>`).
 2. **Scout (`2_scout`, sole analytic orienter).** Dispatch Scout to read the captured
    claims, do light bounded orientation, and produce a neutral map. Orientation includes
    a bounded recurrence check: using an available read-only incident-history capability,
@@ -372,7 +409,11 @@ findings plus named gaps rather than a long-running sweep.
    lead ledger as `deferred-by-known-issue-first` (held, not dropped), dispatched as the normal one-per-hypothesis
    wave the moment any fail-open trigger fires or the candidate is refuted/unverified (see the
    known-issue acceleration settle rule in `references/grading-rubric.md`). Absent such a
-   candidate, dispatch the normal one-Specialist-per-hypothesis wave. Each fetches and analyzes its own observations through the
+   candidate, dispatch the normal one-Specialist-per-hypothesis wave. (Ordering: the
+   coordinator may steer to the intake fast-lane FIRST at intake on a recognized curated
+   registry match, skipping Scout; known-issue-first is a deep-lane mechanism that applies
+   only when the fast-lane did not fire — they are complementary and non-conflicting.) Each
+   fetches and analyzes its own observations through the
    evidence sources and capabilities you pass it, cites what it saw, and proposes
    theories with cause + mechanism. Each specialist also carries the
    pre-registered discriminator for its hypothesis (from Scout's discriminator
@@ -441,14 +482,67 @@ findings plus named gaps rather than a long-running sweep.
    Knowledge Value Triage over the FINAL artifacts only (`5_grader/ranking.md`, `6_report`, and the scout's
    recurrence/sibling findings). Dispatch the Knowledge Curator ONLY if at least one evidence-backed novelty
    trigger is present: a new or revised reusable signature, a recurring sibling pattern, a verified
-   observability/source gap, a misleading monitor/telemetry gotcha, a repeated manual-handoff gap, or a verified
-   mechanism absent from the service KB. If none, record `knowledge_capture: skipped — no durable novelty/value`
+   observability/source gap, a misleading monitor/telemetry gotcha, a repeated manual-handoff gap, a verified
+   mechanism absent from the service KB, or a deep-lane-confirmed NEW recurring known/benign disposition that
+   carries a falsifiable discriminator — for which the Knowledge Curator proposes an UN-APPLIED
+   known-recurrence registry-entry delta (curated/promoted later by a human, never self-applied; schema in
+   `references/fast-lane.md`). If none, record `knowledge_capture: skipped — no durable novelty/value`
    and stop — never create a candidate just to fill the stage. The pass is non-blocking and never changes the
    verdict, the report, or the post; it writes run-local candidate knowledge only (no mutation of curated service
    knowledge). The skip record (when no Curator is dispatched) is written to `run.md`. Details in
    `references/subagents/knowledge.md`. Expected output: either the skip record, or
    classified candidate items (kind/status/confidence/evidence/recurrence/freshness) plus a proposed, un-applied
    KB delta.
+
+## Intake fast-lane (recognized-recurrence confirm-and-dispose)
+
+On steering to the fast-lane at intake (§`1_intake`), the coordinator substitutes a bounded
+confirm-and-dispose path for the Scout→Grader deep-lane — self-governing the lane with
+judgment, not firing a mechanical rule. It NEVER lowers a verdict bar and fails open to the
+deep-lane on any uncertainty. Full contract — the lane decision, probe budget, escalation
+triggers, disposition/auto-post rules, recall safeguards, telemetry, and the
+known-recurrence registry schema — in `references/fast-lane.md`.
+
+- **DECISION** (coordinator self-governs, an intake read of class (a)): the
+  recurrence-identity-vs-registry reasoning above. Steer to the fast-lane only on a
+  confident single in-bound recognized match; otherwise ESCALATE.
+- **CONFIRMING PROBE** (one bounded `full-evidence` dispatch, economical/mid class, an
+  awaited class (b) dispatch): `capabilities_to_invoke` = the matched entry's named
+  `evidence_source`. It checks ONLY the entry's `discriminator` predicate against THIS
+  incident's live evidence, with the same mechanism-discriminator gate rigor as the
+  deep-lane scoped to that one predicate — states the entry's expected favored vs rival
+  BEFORE reading, then records the observed value, gate status, and a cited OBS. Budget
+  ≤ ~2 targeted reads / a tight time cap; never a broad sweep. Within that budget it also
+  corroborates the incident's actual scope from live evidence and confirms it falls within
+  the entry's `blast_radius_bound` (the intake-captured scope is pre-Scout and not trusted
+  alone). Returns CONFIRMED (live evidence matches the known signature AND scope is in
+  bound) or DISAGREES/inconclusive/blocked (including live scope wider than the bound).
+- **DISPOSE + AUTO-POST** (on CONFIRMED only, class (f) handoff/Report + poster): compose
+  the disposition from the entry's `disposition` template — cause + mechanism, "known
+  recurrence — registry ref `<id>`", the probe's confirming OBS as the cited evidence
+  (honesty floor: cite the live observation, never "registry says so"), and the engineer
+  next-step. The fast-lane disposition does NOT classify `canonical`/`duplicate-of` — that
+  linkage is exclusively a Scout(sibling discovery)+Grader(clock-ordering) product and is
+  NEVER coordinator-inferred here; a sibling/duplicate linkage is carried only when it is
+  already host-supplied (incident-system duplicate linkage in the intake bundle, or the
+  entry's `provenance`), rendered labeled "incident-system-linked". Emit an observable
+  fast-lane verdict and a `6_report` so the run is auditable, rendered as the named
+  `Known-recurrence` poster disposition (`references/subagents/poster.md` § Verdict policy),
+  and apply the existing Poster post-mode check — contribute as a collaborator, not a
+  standalone note, when the discussion thread already carries human root cause / mitigation
+  / progress. Post via the existing poster path under the SAME authorization +
+  idempotency/audit rules as deep-lane posting (live posting still requires brief
+  authorization AND a non-gated capability; otherwise report-only). Record a FAST-LANE
+  receipt + the `model_tiering` Tier Record in `run.md`.
+- **ESCALATE → DEEP-LANE** (on DISAGREES / inconclusive / blocked / out-of-bound / live
+  scope wider than the entry's `blast_radius_bound` / ambiguous-match / capability-unavailable):
+  run the normal deep-lane (Scout → Specialists → Grader → Report) with NO verdict bar
+  lowered. The lane decision + probe OBS carry
+  forward as intake context (the probe becomes a pre-registered discriminator check); never
+  dispose on doubt.
+- **Telemetry:** record per fast-lane run `registry_id`, probe outcome (`confirmed` |
+  `escalated-<reason>`), and disposition. An entry whose probe escalates and the deep-lane
+  then finds a different/new cause is flagged `registry-drift → re-curate`.
 
 ## Iteration mode (new information)
 
@@ -491,6 +585,7 @@ lead-state transitions, isolation, and the delta-report contract — in
 - Operational efficiency floor: `references/operational-discipline.md`
 - Run layout and observation ids: `references/run-store.md`
 - Iteration mode (new information): `references/followup.md`
+- Intake fast-lane (recognized-recurrence confirm-and-dispose): `references/fast-lane.md`
 - What each stage produces: `references/artifact-contracts.md`
 - How to judge: `references/grading-rubric.md`
 - Specialist worker guidance: `references/specialists/AGENTS.md`

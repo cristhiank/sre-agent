@@ -92,6 +92,7 @@ order is:
    - `Confirmed` / `Likely-rooted` / `Proximate-only`: **Impact** · **Fix**
    - `Inconclusive-blocked`: **Impact** · **Blocked** · **Do next**
    - `Refuted` / closure: **Checked** · **Finding** · **Residual risk**
+   - `Known-recurrence` (intake fast-lane confirm-and-dispose disposition; not a Grader verdict): **Checked** · **Known recurrence** · **Residual risk**
 4. **Failure path** — the indented causal tree is the single mechanism representation. Put evidence links
    on the nodes they prove and mark the terminal node plainly. Skip only when no chain exists.
 5. **Manual Investigation Kit** — promoted and visible for `Inconclusive-blocked` or any manual-handoff-capped
@@ -101,7 +102,9 @@ order is:
 Field meanings: Impact = blast radius as **category + count, never a verbatim customer/tenant/subscription/
 GUID/IP/resource path**; Fix = owner-routed single action plus hyperlinked related incident ids when known;
 Blocked = decisive missing evidence or inaccessible discriminator; Do next = the human-executable next
-check or owner handoff; Checked/Finding/Residual risk for closures.
+check or owner handoff; Checked/Finding/Residual risk for closures. Known recurrence = the curated
+registry ref plus the live confirming observation (the discriminator result for THIS incident); never a
+`duplicate-of`/`canonical` claim.
 
 **Closed skip-rule (no latitude):** keep every section in this order with its canonical label; do NOT
 rename, reorder, add, or fold sections together. A section is omitted ONLY by its own explicit skip-rule:
@@ -214,6 +217,15 @@ Correct: render the kit as a titled multi-step section, state Impact / Blocked /
 - `Refuted` / clean no-failure closure: post a short, clearly-labeled closure — what was checked, why
   the suspected cause is disproven or no real failure was found, and any residual risk. Never an
   unqualified all-clear while a material gap remains.
+- `Known-recurrence` (intake fast-lane confirm-and-dispose disposition; NO Grader verdict): post a short,
+  clearly-labeled **Known / ongoing issue note** — the curated registry ref, the live confirming
+  observation (the discriminator result for THIS incident), and the engineer next-step. It is a known-issue
+  disposition, NOT a Grader verdict band, and it NEVER asserts a `duplicate-of`/`canonical` classification
+  (that lane is Scout sibling discovery + Grader clock-ordering only — the one-predicate probe confirms only
+  the discriminator). Any sibling/duplicate linkage may come ONLY from incident-system-supplied provenance
+  already in the intake bundle, or the registry entry's `provenance`, rendered labeled `incident-system-linked`
+  — never coordinator-inferred. Post mode (below) still governs: when the thread already carries human root
+  cause/mitigation/progress, contribute as a collaborator, not a standalone note.
 - Suppress only when, on an iteration, nothing material changed since the last post. (The coordinator may already have ended the iteration early per `../followup.md` § Early-exit gate; this is the late post-suppression backstop.)
 
 When the grader emits a `Confidence reducer / verdict cap`, surface its reducer and lift condition in the post — in plain on-call words (translate the status/cap-effect token; never emit the verbatim gate label) — so responders know the limit and what would raise confidence; render the grader-stated reducer, do not infer, re-rank, or independently derive one. If the verdict is hedged or capped but the field is missing, treat the report as incomplete rather than inventing a reducer.
