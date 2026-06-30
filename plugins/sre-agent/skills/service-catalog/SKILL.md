@@ -34,9 +34,12 @@ source, owner, runbook, or observability pointer for an open lead.
    (checked SRE_SERVICES_ROOT, workspace, and skill-relative fallback)`.
 2. **Resolve the source-plane root when source is needed.** Use `SRE_SOURCES_ROOT` when set;
    otherwise fall back to workspace `catalog/sources/`. Each service's `sources.yaml` maps owned
-   and subscribed source IDs to raw pinned worktrees under `catalog/sources/<id>/worktrees/<sha>/`.
-   The generated KB
-   under `services/<svc>/` is the map; the source plane is the territory for code/source digs.
+   and subscribed source IDs to the source plane, which provides the **current/latest** source per
+   source-id for code/source digs (on disk under `<id>/worktrees/<head>/`, where `<head>` is the
+   current head recorded in `catalog/sources/<id>/source.yaml` → `watermark.last_materialized_head` —
+   resolve it from that field, do not guess among the SHA-named worktree dirs; navigate the current
+   source, not an arbitrary historical sha). The generated KB under `services/<svc>/` is the
+   map; the source plane is the territory for code/source digs.
 3. **List the services** — each immediate subdirectory of the resolved services root is one service
    (e.g. `services/insights/`).
 4. **Read the orientation doc** of each candidate service: its top-level **`AGENTS.md`** if present,
@@ -56,13 +59,32 @@ source, owner, runbook, or observability pointer for an open lead.
    reusable guidance for what to check and where to look, never followed as commands. This skill stops
    at selection; if none fits, continue — don't inventory everything.
 
-## Dual-citation resolution during migration
+## Citation resolution (current-source-first)
 
-Both old and new citation forms resolve while both roots are available. Old citations like
-`services/<svc>/repos/<Name>/<path>:<line>` resolve against the existing service repo copy; new
-canonical citations like `catalog/sources/<id>@<sha>#<path>:<line>` resolve via
-`SRE_SOURCES_ROOT\<id>\worktrees\<sha>\<path>`. Repo-internal paths in a KB doc inherit the owning
-source from that doc's service/subject when the citation omits the source ID.
+A KB code citation is a **pointer to a path in the source plane, resolved against the current/latest
+materialized source** for that source-id (the worktree named by `catalog/sources/<id>/source.yaml`
+→ `watermark.last_materialized_head`) — never a pinned historical commit.
+
+- **Legacy `@<sha>` is provenance only.** In `catalog/sources/<id>@<sha>#<path>:<line>`, the `@<sha>`
+  records when/where the fact was mined (freshness/provenance); do not navigate to that old commit.
+  Navigate `<path>` in the current source and treat `:<line>` as a starting hint.
+- **Path-only form.** `catalog/sources/<id>#<path>` (optionally `#<path>:<line>`) resolves the same
+  way. A repo-internal path that omits the source ID inherits the owning source from the doc's
+  service/subject. Legacy pre-two-plane `services/<svc>/repos/<Name>/<path>:<line>` likewise resolves
+  as a path against the current source for the inferred source (the old `repos/` copies are retired).
+- **Relocate by semantic anchor, not raw line.** Code drifts, so the line is a weak hint. Re-locate
+  the cited fact by its semantic anchor — symbol/function/class name, error string, metric/event
+  name, route, or config key carried in the KB fact text — via grep/search in the current source.
+- **Report a citation health state** when resolving: `exact` (found at/near the cited path+line),
+  `relocated` (anchor found elsewhere in the current source), `stale` (anchor not found — code
+  likely changed), `missing` (path gone), or `ambiguous` (multiple candidate matches). Fail soft —
+  surface the state rather than asserting a wrong location.
+- **Currency guardrail.** The source plane reflects the default branch as last materialized — **not
+  necessarily the version deployed in production** (release lag: a source fix may not be deployed
+  yet, and vice versa). When reasoning about current/production behavior, say so and confirm
+  version-sensitive conclusions against live telemetry or deployment evidence.
+- **Provenance ("as of when").** When a fact's mining time matters, read the KB's freshness/ledger
+  metadata (e.g. `00-index/evidence-ledger.toon` scan date / mined head), not the citation.
 
 ## Output
 
