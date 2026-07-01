@@ -23,9 +23,9 @@ Intake also holds the **intake recurrence cluster** for the fast-lane decision (
 Bootstrap also produces the CAPABILITY MAP before Scout: available capabilities
 inventoried, matched to stages, and gaps recorded. For each CRITICAL-EVIDENCE-PATH
 capability, include one ACCESS STATUS line:
-- `status`: `confirmed` | `unconfirmed-nondiagnostic(self-misuse | wrong-target | auth-cold-start)` | `blocked(hard-absent | denied-after-valid-auth)`
+- `status`: `confirmed` | `unconfirmed-nondiagnostic(self-misuse | wrong-target | auth-cold-start | probe-defect)` | `blocked(hard-absent | denied-after-valid-auth)`
 - fields: `canonical_source_read` (help/metadata/error-guidance source), `corrected_invocation_attempted` (yes/no + generic description), `target_dependency: none | guessed | provided | discovered`, `last_error` (short verbatim); for `blocked` only, `human_command` (one concrete command a human/specialist should run).
-- Wrong-target, self-misuse, and auth/cold-start failures are non-diagnostic for availability: record `unconfirmed-nondiagnostic`, not `confirmed` or `blocked`. Non-critical capabilities default to `unconfirmed / not-probed` and need no access status.
+- Wrong-target, self-misuse, and auth/cold-start failures are non-diagnostic for availability: record `unconfirmed-nondiagnostic`, not `confirmed` or `blocked`. An expected-output control probe (help/version/health/list/schema/status) that exits 0 with EMPTY stdout/stderr is `unconfirmed-nondiagnostic(probe-defect)` — a silent no-op, never `confirmed`, `blocked`, `reached`, or `reached_empty`; record `corrected_invocation_attempted` and the alternate-invocation next step for a specialist. Non-critical capabilities default to `unconfirmed / not-probed` and need no access status.
 Intake captures the literal trigger and measured/impacted failure target; it does not
 hypothesize causes.
 

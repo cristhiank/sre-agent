@@ -216,6 +216,8 @@ A capability appearing absent inside a `reasoning-only`/restricted worker is non
 
 Read the capability's own help, metadata, or error guidance first. Confirm through its canonical invocation, starting with the cheapest capability-level health/list/schema/status check that does not depend on a guessed incident-specific target; do not first-probe by firing a guessed incident-specific query.
 
+If that control probe exits 0 with EMPTY stdout/stderr, it is a silent no-op, not a confirmation: record `unconfirmed-nondiagnostic(probe-defect)` (never `confirmed` or `blocked`), retry once via an alternate host-supported invocation (a real absolute path rather than a wrapper/symlink, or a documented alternate entry point), and carry the alternate-invocation next step for a specialist.
+
 Record `blocked` only when ACCESS STATUS cites all four: canonical invocation attempted; auth/cold-start handled or inapplicable; no dependency on a guessed incident-specific target (target-independent check or discovered/provided target); terminal missing-command or denied-after-valid-auth error.
 
 After a usage/parse, target/resource resolution, or auth/init failure, make at least one corrected re-probe before any block. The correction removes the original defect and must not introduce another guessed target; if no target is known or discovered, record `unconfirmed-nondiagnostic(wrong-target)`, never `blocked`. Cap corrected attempts at two.

@@ -113,6 +113,13 @@ Correct: resolve `effective_class = max(default_class, model_demand→class, coo
 The coordinator tracks open questions and gaps there in whatever compact form is clear. When a known-issue acceleration path is taken or considered (per the Grader's known-issue decision rule in [grading-rubric.md](grading-rubric.md)), `run.md` records a compact line: the leading candidate's source asset/capability, the dispositive `OBS###` id(s) that closed its discriminator, and the settle-or-fail-open reason — so the acceleration is auditable and a wrong shortcut is visible.
 A CAPABILITY MAP lives in `run.md` or `1_intake/capability-map.md`; per capability,
 record capability, match, stage, and action-or-gap. Keep it small.
+Mark a capability confirmed usable only from a target-independent liveness/control
+probe expected to emit output (help/version/health/list/schema/status) that returned
+nonempty, well-formed output — not a bare exit 0: such a probe exiting 0 with EMPTY
+stdout/stderr is `unconfirmed-nondiagnostic(probe-defect)` / GAP with an
+alternate-invocation next step, never `available`; this does not turn a fit data
+query's legitimate zero-row result into a failed probe. See the probe-liveness floor
+in [investigation-invariants.md](investigation-invariants.md).
 Stable `OBS###` ids are the citation key. Once assigned, do not reuse or silently rewrite
 them; material claims in later stages cite those ids.
 
