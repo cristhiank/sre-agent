@@ -36,11 +36,12 @@ run-local as candidates — never overwriting curated service knowledge.
 - **already-known** — material prior knowledge this run reused, cited to its source (so reviewers see new vs known).
 - **follow-up** — an open thread for the next investigation (including any contradiction-with-verdict noticed
   here — recorded, never acted on).
-- **registry-entry-delta** — when this deep-lane run confirmed a NEW recurring known/benign disposition that
-  carries a falsifiable discriminator + bounds, propose an UN-APPLIED known-recurrence registry entry (schema in
-  [../fast-lane.md](../fast-lane.md): `match_predicate`, `sev_applicability`, `blast_radius_bound`,
-  `discriminator`, `disposition`, `provenance`). It is a suggestion only — written run-local, never self-applied;
-  human curation/promotion is what makes it intake-fast-lane-eligible.
+- **recurrence-ledger-delta** — when this deep-lane run confirmed a NEW recurring known/benign disposition that
+  carries a falsifiable discriminator + bounds, propose an UN-APPLIED identity-keyed recurrence-ledger entry
+  (schema in [../fast-lane.md](../fast-lane.md): `recurrence_identity` match fields, `sev_applicability`,
+  `scope_bound`, `discriminator`, `verdict`, `disposition`, `evidence_icms`, `provenance`). It is keyed by
+  recurrence identity, NOT by service path. It is a suggestion only — written run-local, never self-applied;
+  human/pipeline curation/promotion (the offline extraction pipeline) is what makes it intake-fast-lane-eligible.
 
 `status`: `verified` | `probable-unverified` | `single-incident-candidate`.  `confidence`: high | medium | low.
 

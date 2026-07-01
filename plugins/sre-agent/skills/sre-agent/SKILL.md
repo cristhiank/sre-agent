@@ -42,8 +42,8 @@ or hypothesis analysis inline in the main context. Dispatch that work; keep inli
 work to mechanical intake, status, merge, and handoff.
 
 Coordinator action taxonomy (local receipt before action): every coordinator tool
-call fits one allowed class: (a) intake/run-artifact read (including the curated
-known-recurrence registry read at intake), (b) dispatch a
+call fits one allowed class: (a) intake/run-artifact read (including the intake
+recurrence-cluster read for the fast-lane decision), (b) dispatch a
 subagent, (c) await/read a subagent's output, (d) update the run-state digest, (e)
 merge/adjudicate/synthesize cited observations, (f) assemble the handoff/Report,
 or (g) inventory capability metadata from host-provided handles, or (h)
@@ -54,8 +54,8 @@ code/log/source search or read, recursive filesystem search, or independent
 hypothesis evidence collection — is Specialist work: dispatch it instead of
 running it inline. Before any coordinator query/search/source-read, confirm it is
 one of (a)-(h); if not, dispatch. The intake fast-lane (§ Intake fast-lane) composes
-with these classes and adds no new inline-evidence license: its lane decision is a registry
-read (a), its confirming probe an awaited dispatch (b), and its disposition a
+with these classes and adds no new inline-evidence license: its lane decision reasons over
+the intake recurrence cluster (a), its confirming probe an awaited dispatch (b), and its disposition a
 handoff/Report (f) routed through the existing poster — the probe collects the
 confirming evidence, never the coordinator.
 
@@ -93,7 +93,7 @@ terminates report-only with an `early_exit` note in `run.md` and dispatches noth
 (2) the coordinator's intake fast-lane decision (see § Intake fast-lane), which substitutes
 one awaited
 confirming probe + a disposition/Report for the Scout→Grader deep-lane on a confirmed
-curated-recurrence match, and still fails open to the full deep-lane (Scout, Specialists,
+recognized-recurrence match, and still fails open to the full deep-lane (Scout, Specialists,
 Grader, Report) on any probe disagreement or uncertainty.
 
 If the host genuinely lacks subagent support — or lacks any
@@ -355,31 +355,56 @@ findings plus named gaps rather than a long-running sweep.
    the incident's recurrence identity: the stable identifiers that would match sibling
    incidents when available — signal or error signature, affected operation/component,
    affected entity/resource/cohort, scope boundary, and owning service/team. This is
-   identity capture for later correlation, not a hypothesis or a cause. Do not dispatch
+   identity capture for later correlation, not a hypothesis or a cause. Alongside the
+   incident record, this stage also holds the **intake recurrence cluster**: the
+   read-only incident-record/context capability's fetch INCLUDES a recurrence set (the
+   recurrence include) — the sibling incidents matched to this incident over a recent
+   window, each row carrying signature/title, owning team, `ClaimedRootCause`,
+   `ClaimedMitigation`, `IsNoise`, `Severity`, and `Status`. The coordinator holds those
+   sibling rows as orientation evidence (claims, not authority) for the FAST-LANE DECISION
+   below. If that capability or include is unavailable, the cluster is an explicit GAP —
+   the fast-lane cannot fire and the run takes the deep-lane (fail open). Do not dispatch
    Scout until the run exists, the CAPABILITY MAP is complete, the intent frame is set,
    AND intake is verified-or-fetched — staged items reconciled against the manifest and
    every redacted/gapped item either fetched or recorded as an explicit gap.
    **FAST-LANE DECISION (coordinator self-governs the lane at intake, with judgment).**
    With intake complete, before dispatching Scout, the coordinator reasons over the cheap
-   orientation it already holds — the captured recurrence identity plus the curated/promoted
-   known-recurrence registry the CAPABILITY MAP exposes as service knowledge (an
-   intake-artifact read, action class (a)). It treats those entries as curated orientation
-   evidence — claims, not authority, bounded by service/component/signature, the same status
-   and honesty floor as failure-knowledge grounding and Scout's known-issue consultation;
-   never run-local `7_knowledge` candidates or sibling run dirs (the same isolation rule as
-   Scout) — and judges whether this is a recognized, low-consequence recurrence worth a
-   bounded confirming probe rather than the full investigation. Steer to the fast-lane only
-   when the coordinator can affirm ALL of: the recurrence identity matches the declared
-   match-predicate of exactly ONE curated entry carrying a falsifiable discriminator + a
-   disposition template; Sev ∈ {3,4} and within the entry's `sev_applicability`; and the
-   incident's blast radius is within the entry's `blast_radius_bound`. When it does, take the
-   fast-lane (§ Intake fast-lane) and defer Scout. On no confident single match, an
-   ambiguous/multiple match, an out-of-bound Sev/blast-radius, a discriminator-less entry, or
-   any doubt, proceed to Scout exactly as below — the decision lives in the coordinator's
-   judgment and fails open to the deep-lane rather than guessing. Full contract:
+   orientation it already holds — the captured recurrence identity plus the intake recurrence
+   cluster (the read-only incident-history recurrence pass surfaces, at intake, the sibling
+   incidents matched to this incident's recurrence identity over a recent window, each
+   carrying its claimed root cause, claimed mitigation, noise flag, severity, and status; an
+   intake-artifact read, action class (a)). It treats the cluster rows as orientation
+   evidence — claims, not authority, the same honesty floor as failure-knowledge grounding
+   and Scout's known-issue consultation; never run-local `7_knowledge` candidates or sibling
+   run dirs (the same isolation rule as Scout). The job is to recognize whether this incident
+   is a member of a known recurrence FAMILY worth re-establishing with one bounded probe
+   rather than the full investigation, following SAMENESS → ARM → PROBE → RE-ESTABLISH (never
+   import): the cluster supplies sameness, a discriminator ARMS a probe, and the probe
+   RE-ESTABLISHES the disposition on live evidence — the prior is never imported. Steer to the
+   fast-lane only when the coordinator can affirm ALL of: (1) a CONVERGENT cluster — multiple
+   siblings sharing the recurrence identity (signature + ≥1 more identity axis; title/team
+   alone is insufficient); (2) the cluster's claims CONVERGE on one recognizable disposition,
+   resting on at least one INDEPENDENT signal — a human-entered `ClaimedRootCause`/
+   `ClaimedMitigation`, the `IsNoise` flag, or a prior DEEP-LANE verdict — and NOT solely on
+   the agent's own prior fast-lane/auto-posts (those do not count as independent corroboration;
+   if they are the only convergence → ESCALATE); (3) a falsifiable discriminator is available
+   — from a Tier-1 promoted ledger entry matched on EVERY populated recurrence-identity axis
+   (`discriminator_source: ledger`) OR derivable from the convergent claims
+   (`discriminator_source: derived`) — with `expected_favored` vs `expected_rival` on a named
+   live `evidence_source`; and (4) Sev ∈ {3,4} with scope consistent with the family bound.
+   When it does, take the fast-lane (§ Intake fast-lane) and defer Scout — EXCEPT on the
+   self-governed re-validation cadence: on a sampling basis (roughly every Nth family member,
+   or when the family's last deep-lane re-validation is stale), the coordinator deliberately
+   routes a recognized recurrence to the FULL deep-lane even when the probe would confirm, so
+   silent drift surfaces. On no convergent cluster, divergent claims, no falsifiable
+   discriminator, an out-of-bound Sev/scope, or any doubt, proceed to Scout exactly as below —
+   the decision lives in the coordinator's judgment and fails open to the deep-lane rather than
+   guessing. The decision is a relationship
+   recognition for routing only; it never sets `canonical`/`duplicate-of`. Full contract:
    `references/fast-lane.md`. Expected output: run pointer, captured claims, discussion-thread summary, intent
-   frame, recurrence identity, the capability map, and the fast-lane decision
-   (`fast-lane: admitted <registry-id>` | `deep-lane: <reason>`).
+   frame, recurrence identity, the intake recurrence cluster (sibling rows, or an explicit
+   unavailable/gap note), the capability map, and the fast-lane decision
+   (`fast-lane: admitted (tier=<1|2>)` | `deep-lane: <reason>`).
 2. **Scout (`2_scout`, sole analytic orienter).** Dispatch Scout to read the captured
    claims, do light bounded orientation, and produce a neutral map. Orientation includes
    a bounded recurrence check: using an available read-only incident-history capability,
@@ -410,8 +435,8 @@ findings plus named gaps rather than a long-running sweep.
    wave the moment any fail-open trigger fires or the candidate is refuted/unverified (see the
    known-issue acceleration settle rule in `references/grading-rubric.md`). Absent such a
    candidate, dispatch the normal one-Specialist-per-hypothesis wave. (Ordering: the
-   coordinator may steer to the intake fast-lane FIRST at intake on a recognized curated
-   registry match, skipping Scout; known-issue-first is a deep-lane mechanism that applies
+   coordinator may steer to the intake fast-lane FIRST at intake on a recognized recurrence-family
+   match, skipping Scout; known-issue-first is a deep-lane mechanism that applies
    only when the fast-lane did not fire — they are complementary and non-conflicting.) Each
    fetches and analyzes its own observations through the
    evidence sources and capabilities you pass it, cites what it saw, and proposes
@@ -485,7 +510,7 @@ findings plus named gaps rather than a long-running sweep.
    observability/source gap, a misleading monitor/telemetry gotcha, a repeated manual-handoff gap, a verified
    mechanism absent from the service KB, or a deep-lane-confirmed NEW recurring known/benign disposition that
    carries a falsifiable discriminator — for which the Knowledge Curator proposes an UN-APPLIED
-   known-recurrence registry-entry delta (curated/promoted later by a human, never self-applied; schema in
+   identity-keyed recurrence-ledger delta (curated/promoted later by a human/pipeline, never self-applied; schema in
    `references/fast-lane.md`). If none, record `knowledge_capture: skipped — no durable novelty/value`
    and stop — never create a candidate just to fill the stage. The pass is non-blocking and never changes the
    verdict, the report, or the post; it writes run-local candidate knowledge only (no mutation of curated service
@@ -498,51 +523,72 @@ findings plus named gaps rather than a long-running sweep.
 
 On steering to the fast-lane at intake (§`1_intake`), the coordinator substitutes a bounded
 confirm-and-dispose path for the Scout→Grader deep-lane — self-governing the lane with
-judgment, not firing a mechanical rule. It NEVER lowers a verdict bar and fails open to the
-deep-lane on any uncertainty. Full contract — the lane decision, probe budget, escalation
-triggers, disposition/auto-post rules, recall safeguards, telemetry, and the
-known-recurrence registry schema — in `references/fast-lane.md`.
+judgment, not firing a mechanical rule. It follows SAMENESS → ARM → PROBE → RE-ESTABLISH
+(never import): the intake recurrence cluster supplies sameness, a discriminator ARMS a probe,
+and the probe RE-ESTABLISHES the disposition on THIS incident's live evidence — the prior is
+never imported. It NEVER lowers a verdict bar and fails open to the deep-lane on any
+uncertainty. Full contract — the backbone, tier model, lane decision, probe budget,
+escalation triggers, disposition-by-tier, recall safeguards, telemetry, and the identity-keyed
+recurrence ledger — in `references/fast-lane.md`.
 
-- **DECISION** (coordinator self-governs, an intake read of class (a)): the
-  recurrence-identity-vs-registry reasoning above. Steer to the fast-lane only on a
-  confident single in-bound recognized match; otherwise ESCALATE.
+- **DECISION** (coordinator self-governs, an intake read of class (a)): the recurrence-cluster
+  reasoning above. Steer to the fast-lane only on ALL of — a convergent cluster (signature +
+  ≥1 more identity axis across multiple siblings; title/team alone is insufficient), the
+  cluster's claims converging on one disposition, a falsifiable discriminator available, and
+  Sev ∈ {3,4} with scope in the family bound; otherwise ESCALATE. Sameness always comes from
+  the cluster; the discriminator comes from a **Tier 1** promoted identity-keyed ledger entry
+  (`discriminator_source: ledger`) or, absent one, is **Tier 2** derived from the convergent
+  claims (`discriminator_source: derived`).
 - **CONFIRMING PROBE** (one bounded `full-evidence` dispatch, economical/mid class, an
-  awaited class (b) dispatch): `capabilities_to_invoke` = the matched entry's named
-  `evidence_source`. It checks ONLY the entry's `discriminator` predicate against THIS
-  incident's live evidence, with the same mechanism-discriminator gate rigor as the
-  deep-lane scoped to that one predicate — states the entry's expected favored vs rival
-  BEFORE reading, then records the observed value, gate status, and a cited OBS. Budget
-  ≤ ~2 targeted reads / a tight time cap; never a broad sweep. Within that budget it also
-  corroborates the incident's actual scope from live evidence and confirms it falls within
-  the entry's `blast_radius_bound` (the intake-captured scope is pre-Scout and not trusted
-  alone). Returns CONFIRMED (live evidence matches the known signature AND scope is in
-  bound) or DISAGREES/inconclusive/blocked (including live scope wider than the bound).
-- **DISPOSE + AUTO-POST** (on CONFIRMED only, class (f) handoff/Report + poster): compose
-  the disposition from the entry's `disposition` template — cause + mechanism, "known
-  recurrence — registry ref `<id>`", the probe's confirming OBS as the cited evidence
-  (honesty floor: cite the live observation, never "registry says so"), and the engineer
-  next-step. The fast-lane disposition does NOT classify `canonical`/`duplicate-of` — that
-  linkage is exclusively a Scout(sibling discovery)+Grader(clock-ordering) product and is
-  NEVER coordinator-inferred here; a sibling/duplicate linkage is carried only when it is
-  already host-supplied (incident-system duplicate linkage in the intake bundle, or the
-  entry's `provenance`), rendered labeled "incident-system-linked". Emit an observable
-  fast-lane verdict and a `6_report` so the run is auditable, rendered as the named
-  `Known-recurrence` poster disposition (`references/subagents/poster.md` § Verdict policy),
-  and apply the existing Poster post-mode check — contribute as a collaborator, not a
-  standalone note, when the discussion thread already carries human root cause / mitigation
-  / progress. Post via the existing poster path under the SAME authorization +
-  idempotency/audit rules as deep-lane posting (live posting still requires brief
-  authorization AND a non-gated capability; otherwise report-only). Record a FAST-LANE
-  receipt + the `model_tiering` Tier Record in `run.md`.
-- **ESCALATE → DEEP-LANE** (on DISAGREES / inconclusive / blocked / out-of-bound / live
-  scope wider than the entry's `blast_radius_bound` / ambiguous-match / capability-unavailable):
-  run the normal deep-lane (Scout → Specialists → Grader → Report) with NO verdict bar
-  lowered. The lane decision + probe OBS carry
+  awaited class (b) dispatch): `capabilities_to_invoke` = the discriminator's named
+  `evidence_source`. It checks ONLY the `discriminator` predicate against THIS incident's live
+  evidence, with the same mechanism-discriminator gate rigor as the deep-lane scoped to that
+  one predicate — states the expected favored vs rival BEFORE reading, then records the
+  observed value, gate status, and a cited OBS. Budget ≤ ~2 targeted reads / a tight time cap;
+  never a broad sweep. Within that budget it also corroborates the incident's actual scope
+  from live evidence and confirms it falls within the family bound (the intake-captured scope
+  is pre-Scout and not trusted alone). Returns CONFIRMED (live evidence matches the known
+  `expected_favored` signature AND scope is in bound) or DISAGREES/inconclusive/blocked
+  (including a value matching neither pre-registered value, or live scope wider than the bound).
+- **DISPOSE (by tier, re-established not imported)** (on CONFIRMED only, class (f)
+  handoff/Report + poster): compose the disposition — cause + mechanism, "known recurrence —
+  ledger ref `<id>`" (Tier 1) or a recognized-recurrence draft (Tier 2), the probe's
+  confirming OBS as the cited evidence (honesty floor: cite the live observation, never "IcM
+  says so"), and the engineer next-step.
+  - **Tier 1 → AUTO-POST** the named `Known-recurrence` poster disposition
+    (`references/subagents/poster.md` § Verdict policy) via the existing poster path under the
+    SAME authorization + idempotency/audit rules as deep-lane posting (live posting still
+    requires brief authorization AND a non-gated capability; otherwise report-only).
+  - **Tier 2 → REPORT-ONLY / DRAFT finalize** only — NEVER a live incident-system mutation
+    on a self-derived discriminator, neither standalone NOR collaborator/additive, regardless
+    of authorization or capability mode. The disposition is composed and written to the
+    `6_report` report-only finalize (the concise draft + evidence kit) as the
+    `report-only (tier-2 self-derived; human confirmation required)` outcome
+    (`references/subagents/poster.md` § Live incident-system posting, `references/artifact-contracts.md`
+    §`6_report/`) and performs NO incident-system write. This conservatism is locked.
+  The fast-lane disposition does NOT classify `canonical`/`duplicate-of` — that linkage is
+  exclusively a Scout(sibling discovery)+Grader(clock-ordering) product and is NEVER
+  coordinator-inferred here; a sibling/duplicate linkage is carried only when already
+  host-supplied (incident-system duplicate linkage in the intake bundle, or the ledger entry's
+  `provenance`), rendered labeled "incident-system-linked". Apply the existing Poster post-mode
+  check on the Tier-1 LIVE post — contribute as a collaborator, not a standalone note, when the
+  discussion thread already carries human root cause / mitigation / progress; the Tier-2
+  finalize is report-only regardless (its draft still credits any in-flight human work, but it
+  never mutates the incident). Emit an observable fast-lane
+  verdict and a `6_report` so the run is auditable. Record a FAST-LANE receipt — including
+  `tier:` (1|2) and `discriminator_source:` (ledger|derived) — plus the `model_tiering` Tier
+  Record in `run.md`.
+- **ESCALATE → DEEP-LANE** (on no convergent cluster / divergent claims / no falsifiable
+  discriminator / DISAGREES / inconclusive / blocked / out-of-bound / live scope wider than the
+  family bound / capability-unavailable): run the normal deep-lane (Scout → Specialists →
+  Grader → Report) with NO verdict bar lowered. The cluster recognition + probe OBS carry
   forward as intake context (the probe becomes a pre-registered discriminator check); never
   dispose on doubt.
-- **Telemetry:** record per fast-lane run `registry_id`, probe outcome (`confirmed` |
-  `escalated-<reason>`), and disposition. An entry whose probe escalates and the deep-lane
-  then finds a different/new cause is flagged `registry-drift → re-curate`.
+- **Telemetry:** record per fast-lane run `tier`, `discriminator_source`, the family identity,
+  probe outcome (`confirmed` | `escalated-<reason>`), disposition, and `Sev`. A discriminator whose
+  probe escalates and the deep-lane then finds a different/new cause emits the
+  `recurrence-drift → re-curate` telemetry flag; the offline extraction/promotion pipeline
+  consumes that flag to hold or demote the ledger entry (the agent never writes it).
 
 ## Iteration mode (new information)
 
