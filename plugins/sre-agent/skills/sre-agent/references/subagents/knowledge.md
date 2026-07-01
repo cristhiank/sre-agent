@@ -36,12 +36,18 @@ run-local as candidates — never overwriting curated service knowledge.
 - **already-known** — material prior knowledge this run reused, cited to its source (so reviewers see new vs known).
 - **follow-up** — an open thread for the next investigation (including any contradiction-with-verdict noticed
   here — recorded, never acted on).
-- **recurrence-ledger-delta** — when this deep-lane run confirmed a NEW recurring known/benign disposition that
-  carries a falsifiable discriminator + bounds, propose an UN-APPLIED identity-keyed recurrence-ledger entry
-  (schema in [../fast-lane.md](../fast-lane.md): `recurrence_identity` match fields, `sev_applicability`,
-  `scope_bound`, `discriminator`, `verdict`, `disposition`, `evidence_icms`, `provenance`). It is keyed by
-  recurrence identity, NOT by service path. It is a suggestion only — written run-local, never self-applied;
-  human/pipeline curation/promotion (the offline extraction pipeline) is what makes it intake-fast-lane-eligible.
+- **recurrence-known-issue-candidate** — when this deep-lane run confirmed a recurring known/benign disposition that
+  carries a falsifiable discriminator + bounds, propose an un-applied recurrence/known-issue knowledge candidate:
+  the recurrence-identity match fields (signal/error signature, affected component/operation, entity/cohort, scope
+  boundary, owning team), the falsifiable `discriminator` (`expected_favored` vs `expected_rival` on a named live
+  evidence source), the `verdict` (the recurring disposition), and `evidence_icms` (the incident ids that confirmed
+  it). It is keyed by recurrence identity, NOT by service path. It is a normal human-reviewed
+  knowledge candidate written run-local as a suggestion only, never self-applied; the intake
+  fast-lane's recognition of a recurrence family comes from the live IcM recurrence cluster at
+  intake, NOT from this candidate (there is no automated feed from it).
+  When a periodic re-validation deep-lane run DIVERGES from a family's assumed root cause, record
+  that as a `recurrence-drift` candidate on this item (the divergence + the two `evidence_icms`)
+  for human attention.
 
 `status`: `verified` | `probable-unverified` | `single-incident-candidate`.  `confidence`: high | medium | low.
 

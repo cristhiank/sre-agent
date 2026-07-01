@@ -51,16 +51,21 @@ Rendering:
 
 ## Live incident-system posting
 
-**Fast-lane tier precondition (checked FIRST, before the authorization/capability gate below).**
-A fast-lane confirm-and-dispose disposition is eligible for a live incident-system mutation ONLY
-when its receipt carries `discriminator_source: ledger` (a Tier-1 promoted-ledger discriminator).
-A disposition carrying `discriminator_source: derived` (Tier-2, a self-derived discriminator) is
-NEVER eligible for a live mutation — neither a standalone post NOR a collaborator/additive
-contribution — regardless of brief authorization or capability mode: it ALWAYS takes the
-report-only finalize path as `report-only (tier-2 self-derived; human confirmation required)`,
-composed into the `6_report` draft + evidence kit with NO incident-system write. Normal deep-lane
-verdicts and Tier-1 fast-lane dispositions proceed to the live-post gate below. `DRAFT` is not a
-separate live mode: it IS this report-only finalize path.
+**Fast-lane precondition (checked FIRST, before the authorization/capability gate below).**
+A fast-lane `Known-recurrence` disposition is eligible for a live incident-system mutation ONLY when
+its receipt carries BOTH `wave1_result: same` AND the wave-1 discriminator `gate: pass` (matched
+`expected_favored` AND refuted the rival) with a cited live confirming OBS — an internally
+consistent verified-duplicate receipt (see [../fast-lane.md](../fast-lane.md) and `SKILL.md`
+§ Intake fast-lane). These are two independent facts: the reconcile result AND the mechanism-
+discriminator gate status. If the receipt is internally inconsistent (`wave1_result: same` but the
+`gate` is not `pass`, or the gate is missing/unparseable) it is NOT eligible for a live post — treat
+it as report-only/escalate, never a live mutation. A SAME + gate-pass disposition is a VERIFIED
+duplicate / known recurrence: it posts LIVE as a **collaborator / additive duplicate-reference**
+("same as the known recurrence family, verified live"), NEVER as a standalone re-derived RCA, and
+NEVER sets `canonical`/`duplicate-of` beyond the recurrence-identity sibling relationship it
+verified. A fast-lane run that did NOT return SAME + gate-pass does not reach this poster: the
+coordinator escalates it to the deep-lane instead (never post a duplicate on doubt). Eligible SAME
+dispositions and normal deep-lane verdicts both proceed to the live-post gate below.
 
 When the dispatch brief authorizes live posting AND a live incident-posting capability is available
 that is NOT in a dry-run/report-only mode, the Poster composes the incident update and delegates the
@@ -71,9 +76,7 @@ skill, and do NOT emit `report-only (no posting capability)` when the brief prov
 and signals live mode. Live posting still requires explicit brief/user authorization; never infer live
 mode from capability discovery alone when the brief gave no authorization. Otherwise the run is
 report-only — state which, none is a gap: `report-only (not authorized)`, `report-only (posting
-capability dry-run gated)`, `report-only (no posting capability)`, or `report-only (tier-2
-self-derived; human confirmation required)` (a Tier-2 fast-lane disposition, ineligible for a live
-mutation per the tier precondition above). `report-only (no posting
+capability dry-run gated)`, or `report-only (no posting capability)`. `report-only (no posting
 capability)` is correct ONLY when the brief provides no usable capability handle.
 
 Compose the post body for the incident system format supported by the capability, in this order:
@@ -89,6 +92,16 @@ Compose the post body for the incident system format supported by the capability
    directories — a retry reuses the same ordinal, never a larger one; only an orchestrator-provided
    new-information packet advances the ordinal.
 3. The RCA/status body following **Post-body structure** below, bounded by the verdict policy below.
+4. **`family-validated` marker (DEEP-LANE recurrence-family posts only):** when a DEEP-LANE run
+   validated a recurrence family's root cause (a full Scout→Grader verdict on a member of a
+   recognized recurrence family, including a fast-lane escalation that ran the deep-lane), include a
+   machine-readable `family-validated` watermark line — a stable tag + the recurrence-identity + a
+   UTC timestamp — so the next sibling's intake recurrence-cluster / thread read surfaces it and the
+   coordinator can compute the fast-lane drift-backstop floors from IcM state alone (no ledger, no
+   sibling run-dir reads; see [../fast-lane.md](../fast-lane.md) § Recall safeguards #7). A fast-lane
+   duplicate-reference post NEVER writes this marker. When the deep-lane result DIVERGED from the
+   family's assumed root cause, the marker carries the corrected disposition so future intake reads
+   see it.
 
 ### Post-body structure
 
@@ -105,7 +118,7 @@ order is:
    - `Confirmed` / `Likely-rooted` / `Proximate-only`: **Impact** · **Fix**
    - `Inconclusive-blocked`: **Impact** · **Blocked** · **Do next**
    - `Refuted` / closure: **Checked** · **Finding** · **Residual risk**
-   - `Known-recurrence` (intake fast-lane confirm-and-dispose disposition; not a Grader verdict; live only when `discriminator_source: ledger` (Tier 1) — a `derived` Tier-2 disposition renders to the report-only finalize, never a live post): **Checked** · **Known recurrence** · **Residual risk**
+   - `Known-recurrence` (intake fast-lane wave-1 duplicate-verification disposition; not a Grader verdict; live-post-eligible when the wave-1 result is SAME with a cited live confirming OBS, posted as a collaborator/additive duplicate-reference): **Checked** · **Known recurrence** · **Residual risk**
 4. **Failure path** — the indented causal tree is the single mechanism representation. Put evidence links
    on the nodes they prove and mark the terminal node plainly. Skip only when no chain exists.
 5. **Manual Investigation Kit** — promoted and visible for `Inconclusive-blocked` or any manual-handoff-capped
@@ -116,7 +129,7 @@ Field meanings: Impact = blast radius as **category + count, never a verbatim cu
 GUID/IP/resource path**; Fix = owner-routed single action plus hyperlinked related incident ids when known;
 Blocked = decisive missing evidence or inaccessible discriminator; Do next = the human-executable next
 check or owner handoff; Checked/Finding/Residual risk for closures. Known recurrence = the
-recurrence ledger ref `<id>` plus the live confirming observation (the discriminator result for THIS incident); never a
+verified duplicate-of-the-recurrence-family statement plus the live confirming observation (the wave-1 discriminator result for THIS incident); never a
 `duplicate-of`/`canonical` claim.
 
 **Closed skip-rule (no latitude):** keep every section in this order with its canonical label; do NOT
@@ -230,22 +243,19 @@ Correct: render the kit as a titled multi-step section, state Impact / Blocked /
 - `Refuted` / clean no-failure closure: post a short, clearly-labeled closure — what was checked, why
   the suspected cause is disproven or no real failure was found, and any residual risk. Never an
   unqualified all-clear while a material gap remains.
-- `Known-recurrence` (intake fast-lane confirm-and-dispose disposition; NO Grader verdict): a short,
-  clearly-labeled **Known / ongoing issue note** — the recurrence ledger ref, the live confirming
-  observation (the discriminator result for THIS incident), and the engineer next-step. Its post path is
-  TIER-GATED by the disposition's `discriminator_source` (see § Live incident-system posting, tier
-  precondition):
-  - `discriminator_source: ledger` (**Tier 1**) → may be posted LIVE under the existing authorization +
-    idempotency/audit gate, standalone or (per Post mode) as a collaborator contribution.
-  - `discriminator_source: derived` (**Tier 2**) → NEVER a live mutation; render it into the report-only
-    finalize as `report-only (tier-2 self-derived; human confirmation required)` — a recognized-recurrence
-    DRAFT for human confirmation, no incident-system write, regardless of authorization or capability mode.
+- `Known-recurrence` (intake fast-lane wave-1 duplicate-verification disposition; NO Grader verdict): a short,
+  clearly-labeled **Known / ongoing issue note** — the verified duplicate-of-the-recurrence-family statement, the live confirming
+  observation (the wave-1 discriminator result for THIS incident), and the engineer next-step. It reaches this poster ONLY
+  when the wave-1 duplicate verification returned SAME with a cited live OBS (see § Live incident-system posting,
+  fast-lane precondition); a run that did not return SAME is escalated to the deep-lane, not posted here:
+  - it may be posted LIVE under the existing authorization + idempotency/audit gate, as a **collaborator / additive
+    duplicate-reference** — "same as the known recurrence family, verified live" — NEVER a standalone re-derived RCA.
   It is a known-issue disposition, NOT a Grader verdict band, and it NEVER asserts a `duplicate-of`/`canonical`
-  classification (that lane is Scout sibling discovery + Grader clock-ordering only — the one-predicate probe
-  confirms only the discriminator). Any sibling/duplicate linkage may come ONLY from incident-system-supplied
-  provenance already in the intake bundle, or the ledger entry's `provenance`, rendered labeled
-  `incident-system-linked` — never coordinator-inferred. Post mode (below) still governs the Tier-1 live post:
-  when the thread already carries human root cause/mitigation/progress, contribute as a collaborator, not a
+  classification (that lane is Scout sibling discovery + Grader clock-ordering only — the wave-1 check verified only
+  the recurrence-identity sibling relationship on live evidence, never a sibling's verdict). Any sibling/duplicate
+  linkage may come ONLY from incident-system-supplied provenance already in the intake bundle, rendered labeled
+  `incident-system-linked` — never coordinator-inferred. Post mode (below) still governs the live post:
+  when the thread already carries human root cause/mitigation/progress, contribute additively/respectfully as a collaborator, not a
   standalone note.
 - Suppress only when, on an iteration, nothing material changed since the last post. (The coordinator may already have ended the iteration early per `../followup.md` § Early-exit gate; this is the late post-suppression backstop.)
 
