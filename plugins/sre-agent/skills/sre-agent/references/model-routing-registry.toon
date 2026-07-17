@@ -1,0 +1,21 @@
+# First live compatible entry wins within a category unless a role preference applies.
+economy:
+  - gpt-5.4-mini
+balanced:
+  - gpt-5.6-luna
+advanced:
+  - gpt-5.6-terra
+  - claude-sonnet-5
+frontier:
+  - gpt-5.6-sol
+  - claude-opus-4.8
+role_preferences:
+  report_synthesis:
+    role: Report synthesis
+    target_tier: frontier
+    preferred:
+      - gpt-5.6-sol
+    fallback: category-order
+prohibited:
+  - gemini-3.1-pro-preview
+  - gemini-3.5-flash
