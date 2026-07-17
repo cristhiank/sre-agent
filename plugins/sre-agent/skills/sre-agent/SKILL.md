@@ -55,8 +55,8 @@ an evidence-calibrated verdict.
   `references/operational-discipline.md`. It adds no coordinator evidence-probe
   license, round, overflow batch, or recursion.
 - Initialize and enforce the canonical **Run pursuit governor** in
-  `references/operational-discipline.md`: one post-initial evidence batch, protected
-  Report tail, and honest `open-budgeted` deadline salvage.
+  `references/operational-discipline.md`: one post-initial evidence batch, max-five
+  fanout per wave, bounded probes/reads/output, and honest structural-cap gaps.
 - Before final Grader settlement, apply the canonical **Time-dependent held-branch
   closure** contract in `references/grading-rubric.md`: dispatch the Grader's one
   bounded freshness obligation when it fits, or retain the predicate explicitly open.
@@ -68,7 +68,7 @@ an evidence-calibrated verdict.
 material progress update helps the user, use at most two plain-language sentences:
 what changed and why it matters, then what happens next. Never relay a worker handoff
 verbatim or expose internal verdict/status tokens, gate names, `OBS###` ids, model
-routing, budget receipts, or stage/artifact paths unless the user asks for diagnostics
+routing, limit receipts, or stage/artifact paths unless the user asks for diagnostics
 or the detail changes their action. Translate necessary limits into on-call language.
 
 **Output and stop.** `references/artifact-contracts.md` is canonical for artifacts and
@@ -76,7 +76,8 @@ the adaptive report shape. The final local response uses at most three short sen
 the plain-language outcome, the one fact that proves it, and the owner-routed next
 action. When capped or blocked, include the cap reason and lift condition in plain
 language; then give the report pointer. Stop only at a supported terminal or an honest
-cap/block, exhausted pursuit budget, and only when no required awaited work remains;
+cap/block after the applicable structural limits are exhausted, and only when no
+required awaited work remains;
 otherwise record an explicit abort/degraded terminal. A whole-verdict reachability
 cap is unsupported while a decisive worker-scoped provisional access/probe failure
 lacks a phase-current canonical control recheck from the coordinator's full-evidence
@@ -118,12 +119,12 @@ confirming evidence, never the coordinator.
 Synthesis stays owned by the coordinator: it may compare Specialist claims, build
 the cited timeline, spot gaps/conflicts, dispatch targeted follow-up, and do
 bounded validation that claim support actually exists. That is synthesis, not
-primary collection. The direct evidence-probe budget is 0 by default. Use at most
+primary collection. The direct evidence-probe cap is 0 by default. Use at most
 2 direct probes per run, total, only to unblock dispatch routing or adjudicate a
 Specialist conflict whose resolution changes the verdict/severity; each probe
 records one line in `run.md`: purpose · why dispatch is invalid/too-slow ·
-source · how the result changes routing/verdict · remaining probe budget. Class
-(h) target-independent access-confirmation is outside this evidence-probe budget.
+source · how the result changes routing/verdict · remaining probe allowance. Class
+(h) target-independent access-confirmation is outside this evidence-probe cap.
 Do not spend probes for corroboration, confidence, or provenance; assign those.
 
 Maintain a compact RUN-STATE DIGEST in `run.md`, initialized before Scout and
@@ -138,14 +139,16 @@ Mandatory dispatch points:
   which defers Scout and fails open to it on any uncertainty.
 - At least one Specialist is dispatched per material hypothesis area from Scout, or
   an explicit gap is recorded when no matching capability, host support, or reserved
-  max-five wave slot exists. Capacity overflow stays activated/open-budgeted with its
+  max-five wave slot exists. Capacity overflow stays activated/open-answerable with
+  reason `fanout-cap` and its
   next discriminator; it is never silently suppressed.
 - Grader synthesis is always dispatched after the Specialist observation merge. After
   the optional single post-synthesis batch (or immediately when none is needed), dispatch
   the same Grader role once in bounded-consequence-audit mode; this narrow audit replaces
-  a broad second re-grade. The only exception is a canonical terminal retirement of
-  synthesis: take `deadline_degraded.mode=no-synthesis` and do not fabricate an audit.
-  A retired audit takes `mode=no-audit`.
+  a broad second re-grade. If synthesis has no valid artifact after a terminal
+  timeout/cancellation/failure or artifact validation, write canonical
+  `mandatory_stage_integrity` for synthesis and do not fabricate an audit. Apply the
+  same integrity path when the audit artifact is missing or invalid.
 - Before dispatching the Grader, pass the run/investigation root already owned for
   this run to the incident-posting capability's evidence-menu function. The capability
   owns canonical query-run root normalization and menu enumeration; the coordinator
@@ -170,8 +173,9 @@ Mandatory dispatch points:
   upstream query-run lineage open. Never synthesize a row, result, URL, raw query, or
   prose substitute.
 - Report is dispatched after the final bounded consequence audit and any required
-  budget-fitting introduction-provenance pass, or through the canonical
-  deadline-degraded report-only successor when synthesis/audit cannot complete.
+  bounded introduction-provenance pass, or through the canonical
+  incomplete-mandatory-stage report-only successor when synthesis/audit has no valid
+  artifact.
 
 These mandatory dispatch points have two exceptions: (1) a recorded iteration early-exit
 (see § Iteration mode) — when an iteration carries no genuine new information, the run
@@ -196,28 +200,27 @@ In unattended/headless/single-shot runs (no human is present to re-prompt;
 the session ends when the coordinator's turn ends), the coordinator MUST
 drive the investigation to its terminal state — Report dispatched, then the
 knowledge-value triage completed (the Knowledge Curator is optional and is awaited
-in-turn only when the triage dispatches it within its reserved envelope), or an explicit
+in-turn when the triage dispatches it), or an explicit
 abort/degraded note in `run.md` — within
 one continuous working turn. It MUST NOT end or yield its turn while any required
 Scout, Specialist, the intake fast-lane wave-1 duplicate-verification specialist,
 Grader synthesis, bounded consequence audit, Report, or dispatched Knowledge Curator
 step is still incomplete. Report is the required investigation terminal; Knowledge
-capture is a post-Report optional stage and is skipped/deferred when its envelope does
-not fit.
+capture is a post-Report optional stage and is skipped when no novelty exists.
 
 A dispatch is settled ONLY after the coordinator writes the canonical Awaited Stage
 Attempt Receipt (`references/artifact-contracts.md`). Normal settlement requires a
-finished `complete|partial` output returned by cutoff and merged into run state. The sole
-deadline exception is a host-emitted terminal timeout/cancellation in
-`deadline_enforcement=host-bounded`; that terminal event retires the attempt
-`open-budgeted` and is not fire-and-forget. If a dispatch returns only an id, handle,
+finished valid `complete|partial` output merged into run state. A host-emitted
+timeout/cancellation or failure is an observed terminal fact with no durable delta; it
+does not authorize synthetic partial output. If a dispatch returns only an id, handle,
 promise, or a `started/running` status, it is NOT settled, and the coordinator's very
 next action MUST be to await/poll/collect that result in the same turn. A cooperative
 worker cannot be synthetically retired while it is still running. Stating "waiting for
 results" in the response is not waiting - it ends the turn and orphans the work.
-Apply the canonical deadline-degraded successor rules when a mandatory Grader synthesis
-or audit is retired, or when reasoning-only synthesis/audit/Report returns late. Those
-rules preserve a local report but prohibit live posting.
+Apply the canonical `mandatory_stage_integrity` successor when mandatory Grader
+synthesis or audit has no valid artifact. It preserves a bounded local report but
+prohibits live posting. A finished valid synthesis, audit, or Report remains admissible
+regardless of elapsed runtime.
 
 Therefore, in unattended runs, fire-and-forget / background / detached
 dispatch is FORBIDDEN for the required pipeline stages (Scout, Specialist,
@@ -236,7 +239,8 @@ Do NOT background/detach the wave (that orphans work and can end the session
 early), and do NOT dribble independent dispatches out one-at-a-time across
 separate turns. Honor the host concurrency limit (max 5 concurrent). The initial
 Specialist wave and the post-synthesis evidence batch never chunk: they dispatch at most
-five and record overflow `open-budgeted`; no generic overflow-batch allowance exists.
+five and record overflow `open-answerable` with reason `fanout-cap`; no generic
+overflow-batch allowance exists.
 Serialize two dispatches only on a
 genuine data dependency (one's output is a required input to the other) — for
 example, run a common prerequisite pass first when several downstream
@@ -255,15 +259,10 @@ preparing the merge/contradiction matrix; do not start new dependent
 investigations during a wait, because their inputs may be invalidated by the
 pending batch.
 
-Bound the wait so "never yield" cannot become "hang forever": keep the whole run within
-the host/lease time budget. In host-bounded mode, collect the runtime's terminal
-timeout/cancellation, write the attempt receipt, and retire the obligation
-`open-budgeted` before advancing. In cooperative mode, a prompt cannot stop or detach the
-worker: await its return, record the overrun, embargo a pre-terminal result returned
-after cutoff when it is evidence-producing, and then settle the receipt. Late
-reasoning-only synthesis/audit/Report follows the deadline-degraded
-`merged-late-terminal` path. Never advance while the attempt is still running, leave a
-required subagent pending, or claim a hard deadline the runtime did not enforce.
+Await each dispatch until the host emits a terminal event. Record host timeout,
+cancellation, or failure exactly as observed; the prompt does not create or enforce a
+cutoff. Never advance while the attempt is still running, leave a required
+subagent pending, or claim cancellation the runtime did not emit.
 
 Interactive, human-driven sessions of this skill MAY use background dispatch,
 but only with an explicit human handoff/checkpoint; the single-turn awaited
@@ -339,7 +338,7 @@ Do not mark a description-matching capability gap/skip from an unverified enviro
 Availability is confirmed by invoking it and reading its self-report, not by guessing inputs exist; coordinator confirmation uses class (h) when it is target-independent. Assumed-unavailable-from-environment-guess is non-diagnostic (see Access confirmation).
 If the description matches an obligation, use it; otherwise it is irrelevant by description.
 
-Keep it eager-but-budgeted: inventory ALL available capability metadata, but only
+Keep it eager-but-selective: inventory ALL available capability metadata, but only
 load or dispatch capabilities matching an immediate stage obligation, a
 Scout-discovered discriminator, or a Grader follow-up obligation. Do not load
 everything.
@@ -446,8 +445,7 @@ Each dispatch declares three independent dimensions:
   `high-consequence-state` → `frontier/high`.
   Scout never chooses the exact model or final tier.
   Grader uses `max` only for unresolved specialist conflict or a top-consequence
-  cross-plane/incident-state claim when the max-effort envelope fits; otherwise it uses
-  `high`.
+  cross-plane/incident-state claim; otherwise it uses `high`.
   Consequence audit remains `advanced/high`. Report uses its registry-scoped
   `frontier/high` role preference and category-order fallback; the Grader owns the
   causal verdict, the audit constrains claim integrity without originating a stronger
@@ -475,9 +473,10 @@ Each dispatch declares three independent dimensions:
   compaction. This is independent of the model-class escalation above — large context on
   a lower capability tier is NOT a model escalation; record a separate context reason.
   Use the standard window only with an explicit bounded-input reason; when the host
-  exposes no override for an over-budget heavy reader, bound or stage the worker's reads
-  (or record a visible context-capability gap) rather than silently dispatching over
-  budget. Record the chosen window tier in the `model_tiering` receipt.
+  exposes no override for a reader that exceeds the standard context window, bound or
+  stage the worker's reads (or record a visible context-capability gap) rather than
+  silently overflowing that window. Record the chosen window tier in the
+  `model_tiering` receipt.
 - Worker toolset class: `full-evidence` = worker context inherits the session's
   evidence toolset; `reasoning-only` = restricted/fast worker for tasks that
   invoke NO evidence tools.
@@ -502,7 +501,7 @@ packet with what the coordinator already established — incident facts, candida
 known-issue/KB hits with pointers, and resolved cluster/db/join-key targets when
 known — so the worker verifies rather than rediscovers them. Pass compact facts
 plus pointers, not raw bulk context. The brief also names the exact single
-question, evidence budget, capability handles to use, and asks for partial
+question, evidence probe/read caps, capability handles to use, and asks for partial
 findings plus named gaps rather than a long-running sweep.
 
 Every subagent brief sets `console_return` to one plain-language sentence (about
@@ -513,12 +512,12 @@ the assigned artifacts.
 
 After run/capability/service-source resolution, resolve advisor mode exactly once:
 launch one read-only persistent conversational advisor when the host exposes a stable
-idle handle, point-to-point follow-up, state, and bounded wait; otherwise use a fresh
+idle handle, point-to-point follow-up, state, and awaited terminal collection; otherwise use a fresh
 stateless advisor for the same initial scan. Unknown handle support selects stateless;
 never skip both. Route either at `balanced/high`, `full-evidence`; the initial scan is
-non-blocking but its answer, abstention, or timeout disposition is consumed before
-Grader synthesis. The coordinator asks one question at a time and waits once, at most
-60 seconds; timeout retires the handle and late output is ignored. The read-only
+non-blocking but its answer, abstention, or host timeout/cancellation disposition is
+consumed before Grader synthesis. The coordinator asks one question at a time and
+collects once. A host-emitted timeout/cancellation retires the handle. The read-only
 advisor returns `asset_record`; the coordinator validates it, adds persistence/relay
 fields, and appends `advisor/assets.toon`. Before a reachability cap, ask exactly one
 follow-up when a fit probe fails or returns empty while an in-hand stable key or fit
@@ -538,10 +537,8 @@ an explicit advice blocker, never evidence that no relevant asset exists.
 
 ## Six-stage flow
 
-1. **Bootstrap / capture (`1_intake`, intent frame).** Note the `started_at` wall clock
-   before incident-identity resolution; when `run.md` is created, persist that original
-   timestamp rather than the write time. Reserve this stage's canonical `7m` envelope. Resolve the incident
-   identity, create the run, then capture the incident record AND its discussion thread
+1. **Bootstrap / capture (`1_intake`, intent frame).** Resolve the incident identity,
+   create the run, then capture the incident record AND its discussion thread
    (human comments, transfers, owner notes, prior RCA/mitigation, linked change/rollout
    notes) as claims and pointers — primary orientation evidence, still claims to
    corroborate, never authority. One path, present-or-absent: if a pre-staged intake
@@ -624,9 +621,6 @@ an explicit advice blocker, never evidence that no relevant asset exists.
    discussion-thread summary, intent frame, recurrence identity, the intake recurrence cluster
    (sibling rows, or an explicit unavailable/gap note), the capability map, and the fast-lane
    decision (`fast-lane: recognized` | `deep-lane: <reason>`).
-   Before entering the deep lane, require at least the canonical `58m` remaining;
-   otherwise record `incompatible-deep-lane-envelope` and return a causal-claim-free
-   budget blocker.
 2. **Scout (`2_scout`, sole analytic orienter).** Dispatch Scout to read the captured
    claims, do light bounded orientation, and produce a neutral map. Orientation includes
    a bounded recurrence check: using an available read-only incident-history capability,
@@ -658,7 +652,7 @@ an explicit advice blocker, never evidence that no relevant asset exists.
 3. **Specialists (`3_evidence`, `4_specialists`).** Dispatch one Specialist per
    material hypothesis area, and launch all independent specialists as a SINGLE
    awaited parallel-sync batch (see Execution model: awaited parallel-sync
-   batch; max 5 concurrent, batch if more; never background/detached, never
+   batch; max 5, record any overflow without chunking; never background/detached, never
    one-at-a-time across turns). Serialize a specialist only on a genuine input
    dependency. **Core-and-edge roster (deep-lane) — coverage-asserted, not fan-out-mandated.** A COVERAGE
    FLOOR of three standing hypothesis classes — a timeline/changepoint capability, a
@@ -682,18 +676,19 @@ an explicit advice blocker, never evidence that no relevant asset exists.
    may propose an edge only with a compact activation receipt:
    cited positive signal for that edge class; the unresolved discriminator; how its
    result could change verdict/owner/mitigation/operator action; a fitting capability;
-   and `budget_fit=yes` under the pursuit governor. The Grader adjudicates the receipt
+   a bounded read/probe/output plan; and an unowned slot in the single refinement wave.
+   The Grader adjudicates the receipt
    and, when it survives, places the edge obligation in the single post-synthesis batch.
    A broad-synchronous onset, code exclusion, or ownership handoff may rank an existing
    edge lead, but none creates one without a class-specific observed signal.
    Edge lenses are discovered by frontmatter (no registry). There is no cap on classes
-   CONSIDERED in this unbounded RCA space, but each reserved evidence wave executes at
+   CONSIDERED in this unbounded RCA space, but each evidence wave executes at
    most five independent workers. Rank activated classes by consequence to verdict,
    owner, mitigation, or operator action; dispatch the top five in one awaited parallel
    wave. Every overflow class remains `ACTIVATED`, is recorded as not dispatched with gap
-   reason `open-budgeted` plus its activation evidence and next discriminator, and is
+   reason `fanout-cap` plus its activation evidence and next discriminator, and is
    carried into Grader/Report. Never suppress or silently drop it, and never launch a
-   sequential overflow chunk into the next stage's reserved window.
+   sequential overflow chunk.
    **Ad-hoc hypothesis-class identity.** When no standing or edge skill owns a
    material hypothesis class and the coordinator spawns a bounded ad-hoc worker, normalize its
    name CONSERVATIVELY to a canonical hypothesis-class key (merge only on clear identity, never
@@ -732,18 +727,18 @@ an explicit advice blocker, never evidence that no relevant asset exists.
    observations into the shared record.
 4. **Grader + bounded refinement (`5_grader`).** After Specialists and observation merge,
    dispatch the Grader. It judges only: no fetching and no dispatch. A `Likely-rooted`/`Confirmed` verdict requires the mechanism-discriminator gate (see `references/grading-rubric.md`). The Grader also receives the scout's recurrence/sibling findings and discussion-thread summary, and applies the duplicate / verdict-determinism gate in `references/grading-rubric.md` (classify `canonical`/`duplicate-of`; siblings sharing the recurrence identity are judged by the same verdict gate). Because the Grader is reasoning-only and must not fetch, the coordinator pre-resolves the late/skeptic prior-method checks (from Scout's intake `full-evidence` read of the prior-method capability) and passes them INLINE in the Grader brief as untrusted prior-method CLAIMS — they arrive as brief content, never a Grader fetch, consistent with the reasoning-only / empty `capabilities_to_invoke` constraint. Before accepting any benign/artifact/known-noise disposition, the Grader MUST pressure-test it against those late/skeptic checks — applied as questions, never overriding live evidence, "none apply" valid — and record the `generalized-heuristic <id>: applied | misleading | not-applicable` curation breadcrumb for any consulted.
-   Grader synthesis settles by the pursuit governor's `synthesis_stop_at`. It either emits
+   Grader synthesis either emits
    no material refinement, or emits the complete ranked set of independent material
    obligations for ONE post-synthesis awaited batch. The coordinator dispatches at most
-   the five highest-consequence obligations in the reserved window and retains every
-   overflow obligation `open-answerable` with reason `open-budgeted`. The
+   the five highest-consequence material, reachable, non-duplicative obligations and
+   retains every overflow obligation `open-answerable` with reason `fanout-cap`. The
    independent residual-discovery obligation and any core-output edge obligation consume
    slots in this batch; neither creates another. Each worker receives one scoped
    discriminator, prior OBS reuse/freshness mode, and a stop condition, and returns only
    its delta as answered / invalid-premise / unanswerable with citations.
 
-   Dispatch selected attempts only when each fits the reserved window ending at
-   `evidence_stop_at`; if none fits, record `post_initial_batch=not-dispatched`. Merge
+   If no obligation survives the structural gates, record
+   `post_initial_batch=not-dispatched`. Merge
    admissible deltas once, then dispatch bounded-consequence-audit mode with the
    provisional ranking, claim-integrity rows, returned deltas, and cited observations.
    The audit independently detects and re-derives every triggered consequence-bearing
@@ -752,20 +747,20 @@ an explicit advice blocker, never evidence that no relevant asset exists.
    mitigation, or incident-state wording. It runs the semantic-role scan over every
    claim row, fetches nothing, emits no new obligation, and finalizes the ranking +
    claim-integrity dispositions. Any newly exposed
-   reachable gap is retained `open-answerable` with reason `open-budgeted`; it cannot
+   reachable gap is retained `open-answerable` with reason `wave-cap`; it cannot
    start a second batch. A final `Proximate-only` report is allowed with that gap visible.
-   If synthesis is terminally retired with no output, skip audit and take the canonical
-   `deadline_degraded.mode=no-synthesis` Report path instead; an audit retirement takes
-   `mode=no-audit`.
+   If synthesis has no valid artifact after a terminal host event or validation, skip
+   audit and take the canonical `mandatory_stage_integrity` Report path. Apply the same
+   path for a missing/invalid audit artifact.
    Do not spin on evidence paths that cannot answer the lead: apply the unconditional
    reachability floor in `references/grading-rubric.md` § blocked-unreachable.
    When the run took the known-issue-first staged path, the Grader applies the known-issue
    acceleration settle rule (`references/grading-rubric.md`): settle without an extra evidence batch once the
    candidate's discriminator passes the full gates on this incident's live evidence, or fail open
    to the deferred normal fanout — never a lower verdict bar.
-   If the final verdict is `Confirmed` or `Likely-rooted` and the verified cause is tied to a code/config/schema/artifact/service-owned location, run ONE bounded introduction-provenance pass before Report, seeded with the verified repo/source, branch/ref when known, implicated path, symbol/line/config key, and known owner/area. It is broad over time but narrow over scope. **Hard-cap it at ≤ ~8 history/source-control reads or ~4 minutes** — it is a post-verdict actionability add-on that must NEVER dominate the run; if the introducing change is not found within that cap, especially across renames/path-moves where a paged history API needs many version-filtered reads, STOP and record the provenance gap plus the one concrete query a human should run, rather than chasing it across the paged API. If the exact introducing change is actually load-bearing for the verdict, owner selection, mechanism discrimination, regression-vs-drift, or rollback-vs-forward-fix, it is no longer actionability-only — route it through the normal pre-verdict discriminator/refinement budget instead of this bounded post-verdict pass. Use a read-only source-control history capability that can search commits, pull requests, file history, diffs, and line/symbol history for that exact path/symbol across available history — not the incident/onset window. Prefer the earliest semantically relevant change that introduced the defective behavior (the missing guard, the defective branch, the config/schema/artifact shape); if introduction cannot be determined, report the closest semantically relevant last-touching change and label it `last-touch, not proven introduction`. Only if the history capability cannot answer AND a local source checkout is available, perform a bounded, authorized history deepen of the implicated repo/ref/path when cheap, then use line-level history/blame on the exact symbol/lines; if that needs unavailable auth, excessive history, or broad whole-repo fetches, do not block — record a provenance gap plus the one concrete query a human should run. Stop after a high-confidence introducing candidate, a labeled last-touch candidate, or an explicit gap. Merge as an actionability add-on (commit, pull request, date, author, fix handle, owner when known); this never changes or gates the verdict.
+   If the final verdict is `Confirmed` or `Likely-rooted` and the verified cause is tied to a code/config/schema/artifact/service-owned location, run ONE bounded introduction-provenance pass before Report, seeded with the verified repo/source, branch/ref when known, implicated path, symbol/line/config key, and known owner/area. It is broad over time but narrow over scope. **Hard-cap it at ≤8 history/source-control reads** — it is a post-verdict actionability add-on that must NEVER dominate the run; if the introducing change is not found within that cap, especially across renames/path-moves where a paged history API needs many version-filtered reads, STOP and record the provenance gap plus the one concrete query a human should run, rather than chasing it across the paged API. If the exact introducing change is actually load-bearing for the verdict, owner selection, mechanism discrimination, regression-vs-drift, or rollback-vs-forward-fix, it is no longer actionability-only — route it through the normal pre-verdict discriminator/refinement allowance instead of this bounded post-verdict pass. Use a read-only source-control history capability that can search commits, pull requests, file history, diffs, and line/symbol history for that exact path/symbol across available history — not the incident/onset window. Prefer the earliest semantically relevant change that introduced the defective behavior (the missing guard, the defective branch, the config/schema/artifact shape); if introduction cannot be determined, report the closest semantically relevant last-touching change and label it `last-touch, not proven introduction`. Only if the history capability cannot answer AND a local source checkout is available, perform a bounded, authorized history deepen of the implicated repo/ref/path when cheap, then use line-level history/blame on the exact symbol/lines; if that needs unavailable auth, excessive history, or broad whole-repo fetches, do not block — record a provenance gap plus the one concrete query a human should run. Stop after a high-confidence introducing candidate, a labeled last-touch candidate, or an explicit gap. Merge as an actionability add-on (commit, pull request, date, author, fix handle, owner when known); this never changes or gates the verdict.
 5. **Report (`6_report`).** Dispatch Report to write the concise RCA, bounded by the
-   Grader's verdict, provenance add-on when required, and open gaps. When the dispatch brief
+   Grader's verdict, provenance add-on when required, and open gaps. Report
    first completes `6_report/investigation-report.md`. Only after that report passes
    its acceptance gate may Report project it into an incident update and enter the
    existing authorization, readiness, idempotency, and live-post gates. Live posting
@@ -785,29 +780,30 @@ an explicit advice blocker, never evidence that no relevant asset exists.
    + mechanism, plain-language verdict wording, visible confidence limits, gaps, closest known introduction for verified
    code/config causes, unresolved upstream why when not rooted, the Grader's
    engineer suggested step, and (when authorized) the posted incident update.
-   If mandatory synthesis or audit retired without output, or a reasoning-only mandatory
-   stage returned late, follow the canonical deadline-degraded successor rule: produce
-   the bounded local report from the permitted capsule/provisional/final artifact, make
-   the missing gate explicit, and prohibit live posting.
+   If mandatory synthesis or audit has no valid artifact, follow the canonical
+   incomplete-mandatory-stage successor: produce the bounded local report from the
+   permitted capsule/provisional artifact, make the integrity gap explicit, and prohibit
+   live posting. Elapsed runtime alone never makes an otherwise accepted report
+   ineligible to post.
 6. **Knowledge value triage + capture (`7_knowledge`, adaptive reflective pass).** After Report, run a brief
    Knowledge Value Triage over the final `claim-integrity.toon`, consequence-audit receipt,
    Report, and Scout recurrence/sibling findings. Dispatch the Knowledge Curator ONLY if
-   its full envelope fits before `deadline_at` and at least one evidence-backed novelty
+   at least one evidence-backed novelty
    trigger is present: a new or revised reusable signature, a recurring sibling pattern, a verified
    observability/source gap, a misleading monitor/telemetry gotcha, a repeated manual-handoff gap, a verified
    mechanism absent from the service KB, or a deep-lane-confirmed NEW recurring known/benign disposition that
    carries a falsifiable discriminator — for which the Knowledge Curator proposes an un-applied
    recurrence/known-issue knowledge candidate (recurrence-identity + discriminator + verdict + evidence, written
    run-local as a suggestion only; schema in `references/subagents/knowledge.md`). If none,
-   record canonical `knowledge_capture.status=skipped-no-value`; when novelty exists but
-   the envelope does not fit, record `knowledge_capture.status=deferred-budget` together
-   with the novelty trigger, required envelope, remaining budget, and
-   `consumer_action=re-triage-on-explicit-iteration`. Never create a
+   record canonical `knowledge_capture.status=skipped-no-value`. The Curator may read at
+   most two cited observation/source summaries plus one narrow service target and may
+   emit at most one candidate in `~2KB`; record `truncated` on structural cap exhaustion,
+   or `not-dispatched` when no eligible route/source is reachable. Never create a
    candidate just to fill the stage. The pass is post-Report and never changes the verdict,
    report, or post; once dispatched in a single-turn run it is awaited, but it is not a
    prerequisite for the Report terminal. After a Curator return, record `completed` or
-   `truncated` in the same canonical `run.md` record. A deferred state creates no candidate,
-   is not equivalent to no novelty, and never resumes automatically. Details in
+   `truncated` in the same canonical `run.md` record. A `not-dispatched` state creates no
+   candidate and is not equivalent to no novelty. Details in
    `references/artifact-contracts.md` and `references/subagents/knowledge.md`. Expected
    output: either the terminal run-state record, or
    at most one atomic interrogative candidate plus a proposed, un-applied KB delta.
@@ -819,12 +815,18 @@ pointer to what changed since a prior investigation of this incident) AND the ta
 explicitly authorizes reading prior runs under the resolved run-root. Do not infer it from
 the presence of sibling run directories — reruns also produce siblings. This mode is
 distinct from the within-run Grader + bounded refinement mechanism and does not change the
-single-turn awaited contract or the per-run pursuit budget. The iteration ordinal is
+single-turn awaited contract or the per-run structural pursuit limits. The iteration ordinal is
 orchestrator-provided and passed through as-is; retries reuse the same ordinal — never
 self-increment it.
 
 Iteration early-exit preflight (do this first): classify the new-information packet against the
-prior run's verdict and the incident's current state. Proceed only when it carries information
+prior run's verdict and the incident's current state. Early-exit is eligible only when
+the prior lineage has a final report/verdict AND canonical `post-status.outcome` is
+`posted-verified|already-present`; any report-only, failed, or unverified prior outcome
+leaves an unmet posting obligation and MUST proceed. Evaluate the complete activity
+delta since that successful post marker/time, not only the newest timeline entry; a
+trailing acknowledgment cannot hide an earlier material item, and incomplete delta
+coverage MUST proceed. When eligible, proceed only when the packet carries information
 that is BOTH not generated by this agent AND plausibly changes what we would **conclude, check,
 prioritize, or post** (verdict, confidence, scope/impact, mitigation state, investigative
 direction, or posting obligation). When it conclusively does not (e.g. the only new timeline

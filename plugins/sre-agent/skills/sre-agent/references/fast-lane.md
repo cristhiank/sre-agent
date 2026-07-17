@@ -112,8 +112,8 @@ computed from the markers; when in doubt it fails open to the full deep-lane.
 
 On recognition, dispatch ONE bounded `full-evidence` specialist as an awaited dispatch
 (`SKILL.md` § Execution model), `advanced/high`, whose entire brief is to answer: **"is THIS
-incident the SAME root cause as the family's previous incidents?"** It runs three moves within a
-tight budget:
+incident the SAME root cause as the family's previous incidents?"** It runs three moves
+within a strict structural scope:
 
 **a. Establish the family's previous root cause (as a CLAIM).** Because sibling
 `ClaimedRootCause`/`IsNoise` fields are typically empty, the specialist reads the prior root cause
@@ -139,14 +139,14 @@ infra rotation (not the family's assumed code path), or a responder revert count
 would confirm a mislabeled family. If any of those gates is unresolved or its result diverges from
 `expected_favored`, return DIFFERENT/ambiguous. To return SAME the
 live evidence must BOTH **(i) match `expected_favored` AND (ii) refute the rival** — a genuinely
-different / real root cause. Within the same budget it also corroborates the incident's ACTUAL
+different / real root cause. Within the same verification allowance it also corroborates the incident's ACTUAL
 scope from the live evidence and confirms it falls within the family bound (the intake-captured
-scope is pre-Scout and not trusted alone). **Budget:** the ≤ ~2-read cap bounds HYPOTHESIS
+scope is pre-Scout and not trusted alone). **Breadth cap:** the ≤ ~2-read cap bounds HYPOTHESIS
 BREADTH — never a second hypothesis, never a broad sweep. The mandatory gates (change-arrival /
 onset-signature / Gate E) are EXEMPT from that breadth cap and get the reads they need to resolve
 on THIS predicate — but stay bounded: if a gate cannot resolve within a tight bound, FAIL OPEN to
 the deep-lane, never shortcut or check-the-box it. A predicate that cannot be evaluated within the
-breadth budget is a block, not a soft pass.
+breadth cap is a block, not a soft pass.
 
 **c. Return.** The specialist returns **SAME** — the discriminator gate PASSED (the live evidence
 matched `expected_favored` AND refuted the rival) and scope is in bound, carried by a cited OBS —
@@ -198,9 +198,10 @@ OBS carry forward as intake context — a pre-registered discriminator check the
 Never post a duplicate on doubt. **Catch-all:** any wave-1 return that is not an internally
 consistent `wave1_result: same` + `gate: pass` — including a missing/unparseable result or gate, or
 any unexpected value — escalates to the deep-lane (defensive fail-open).
-An attempt receipt with `merge_disposition=embargoed-late` or
-`retired-open-budgeted` cannot supply the required positive pair and therefore also
-escalates; it is never admissible support for a live or automatic duplicate post.
+An attempt receipt whose `terminal_event` is not `finished`, whose `result_state` is not
+`complete`, or whose `merge_disposition` is not `merged` cannot supply the required
+positive pair and therefore also escalates; it is never admissible support for a live
+or automatic duplicate post.
 A verifier receipt with a target other than `advanced`, a selected tier below
 `advanced`, a selected-model/argument mismatch, effort other than `high`, or
 unverified binding also escalates to the deep lane and cannot mutate the incident.
@@ -244,13 +245,14 @@ unchanged in depth and recall:
 - wave-1 **DIFFERENT** (live evidence matches the rival, or neither pre-registered value);
 - wave-1 **ambiguous** (predicate evaluated but inconclusive);
 - **wave-1 gate unresolved or divergent** (the change-arrival, onset-signature→cause-class, or Gate E check is unresolved or diverges from `expected_favored`);
-- wave-1 **can't-verify / blocked** (predicate not evaluable within budget, or the prior-RCA read
+- wave-1 **can't-verify / blocked** (predicate not evaluable within the verification
+  read/probe caps, or the prior-RCA read
   was blocked);
 - **gate not `pass` / internally inconsistent receipt** (`wave1_result: same` without a wave-1
   `gate: pass`, or a missing/unparseable result or gate — the defensive catch-all above);
 - **out-of-bound** Sev or scope (intake-captured Sev or scope outside the family bound);
 - **live scope wider than the family bound** (the wave-1 live evidence shows the actual incident
-  scope exceeds the bound, or scope could not be corroborated within budget);
+  scope exceeds the bound, or scope could not be corroborated within the verification caps);
 - **verification-capability-unavailable** (the live evidence source, or the incident-context read
   for the prior root cause, is not reachable);
 - **periodic re-validation floor tripped** (§ Recall safeguards #7) — no in-window

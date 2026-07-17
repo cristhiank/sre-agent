@@ -83,15 +83,15 @@ run_state_digest:
   open gaps: gap id, why it matters, best next source/capability
   current hypotheses: hypothesis id, mechanism, discriminator, status, confidence cap
   specialist assignments: role/question, capability handles, status, output pointer
-  advisor session: persistent attempt/handle, route receipt, state, question/cumulative budget, auxiliary ledger pointer
-  stage attempts: attempt id, stage/obligations, cutoff/enforcement, terminal event/returned-at, result state, durable delta, merge disposition
+  advisor session: persistent attempt/handle, route receipt, state, question/search/open/word caps, auxiliary ledger pointer
+  stage attempts: attempt id, stage/obligations, terminal event/returned-at, result state, durable delta, merge disposition, integrity gap
   evidence conflicts: conflict id, competing claims, sources, needed resolver
   report-ready claims: claim, support OBS ids, verdict wording allowed, caveats
   claim integrity: claim id, receipt pointer, publish disposition, audit status
-  pursuit budget: deadline, 7m Bootstrap envelope, 65m planned deep-lane budget, 58m actual deep-lane remaining floor, initial-evidence/synthesis/evidence stops, 15m protected Report tail, deadline enforcement, budget state, current stage, post-initial batch status
-  wave overflow: hypothesis/obligation id, activation evidence, materiality rank, not-dispatched status, open-budgeted reason, next discriminator
-  deadline degraded: trigger attempt, mode, report source, live-post prohibition
-  knowledge capture: terminal status, novelty trigger, required envelope, remaining budget, candidate pointer, consumer action
+  pursuit limits: initial/refinement fanout caps, single-refinement-wave state, probe/read/output caps, current stage, post-initial batch status
+  wave overflow: hypothesis/obligation id, activation evidence, materiality rank, not-dispatched status, fanout-cap|wave-cap|probe-cap reason, next discriminator
+  mandatory stage integrity: trigger attempt, missing/invalid synthesis|audit, reason, report source, live-post prohibition
+  knowledge capture: terminal status, novelty trigger, structural limits, reason, candidate pointer, consumer action
   continuity capsule: best-supported verdict, decisive claim/evidence refs, open obligations, next unfinished stage
 ```
 
@@ -101,14 +101,14 @@ mitigation/recovery, or supplies an incident event time. Incident state carries 
 incident-authoritative source and observed-at/as-of basis.
 
 Refresh the continuity capsule after each major merge and before every stage advance.
-It is the deadline-salvage handoff: enough compact state to produce the best honest
-Report without reopening the case. It does not itself authorize cross-run resume; a
-runtime must explicitly carry and re-verify it before a later attempt can continue.
-Before advancing past a dispatch cutoff, also persist its canonical Awaited Stage Attempt
-Receipt. Evidence deltas require `merge_disposition=merged`. A reasoning-only
-`merged-late-terminal` result may enter its required successor only with the canonical
-`deadline_degraded` record and forces report-only finalization. Retired attempts remain
-visible as `open-budgeted` gaps.
+It is the compact integrity handoff: enough state to produce the best honest Report
+without reopening the case. It does not itself authorize cross-run resume; a runtime
+must explicitly carry and re-verify it before a later attempt can continue. Before
+advancing past a terminal dispatch, persist its canonical Awaited Stage Attempt Receipt.
+Evidence deltas require `merge_disposition=merged`. Missing or invalid mandatory
+synthesis/audit uses the canonical `mandatory_stage_integrity` record and forces
+report-only finalization. Limit-capped obligations remain visible as `open-answerable`
+with `fanout-cap`, `wave-cap`, or `probe-cap`.
 
 At the first CAPABILITY MAP, the coordinator reads
 `references/model-routing-registry.toon` once, hashes it, and intersects its ordered

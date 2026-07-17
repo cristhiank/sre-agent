@@ -32,7 +32,7 @@ When a throw-site or symbol is absent from the primary repo but arrives through 
 
 ## Expected output
 
-Write `2_scout/scout-report.md` in a COMPACT structured shape — typed rows/fields (surfaces, related-incident rows, discriminator table), not a prose narrative; keep the total authored output within the Scout envelope (`~6KB`) and put bulky source material behind pointers (the `2_scout/` shape in [../artifact-contracts.md](../artifact-contracts.md) + cap-prose-not-proof in [../operational-discipline.md](../operational-discipline.md)). Include:
+Write `2_scout/scout-report.md` in a COMPACT structured shape — typed rows/fields (surfaces, related-incident rows, discriminator table), not a prose narrative; keep the total authored output within `~6KB` and put bulky source material behind pointers (the `2_scout/` shape in [../artifact-contracts.md](../artifact-contracts.md) + cap-prose-not-proof in [../operational-discipline.md](../operational-discipline.md)). Include:
 
 - surfaces in scope: services, regions, rings, dependencies, cohorts, and time windows worth checking
 - related incidents: same-signal siblings AND cross-signal cascade candidates — each with its stable incident id, trigger/start time, matched dimension or shared resource/dependency edge, native parent/duplicate/related link when exposed, tier (`related`/`cascade-candidate`), and any verdict/mitigation carried as claims — and how they shape the hypotheses, or an explicit none/unavailable note
