@@ -10,13 +10,13 @@ Write a concise but structured, observation-cited RCA/status bounded by the grad
 After writing the file-first artifacts, emit the worker brief's bounded
 `console_return`; console text never replaces the staged files.
 
-REPORT ACCEPTANCE GATE: apply the grader target-alignment gate (see grading-rubric.md) — the primary finding addresses the run's `rca_target` or carries the grader's discovery receipt. For a normal deep-lane run, also require final `claim-integrity.toon` plus `consequence-audit.toon`; render only `exact` claims or the receipt's allowed qualified wording. Under a canonical `deadline_degraded` record, render the bounded local report from that record's permitted `report_source`, state the missing/late gate, and prohibit live posting; the missing final artifacts in `no-synthesis|no-audit` are expected, not a reason to suppress the local report. Under canonical `routing_blocked`, render only that receipt's causal-claim-free routing-gap status; missing Grader artifacts are expected and live posting is prohibited. A fast-lane known-recurrence report remains bounded by its existing SAME + gate-pass receipt.
+REPORT ACCEPTANCE GATE: apply the grader target-alignment gate (see grading-rubric.md) — the primary finding addresses the run's `rca_target` or carries the grader's discovery receipt. For a normal deep-lane run, also require final `claim-integrity.toon` plus `consequence-audit.toon`; render only `exact` claims or the receipt's allowed qualified wording. Under a canonical `mandatory_stage_integrity` record, render the bounded local report from that record's permitted `report_source`, state the missing/invalid mandatory stage, and prohibit live posting; the missing final artifacts are expected, not a reason to suppress the local report. Under canonical `routing_blocked`, render only that receipt's causal-claim-free routing-gap status; missing Grader artifacts are expected and live posting is prohibited. A fast-lane known-recurrence report remains bounded by its existing SAME + gate-pass receipt.
 
 ## Inputs
 
 - `5_grader/ranking.md` (the latest admissible assessment), the
-  `deadline_degraded.report_source`, or a canonical `routing_blocked` receipt
-- `5_grader/claim-integrity.toon` and `5_grader/consequence-audit.toon` for normal deep-lane runs; under `deadline_degraded`, only the artifacts allowed by its mode
+  `mandatory_stage_integrity.report_source`, or a canonical `routing_blocked` receipt
+- `5_grader/claim-integrity.toon` and `5_grader/consequence-audit.toon` for normal deep-lane runs; under `mandatory_stage_integrity`, only the artifacts allowed by its stage/gap
 - `5_grader/refinement-obligations.md` when present
 - merged observation ledger
 - scout output and intake claims
@@ -108,6 +108,9 @@ Rendering:
 
 ## Live incident-system posting
 
+Elapsed runtime is not a posting gate. A valid accepted report proceeds to the
+non-time mutation-safety gates below.
+
 **Fast-lane precondition (checked FIRST, before the authorization/capability gate below).**
 A fast-lane `Known-recurrence` disposition is eligible for a live incident-system mutation ONLY when
 its receipt carries BOTH `wave1_result: same` AND the wave-1 discriminator `gate: pass` (matched
@@ -128,10 +131,9 @@ For a deep-lane live mutation, the final consequence audit must exist and every 
 consequence-bearing claim must be `exact` or use its allowed qualified wording. Missing
 audit state or a rendered blocked/strengthened claim fails closed to report-only; it
 never delays the local report.
-Any canonical `deadline_degraded` record also forces report-only, including a
-`merged-late-terminal` synthesis/audit/Report. Report may consume only the source allowed
-by that record and must state the missing/late gate; no deadline-degraded path may invoke
-the incident mutation.
+Any canonical `mandatory_stage_integrity` record forces report-only. Report may consume
+only the source allowed by that record and must state the missing/invalid mandatory
+stage; no incomplete-mandatory-stage path may invoke the incident mutation.
 
 When the dispatch brief authorizes live posting AND a live incident-posting capability is available
 that is NOT in a dry-run/report-only mode, the Poster composes the incident update and delegates the
@@ -358,7 +360,7 @@ details.
   `incident-system-linked` — never coordinator-inferred. Post mode (below) still governs the live post:
   when the thread already carries human root cause/mitigation/progress, contribute additively/respectfully as a collaborator, not a
   standalone note.
-- Suppress only when, on an iteration, nothing material changed since the last post. (The coordinator may already have ended the iteration early per `../followup.md` § Early-exit gate; this is the late post-suppression backstop.)
+- Suppress only when, on an iteration, nothing material changed since the last post. (The coordinator may already have ended the iteration early per `../followup.md` § Early-exit gate; this is the downstream post-suppression backstop.)
 
 When the grader emits a `Confidence reducer / verdict cap`, surface its reducer and lift condition in the post — in plain on-call words (translate the status/cap-effect token; never emit the verbatim gate label) — so responders know the limit and what would raise confidence; render the grader-stated reducer, do not infer, re-rank, or independently derive one. If the verdict is hedged or capped but the field is missing, treat the report as incomplete rather than inventing a reducer.
 

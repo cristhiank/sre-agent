@@ -68,52 +68,43 @@ stage_attempt:
   attempt_id: <stable run-local id>
   stage: <stage/role>
   obligation_ids: <ids or none>
-  cutoff_at: <UTC>
-  deadline_enforcement: host-bounded|cooperative
-  terminal_event: finished|host-timeout|host-cancelled|cooperative-return
-  returned_at: <UTC>
-  result_state: complete|partial|none|late
+  terminal_event: finished|host-timeout|host-cancelled|failure
+  returned_at: <UTC|none>
+  result_state: complete|partial|none
   durable_delta: <artifact pointer|none>
-  merge_disposition: merged|retired-open-budgeted|embargoed-late|merged-late-terminal
+  merge_disposition: merged|not-merged
+  integrity_gap: none|host-timeout|host-cancelled|failure|missing-artifact|invalid-artifact
 ```
 
-`complete|partial` may be `merged` only when the terminal return is at or before
-`cutoff_at` and the pointer names the exact durable output consumed. A host timeout or
-cancellation is itself a terminal event and retires the attempt `open-budgeted` with
-`result_state=none`; this is the only precedence exception to normal awaited completion.
-In cooperative mode, a still-running worker cannot be retired or converted to a partial
-result. After it returns, a late evidence-producing output is
-`merge_disposition=embargoed-late` and cannot enter this run's audit, Report, or
-Knowledge artifacts. A reasoning-only Grader synthesis, bounded audit, or Report that
-returns late may be `merged-late-terminal`; successors may consume it only through the
-deadline-degraded rule below. A late optional Curator is `truncated`, never a reason to
-delay or rewrite Report. The receipt resolves ownership; it never claims prompt-level
-hard cancellation.
+`complete|partial` may be `merged` when the pointer names the exact valid durable output
+consumed. Elapsed runtime does not change merge or post eligibility. A host timeout,
+host cancellation, or failure is an observed terminal event with `result_state=none`;
+a still-running worker cannot be converted to a partial result. A finished attempt with
+a missing or invalid required artifact is `not-merged` with the matching integrity gap.
+The receipt resolves ownership; it never claims prompt-level cancellation.
 
-### Deadline-degraded successor rule
+### Incomplete mandatory-stage successor rule
 
-The coordinator writes this record when a mandatory reasoning/terminal stage misses its
-cutoff:
+The coordinator writes this record when mandatory synthesis or audit has no valid
+artifact:
 
 ```toon
-deadline_degraded:
+mandatory_stage_integrity:
   trigger_attempt: <attempt id>
-  mode: no-synthesis|no-audit|late-reasoning
-  report_source: continuity-capsule|provisional-ranking-and-claims|final-ranking-and-claims
+  stage: synthesis|audit
+  gap: host-timeout|host-cancelled|failure|missing-artifact|invalid-artifact
+  report_source: continuity-capsule|provisional-ranking-and-claims
   live_post: prohibited
 ```
 
-- Retired synthesis (`result_state=none`) cannot feed audit. Skip audit and produce a
+- Missing/invalid synthesis cannot feed audit. Skip audit and produce a
   causal-claim-free local report from the continuity capsule with every causal/verdict
-  gap explicit (`mode=no-synthesis`).
-- Retired audit produces a report-only incomplete assessment from the provisional
-  ranking and claim rows; no consequence claim is strengthened or treated as final
-  (`mode=no-audit`).
-- A reasoning-only synthesis or audit with `merge_disposition=merged-late-terminal` is
-  admissible to its required successor because no successor ran while it was awaited.
-  The audit/Report records `mode=late-reasoning`, and live posting remains prohibited.
-- A late Report is retained as the local terminal artifact with
-  `mode=late-reasoning`. No deadline-degraded path may mutate the incident.
+  gap explicit.
+- Missing/invalid audit produces a report-only incomplete assessment from the
+  provisional ranking and claim rows; no consequence claim is strengthened or treated
+  as final.
+- A finished valid synthesis, audit, or Report remains admissible regardless of elapsed
+  runtime. No `mandatory_stage_integrity` path may mutate the incident.
 
 ### Routing-blocked successor rule
 
@@ -406,13 +397,13 @@ Discovery receipt for causal `blocked-unreachable` leads, a final `Proximate-onl
 - `observability_service_knowledge_lookup`: result or explicit absence
 - `schema_catalog_discovery_attempted`: source + scope + result
 - `log_vs_metric_distinction`: why available evidence is insufficient and what evidence type is needed
-- `access_result`: the result of an actual canonical probe attempted against the source that answers this lead — a correct/authed/non-guessed query result, or a recorded terminal authorization/missing-command/missing-source/schema error. A documentation gap (a signal/table/source named-but-not-confirmed) is not an access result and cannot satisfy `blocked-unreachable` (see the access invariant in [investigation-invariants.md](investigation-invariants.md)). To record a source unreachable, canonical missing-command after entrypoint discovery, authenticated authorization denial, missing-source, or schema-absent qualify; token-acquisition/auth-init, usage, entrypoint, output-capture, a soft or unnamed "unavailable", a time-budget constraint, or assumed provider ownership do not. When such a provisional failure comes from a worker and would cap the whole verdict, cite the coordinator's phase-current canonical capability-level control recheck from `full-evidence`; without it the lead stays `open-answerable`.
+- `access_result`: the result of an actual canonical probe attempted against the source that answers this lead — a correct/authed/non-guessed query result, or a recorded terminal authorization/missing-command/missing-source/schema error. A documentation gap (a signal/table/source named-but-not-confirmed) is not an access result and cannot satisfy `blocked-unreachable` (see the access invariant in [investigation-invariants.md](investigation-invariants.md)). To record a source unreachable, canonical missing-command after entrypoint discovery, authenticated authorization denial, missing-source, or schema-absent qualify; token-acquisition/auth-init, usage, entrypoint, output-capture, a soft or unnamed "unavailable", an exhausted probe/fanout cap, or assumed provider ownership do not. When such a provisional failure comes from a worker and would cap the whole verdict, cite the coordinator's phase-current canonical capability-level control recheck from `full-evidence`; without it the lead stays `open-answerable`.
 - `evidence_source_probed`: which source/endpoint was actually queried for this lead. An unfit or never-probed source — including an unprobed service telemetry source the lead needs — leaves the lead `open-answerable`, not blocked; a fit-for-purpose probe of the source that answers the lead which comes back genuinely empty is `reached_empty` — it rules out only what a fit probe in the correct scope/window rules out (it may close/refute on the merits when fit) but NEVER licenses a block per "Empty is not absent"; only a `denied` probe licenses `blocked-unreachable`.
 - `probe_fitness`: `fit=yes|no`; the claim being supported; signal/source used and why it observes that claim; basis (documented source, schema/catalog discovery, runbook, owner hint, or explicit rationale); claim scope vs queried scope (+ justification if narrower); result. A guessed signal or unjustified sub-window is `fit=no`; a lens that cannot observe the symptom class (an error-/failure-level filter for a latency/late-completion symptom) is `fit=no`; a `fit=no` result is nondiagnostic and cannot support `blocked-unreachable` or clean closure.
 - `correlation_follow_through`: discriminating ids/joins the symptom exposed (if any), whether followed to the next causal layer, and the result or why-not.
 - `verdict_ceiling_lead`: the open causal lead targeting `rca_target` whose reachability sets the verdict ceiling (its block would downgrade the verdict, e.g. Likely-rooted → Proximate-only). Named by lead id; if two co-equal leads each set the ceiling, each carries its own receipt (cannot split to dodge). Non-decisive/contributing leads and `closed-supported`/`closed-refuted` dispositions carry no typed receipt and settle as today. A named change with `arrival_status=disproven` is a `closed-refuted` disposition, NOT a `verdict_ceiling_lead` — it cannot be carried as a capped-but-named ceiling lead.
 - `arrival_status`: for a named introducing change carried by any lead (code commit/PR/build OR infra/control-plane rotation/push event), the three-valued change-arrival resolution — `verified | unverified | disproven` — per the change-arrival gate in grading-rubric.md. `disproven` ⇒ the lead is `closed-refuted` (`correlation-not-causal`), not a `verdict_ceiling_lead`; `unverified` with reachable build/branch/deploy provenance is `unattempted_open` ⇒ the `verdict_ceiling_lead`, MUST-dispatch a bounded arrival probe (not a Proximate-only soften) per Gate B; `verified` ⇒ eligible UNLESS post-onset or a revert/rollback/mitigation (Gate E), which is ineligible regardless of arrival. Absence of arrival evidence is `unverified`, never `disproven`. Logic lives in grading-rubric.md; this field records the resolved value.
-- `reachability_outcome`: the typed resolution, for the `verdict_ceiling_lead`, that the `access_result` / `evidence_source_probed` / `probe_fitness` / `correlation_follow_through` / `generic_pivot_ladder` / `alternate_capability_pivot` evidence above consolidates into — exactly one of: `reached` (probe issued, nonempty result; cite {call_id, result handle}) · `reached_empty` (probe issued, zero rows; states what a fit probe in the correct scope/window RULES OUT — empty ≠ absent; weighed on probe fitness, NEVER licenses a block, and does not auto-refute — sole exception: the change-arrival gate resolution against an authoritative, COMPLETE serving-build/deploy/control-plane manifest that positively EXCLUDES the change resolves to `DISPROVEN`, see grading-rubric.md § Mechanism-discriminator gate → Change-arrival gate) · `denied` (canonical entrypoint resolution returned missing-command, or a canonical probe issued after auth/init resolution and returned an authenticated authorization/missing-source/schema-absent error or redaction sentinel; cite {probe call_id, verbatim returned error/sentinel string}; provisional failures listed in `access_result` are nondiagnostic, not `denied`) · `discovery_exhausted` (bounded discovery — actual schema/catalog discovery probe(s) of candidate sources — found no source consuming the pivot dimensions; a DEMONSTRATED exhaustion of the causal chain via spent probes, not a reachability denial; MUST cite the schema/catalog discovery probe call_id(s) + verbatim result(s) for each candidate checked; absence from a discovery artifact — CAPABILITY MAP, scout enumeration, self-built map — does NOT satisfy this; only spent probe call_ids do) · `unattempted_open` (no probe issued; the lead stays `open-answerable`). There is NO `unattempted_blocked` member — "I didn't try" projects only to `unattempted_open`, so a 0-probe "no access established" block is unrepresentable; a bare "I couldn't find a source" assertion (no cited spent schema/catalog discovery probe, budget not actually spent) is likewise `unattempted_open`, never `discovery_exhausted`. Only `denied` (cited returned error/sentinel + call_id) or `discovery_exhausted` (cited spent schema/catalog discovery probe call_id(s) + results, bounded budget actually spent) licenses `blocked-unreachable` or a Proximate-only-due-to-block cap; `reached_empty` and `unattempted_open` CANNOT cap and keep the lead open. Cross-source consolidation: the ceiling lead's `reachability_outcome` is the WEAKEST / MOST-OPEN resolution across the primary probe AND every fit discovery-artifact-listed alternate able to reach the decisive scope — its listing or omission in the CAPABILITY MAP never closes it (see `alternate_capability_pivot` below) — it is `denied` or `discovery_exhausted` ONLY when the primary AND all fit alternates each resolved `denied`/`discovery_exhausted`; if any fit alternate is `unattempted_open`, the consolidated outcome is `unattempted_open` and CANNOT cap (this closes the primary-`denied`-while-map-named-alternate-`unattempted_open` and arrival-lead-as-ceiling bypasses). Canonical verdict logic: [grading-rubric.md](grading-rubric.md) § blocked-unreachable. Reuse-before-probe: a prior in-run probe artifact (call_id) for that same evidence source already satisfies the access component — no new query.
+- `reachability_outcome`: the typed resolution, for the `verdict_ceiling_lead`, that the `access_result` / `evidence_source_probed` / `probe_fitness` / `correlation_follow_through` / `generic_pivot_ladder` / `alternate_capability_pivot` evidence above consolidates into — exactly one of: `reached` (probe issued, nonempty result; cite {call_id, result handle}) · `reached_empty` (probe issued, zero rows; states what a fit probe in the correct scope/window RULES OUT — empty ≠ absent; weighed on probe fitness, NEVER licenses a block, and does not auto-refute — sole exception: the change-arrival gate resolution against an authoritative, COMPLETE serving-build/deploy/control-plane manifest that positively EXCLUDES the change resolves to `DISPROVEN`, see grading-rubric.md § Mechanism-discriminator gate → Change-arrival gate) · `denied` (canonical entrypoint resolution returned missing-command, or a canonical probe issued after auth/init resolution and returned an authenticated authorization/missing-source/schema-absent error or redaction sentinel; cite {probe call_id, verbatim returned error/sentinel string}; provisional failures listed in `access_result` are nondiagnostic, not `denied`) · `discovery_exhausted` (bounded discovery — actual schema/catalog discovery probe(s) of candidate sources — found no source consuming the pivot dimensions; a DEMONSTRATED exhaustion of the causal chain via spent probes, not a reachability denial; MUST cite the schema/catalog discovery probe call_id(s) + verbatim result(s) for each candidate checked; absence from a discovery artifact — CAPABILITY MAP, scout enumeration, self-built map — does NOT satisfy this; only spent probe call_ids do) · `unattempted_open` (no probe issued; the lead stays `open-answerable`). There is NO `unattempted_blocked` member — "I didn't try" projects only to `unattempted_open`, so a 0-probe "no access established" block is unrepresentable; a bare "I couldn't find a source" assertion (no cited spent schema/catalog discovery probe, required discovery sequence not completed) is likewise `unattempted_open`, never `discovery_exhausted`. Only `denied` (cited returned error/sentinel + call_id) or `discovery_exhausted` (cited spent schema/catalog discovery probe call_id(s) + results, required bounded discovery sequence completed) licenses `blocked-unreachable` or a Proximate-only-due-to-block cap; `reached_empty` and `unattempted_open` CANNOT cap and keep the lead open. Cross-source consolidation: the ceiling lead's `reachability_outcome` is the WEAKEST / MOST-OPEN resolution across the primary probe AND every fit discovery-artifact-listed alternate able to reach the decisive scope — its listing or omission in the CAPABILITY MAP never closes it (see `alternate_capability_pivot` below) — it is `denied` or `discovery_exhausted` ONLY when the primary AND all fit alternates each resolved `denied`/`discovery_exhausted`; if any fit alternate is `unattempted_open`, the consolidated outcome is `unattempted_open` and CANNOT cap (this closes the primary-`denied`-while-map-named-alternate-`unattempted_open` and arrival-lead-as-ceiling bypasses). Canonical verdict logic: [grading-rubric.md](grading-rubric.md) § blocked-unreachable. Reuse-before-probe: a prior in-run probe artifact (call_id) for that same evidence source already satisfies the access component — no new query.
 - `discriminator_rung`: the dispositive ladder rung(s) this receipt resolves — the typed close that the `access_result` / `evidence_source_probed` / `probe_fitness` / `correlation_follow_through` / `reachability_outcome` evidence above consolidates into, exactly as `reachability_outcome` already consolidates the access sub-fields. Per rung: `dispositive` (decisive-for-verdict; orientation-proposed, grader content-verified), `observed_identity{scenario, signal, owner, correlation_key}` (each projected non-null from an authoritative probe, or `n/a-not-exposed` with cited justification where the capability does not expose it), and `status` (`open | closed_confirmed | closed_refuted`). Rung close/refute rules live solely in grading-rubric.md (Gate A); this field RECORDS the Gate A result — the cited identity projection and the resulting status — and does not restate the rule.
 - `held_branch_freshness`: one row for every held or conditionally closed branch whose
   exit carries a time-dependent reactivation predicate. Record `lead_id`;
@@ -427,12 +418,12 @@ Discovery receipt for causal `blocked-unreachable` leads, a final `Proximate-onl
   per-branch decision and never treats an empty/unproven or skipped read as closure.
 - `promotion_precondition` (Gate B): records the grader's Gate B evaluation per grading-rubric.md — the dispositive rung ids + statuses, each open dispositive rung's `reachability_outcome`, and the dispatch/cap disposition. Do not restate the rule here.
 - `remaining_gap`: what evidence would change the RCA
-- `budget_used`: which bounded discovery steps were spent
+- `structural_cap_used`: which bounded discovery steps were spent
 - `generic_pivot_ladder`: the VERTICAL next-causal-layer pivot — the time ∧ affected-scope/entity ∧ operation/step pivot was attempted into a capability-map-named next-causal-layer source, recorded as source + result. The cited probe MUST — by DEFAULT for every vertical-pivot citation, whether the layer is a separately-named source OR a signal/namespace within a source already `reached` for the primary — be a spent probe schema-attributable to that next causal layer's own instrumentation, the attribution established from a schema/catalog probe call_id or an explicit read-shape citation of that layer's own interface/schema (same provenance rigor as `alternate_capability_pivot`'s capability class; a bare attribution sentence never satisfies it), and carry a call_id distinct from the primary's already-`reached` call_id; when the target is within an already-`reached` source, re-citing the primary probe or a second differently-filtered query against the SAME already-`reached` producer schema additionally does not satisfy the vertical pivot. The alternative is a terminal `no such source named` — and that terminal value MUST cite the schema/catalog discovery probe call_id(s) + verbatim result(s) that established no source consuming the pivot dimensions (same provenance rigor as `access_result`/`probe_fitness`: a bare assertion of absence is invalid, exactly as a documentation gap cannot satisfy `blocked-unreachable`; absence from a discovery artifact — CAPABILITY MAP, scout enumeration, self-built map — does not satisfy this terminal). The HORIZONTAL same-scope alternate-capability pivot is a distinct obligation recorded in `alternate_capability_pivot` below.
 - `alternate_capability_pivot`: the HORIZONTAL same-scope pivot, required whenever the primary source for the decisive scope is unreachable/failed — for EACH capability-class-fit or scope-derived same-class alternate read capability able to reach that same scope (an alternate cluster/endpoint, a log/trace-grep capability vs a metrics-query cluster, an elevated-entitlement read vs a GUI-only reader): the alternate + its probed outcome (`reached`/`reached_empty`/`denied`/`discovery_exhausted`), OR a terminal `none-named` with a cited spent schema/catalog discovery probe call_id + result showing no candidate with the needed capability class reaches this scope — absence from a discovery artifact (CAPABILITY MAP, scout enumeration, self-built map) does NOT satisfy `none-named`. A candidate leaves the pivot only by reachability-floor conditions: (a) its own cited probe terminal error, or (c) a gated cross-class structural non-fit — the candidate's capability class (from the taxonomy `{metrics-query | log/trace-grep | GUI-only-reader | elevated-entitlement-read | control-plane/config}`, established from a schema/catalog probe call_id or explicit read-shape citation of the candidate's own interface/schema) plus a stated reason why that class cannot carry the decisive-scope data model; the class + citation are recorded in this field. NEVER by a KB note, discovery-artifact scope-match absence, enumeration omission, or same-class non-fit assertion. A fit alternate left `unattempted_open` keeps the consolidated `reachability_outcome` `unattempted_open` (cannot cap); canonical verdict logic and terminology: [grading-rubric.md](grading-rubric.md) § blocked-unreachable.
 - `in_hand_branches_dispositioned`: `yes` (list each zero-cost in-context branch + the OBS id / observation that disposes it) | `n/a-with-reason`.
 - `signal_validity`: CONDITIONAL — when the trigger is a measurement/alert/monitor signal, disposed via the existing signal-validity / alert-semantics capability → `real-failure | evaluation-artifact | unresolved`; when the trigger is not signal-shaped, record `n/a-trigger-not-signal-shaped`. An `unresolved` value is an `open-answerable` lead only when it meets the materiality bar (could materially change the verdict); otherwise it is a confidence-capping gap, never by itself a basis for `Inconclusive-blocked`.
-- For a final `Proximate-only`-with-reachable-keys settle, the load-bearing fields are `correlation_follow_through`, `evidence_source_probed`, `remaining_gap`, and `budget_used` — showing the cross-source pivot was spent or why no reachable next-causal-layer source exists; `access_result`/`probe_fitness` apply only once that pivot is actually probed, so a receipt marking them N/A without a spent pivot does not license the settle.
+- For a final `Proximate-only`-with-reachable-keys settle, the load-bearing fields are `correlation_follow_through`, `evidence_source_probed`, `remaining_gap`, and `structural_cap_used` — showing the cross-source pivot was spent or why no reachable next-causal-layer source exists; `access_result`/`probe_fitness` apply only once that pivot is actually probed, so a receipt marking them N/A without a spent pivot does not license the settle.
 Detailed judging rules live in `grading-rubric.md`.
 
 ## `6_report/` — bounded RCA
@@ -462,7 +453,7 @@ downgrades) — bounded by the current grader verdict.
 
 ### Adaptive operator projection
 
-The report optimizes for one-minute comprehension, not artifact completeness. Internal
+The report optimizes for rapid comprehension, not artifact completeness. Internal
 receipts stay in their stage files. Choose one operator shape:
 
 - **Decision Brief** — the default when the result is actionable without a
@@ -667,22 +658,20 @@ The coordinator always writes this canonical terminal record to `run.md`:
 
 ```toon
 knowledge_capture:
-  status: completed|skipped-no-value|deferred-budget|truncated
+  status: completed|skipped-no-value|not-dispatched|truncated
   novelty_trigger: <trigger id/summary, or none>
-  required_envelope: <2m / ~2KB, or n/a>
-  remaining_budget_at_triage: <duration>
+  structural_limits: <one candidate; <=2 cited OBS rows; narrow target read; ~2KB>
+  reason: none|no-eligible-route|source-unreachable|read-cap|output-cap
   candidate: 7_knowledge/knowledge.md|none
-  consumer_action: candidate-review|none|re-triage-on-explicit-iteration
+  consumer_action: candidate-review|none
 ```
 
 `skipped-no-value` means triage found no evidence-backed durable novelty.
-`deferred-budget` means triage found a named novelty trigger but did not dispatch the
-Curator because its full envelope did not fit; it writes no `knowledge.md`, is not
-equivalent to no novelty, and is terminal for this run. It never resumes automatically:
-only a later explicitly authorized iteration may re-triage fresh final artifacts.
-`truncated` means the Curator was dispatched but its envelope expired; `candidate` points
-to a grounded partial file only when one was safely completed. `completed` may still have
-`candidate: none` when the bounded extract/generalize pass rejects every candidate.
+`not-dispatched` means novelty existed but no eligible route/source was reachable; it
+writes no `knowledge.md` and is not equivalent to no novelty. `truncated` means the
+Curator reached a structural read/output cap; `candidate` points to a grounded file only
+when one was safely completed. `completed` may still have `candidate: none` when the
+bounded extract/generalize pass rejects every candidate.
 
 `7_knowledge/knowledge.md` is written only when the coordinator's Knowledge Value Triage
 (see `SKILL.md` § Six-stage flow) found evidence-backed novelty and dispatched the
