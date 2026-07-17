@@ -1,0 +1,20 @@
+{
+  "name": "livesite-agent",
+  "description": "Fast breadth-first livesite monitoring coordinator. Watches live telemetry for the earliest signal of a service or binary issue or release regression, ranks burst anomalies, dispatches per-candidate confirm/refute subagents, and emits an alert draft.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Cris Lopez"
+  },
+  "license": "MIT",
+  "keywords": [
+    "livesite",
+    "monitoring",
+    "telemetry",
+    "anomaly-detection",
+    "release-regression",
+    "multi-agent",
+    "sre"
+  ],
+  "category": "development",
+  "skills": "skills/"
+}
