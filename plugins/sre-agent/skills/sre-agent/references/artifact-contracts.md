@@ -24,7 +24,8 @@ The Grader writes `5_grader/claim-integrity.toon` before Report for every
 **consequence-bearing claim**: a causal mechanism or attribution, exclusion/refutation,
 population or blast-radius statement, incident state/mitigation/recovery statement,
 cross-source shared-cause statement, or Manual Investigation Kit branch that changes
-the operator action. Ordinary factual observations do not need a row.
+the operator action. Ordinary factual observations do not need a row unless selected
+as an operator exemplar or as the premise for the owner action.
 
 Each compact row has this shape:
 ```toon
@@ -40,10 +41,14 @@ protocol_semantics: observed=<layer|n/a>; claimed=<layer|n/a>; fit=<yes|no|unkno
 time_basis: <observed_at + as_of/freshness + source|n/a>
 rival_test: <favored predicts ...; rival predicts ...; observed ...; discriminates=yes|no|n/a>
 attribution_scope: <authoritatively closed sources/entities + open sources/entities|n/a>
+post_candidate: yes|no
+terminal_attempt_refs: <attempt ids|n/a>
+ref_resolution: resolved-exact|missing|invalid|identity-mismatch|n/a
+availability: <observed|typed field gaps|n/a>
 publish: exact|qualified:<allowed wording>|blocked:<reason>
 ```
 
-All rows require `evidence`, `source_fit`, and `publish`. Conditional facets are required
+All rows require `evidence`, `source_fit`, `post_candidate`, and `publish`. Conditional facets are required
 only when their claim class triggers them: state/time for incident state or recovery;
 population semantics for counts/cohorts; protocol semantics for a cross-layer
 projection; rival test for exclusions, causal selection, or a decisive manual branch;
@@ -58,6 +63,17 @@ Knowledge may weaken or omit a row; they may never strengthen it. A missing/inco
 row is a `claim_integrity_gap`, not permission to re-derive or silently publish the
 claim.
 
+Set `post_candidate: yes` only for Grader-selected evidence-bearing facts that can
+change the verdict, incident state, exemplar carriage, or owner-action premise.
+Stage-derived facts require attempt-bound evidence and `ref_resolution:
+resolved-exact`. Direct authoritative intake metadata may use attempt/ref `n/a` only
+when `evidence` cites its Bootstrap/source pointer and the wording reproduces that
+metadata without causal inference; human comments, advisor content, worker-derived
+facts, and family/population claims cannot use this path. The final audit freezes these
+fields. One observed confirmation permits only one-unit wording, never unsupported
+family/population wording. Report may omit or weaken a row, but never repair its
+lineage in prose or strengthen it.
+
 ## Awaited Stage Attempt Receipt (canonical)
 
 Every dispatched Scout, Specialist, Grader, Report, or Curator attempt has one
@@ -69,7 +85,8 @@ stage_attempt:
   stage: <stage/role>
   obligation_ids: <ids or none>
   terminal_event: finished|host-timeout|host-cancelled|failure
-  returned_at: <UTC|none>
+  terminal_event_at: <host-recorded UTC|unknown>
+  returned_at: <UTC when the coordinator collected the terminal result|none>
   result_state: complete|partial|none
   durable_delta: <artifact pointer|none>
   merge_disposition: merged|not-merged
@@ -77,11 +94,18 @@ stage_attempt:
 ```
 
 `complete|partial` may be `merged` when the pointer names the exact valid durable output
-consumed. Elapsed runtime does not change merge or post eligibility. A host timeout,
+produced by this `attempt_id` under the run's source identity. `terminal_event_at` and
+`returned_at` are immutable chronology only: neither timestamp, their ordering, nor
+elapsed runtime changes merge, Report, or post eligibility, and they never create
+late, embargo, cutoff, or deadline states. An attempt-bound pointer that resolves to a
+different attempt or source identity is `not-merged` with
+`integrity_gap=invalid-artifact`; its claim row remains
+`ref_resolution=identity-mismatch`. A host timeout,
 host cancellation, or failure is an observed terminal event with `result_state=none`;
-a still-running worker cannot be converted to a partial result. A finished attempt with
-a missing or invalid required artifact is `not-merged` with the matching integrity gap.
-The receipt resolves ownership; it never claims prompt-level cancellation.
+a still-running worker cannot be converted to a partial result. A finished attempt
+with a missing or invalid required artifact is `not-merged` with the matching
+integrity gap. The receipt resolves ownership; it never claims prompt-level
+cancellation.
 
 ### Incomplete mandatory-stage successor rule
 
@@ -441,6 +465,13 @@ changes the handoff. Report never creates a new consequence-bearing claim. Fast-
 known-recurrence output remains bounded by its existing SAME + gate-pass receipt and may
 not add recovery, exclusion, or causal attribution beyond that receipt.
 
+**Report completeness.** When the Grader selects Operator exemplars, carry the ranked
+set and #1 owner action into the existing Answer/Facts/Proof envelope. Omitting a
+reachable selected exemplar or its owner/action fails acceptance. Preserve typed field
+gaps and the single executable next check; an unreachable field does not suppress an
+otherwise supported report/post. This changes content completeness, not the visual
+layout.
+
 A source's last observed failure is not incident recovery. Render it as
 `last observed at <time> in <source/window>` unless a publishable claim has
 `state_plane=incident` and an authoritative recovery time basis. Never translate an
@@ -502,7 +533,9 @@ Both shapes preserve this information hierarchy:
    confirmed/likely/proximate -> **Impact** and **Fix**; blocked -> **Impact**,
    **Blocked**, and **Do next**; refuted/closure -> **Checked**, **Finding**, and
    **Residual risk**; collaborator/additive -> **Builds on**, **Delta**, and
-   **Why it matters**. Do not repeat the answer.
+   **Why it matters**. Do not repeat the answer. When present, compress Operator
+   exemplars into these existing Facts or the existing Proof bullets, never both and
+   never a new heading; move only unique telemetry to Technical details.
 4. **Proof** — represent the mechanism once. A local Decision Brief uses at most
    three unique proof bullets OR a compact failure path; a Mechanism Handoff uses a
    compact failure path. A live incident-management projection with a causal chain always re-projects
