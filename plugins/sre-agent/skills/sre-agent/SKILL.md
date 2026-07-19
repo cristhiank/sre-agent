@@ -158,7 +158,7 @@ Mandatory dispatch points:
   rows that contract marks selectable may be selected. A decoded alert
   telemetry/monitor query becomes selectable only after execution maps it to a
   normalized `OBS###`. The Grader selects 1-3 eligible queries by `runId`; the posting
-  capability resolves each deep-link deterministically. Attach a safe selected link
+  capability resolves each deep-link deterministically. Attach a canonical capability-resolved selected link
   to the exact Failure path node identified by its `observation_ref` when possible
   without duplication; only an unmappable selection falls back to Evidence Kit. Each
   selection and downstream handoff MUST satisfy the canonical **Decisive-query
@@ -169,7 +169,7 @@ Mandatory dispatch points:
   `observation_ref`. Every resolvable returned row must survive. Keep a missing or
   malformed row visible as an ineligible lineage gap using the existing gap
   vocabulary. An empty menu while cited executed-query receipts or runIds exist is
-  `evidence-incomplete (lineage-gap)`, never proof that no safe query exists; leave
+  `evidence-incomplete (lineage-gap)`, never proof that no eligible canonical query exists; leave
   upstream query-run lineage open. Never synthesize a row, result, URL, raw query, or
   prose substitute.
 - Report is dispatched after the final bounded consequence audit and any required

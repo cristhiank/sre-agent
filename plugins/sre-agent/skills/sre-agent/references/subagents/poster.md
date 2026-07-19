@@ -191,7 +191,7 @@ never a `duplicate-of` or `canonical` claim.
 
 **Evidence and deep-links:** the **Evidence Kit** is a curated set of **1-3 decisive
 verification queries** an OCE can use to verify the RCA, but it is fallback-only. The
-primary surface is the Failure path: attach each selected safe link to the exact node
+primary surface is the Failure path: attach each selected canonical capability-resolved link to the exact node
 identified by its proving observation and show the observed result on that node. Do
 not duplicate that link. Use Evidence Kit immediately after the path only when a
 selected query cannot map to one node or no chain exists. It is distinct from the
@@ -201,13 +201,18 @@ human-only checks in the internal **Manual Investigation Kit**. The Grader selec
 from manifests. Clickable evidence therefore never depends on an agent pasting or
 recovering a URL. The capability uses each selection's `observation_ref` to place its
 resolved link on the proving node; report-only finalize does the same. When no selected
-query needs fallback placement, omit Evidence Kit — empty beats noisy. If a proving
-observation has no safe link, put de-identified raw query text in Technical details
-instead; never fabricate a link. Do not attach a deep-link when its underlying query embeds restricted
-identifiers (customer id, tenant, subscription, GUID, IP, or resource path): query text travels inside the
-link and would bypass de-identification, so surface de-identified raw query text in Details instead. The
-posting capability also scans deep-link queries as a backstop and refuses links carrying restricted
-identifiers; compose the de-identified evidence up front. This applies to both structured HTML and
+query needs fallback placement, omit Evidence Kit — empty beats noisy. If the capability
+cannot resolve a canonical link, put de-identified raw query text in Technical details
+instead; never fabricate a link. **Disclosure follows provenance and verified lineage,
+not identifier shape:** retain a canonical capability-resolved link whose literals came
+from internal operational telemetry, even when values look like GUIDs, IPs,
+account/subscription/resource ids, tenant-like ids, hostnames, or paths. **MUST NOT**
+withhold, downgrade, or choose report-only for shape alone. Withhold only when the query
+carries a secret/credential/token or reproduces `pii-marker`/do-not-republish customer
+content. The posting capability decodes the query; its `E_ICM_PII` content-match gate
+fires only on a marked-content digest match, while unusable markers and missing required
+PII decisions also fail closed. It never refuses for identifier shape. The capability owns canonical run-id/host/decode/lineage validation
+([../investigation-invariants.md](../investigation-invariants.md)). This applies to both structured HTML and
 report-only/additive markdown drafts: HTML uses `<a href>` on the proving tree node/proof line, and markdown
 uses `[label](evidence_link)` on the proving node/claim. Surface `TSG/KB consulted` with links only when the
 investigation actually used those sources; omit the line when none were used. Hyperlink incident ids whenever
@@ -230,7 +235,7 @@ respectful, evidence-cited contradiction of a human RCA; Why it matters = owner 
 (when it is the one mechanism representation) -> owner-routed next action -> Technical details.
 
 Incident-safe projection includes de-identification: customer-identifying values never appear verbatim in
-the post (see "Do not republish redacted customer content" in ../investigation-invariants.md). At the field
+the post (see "Do not republish marked customer content or secrets" in ../investigation-invariants.md). At the field
 level this means the **Impact** field (and any owner reference) is **category + count only**.
 
 **Rich rendering when supported:** render the selected adaptive shape as a scannable
@@ -276,11 +281,12 @@ no new chain may omit the path.
 Technical details may collapse visually but cannot lose a unique causal caveat,
 timeline fact, ruled-out path, provenance qualifier, related incident, reference, or
 raw-query fallback. Bulk identifiers no on-call action uses are summarized (count +
-1-3 examples, or folded into the step that consumes them). **Exception —
-customer-identifying or pii-marker-covered fields** (customer emails,
-tenant/account/subscription ids, GUIDs, IPs, hostnames, resource paths, or any field a
-`pii-marker`/`manifest.pii` covers) are category + count only, never verbatim examples.
-Report-only is the fallback for an unrewritable leak, never permission to drop content.
+1-3 examples, or folded into the step that consumes them). **Exception — marked
+customer-origin content:** values covered by `pii-marker`/`manifest.pii` are category +
+count only, never verbatim examples; credentials, tokens, keys, and secrets are never
+included. This is an origin/marker rule, not a field-name or value-shape rule:
+operational telemetry/log values are allowed when relevant. Report-only is the fallback
+for an unrewritable marked-content or secret leak, never permission to drop content.
 
 **Host-owned feedback placement:** the model authors no feedback copy or link. For a
 watermark-enforced standalone live AI post, the host inserts exactly one feedback link

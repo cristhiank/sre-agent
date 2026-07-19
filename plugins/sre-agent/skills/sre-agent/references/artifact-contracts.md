@@ -268,25 +268,26 @@ provenance pointer, and what entity/time/surface it is about.
 Observation/evidence rows include the observation id, factual statement, source/provenance
 pointer, entity/time/surface, and optional `evidence_link`. For telemetry-query-backed
 observations, include the query execution `runId` so the candidate menu can map the
-manifest to this `OBS###`; specialists also capture `evidence_link` from the shareable deep-link the
+manifest to this `OBS###`; specialists also capture `evidence_link` from the canonical deep-link the
 telemetry-query capability surfaced for the query that produced this observation (its
-`DeepLink:` output / run-manifest `deepLink`). Omit `evidence_link` when no shareable
-link was surfaced or when the underlying query embeds restricted identifiers; carry
-de-identified raw query text in Details instead. A service-internal `ScopeId` is an
-operational routing key and is not restricted solely because it is GUID-shaped; it may
-remain in an IcM evidence link unless service documentation explicitly classifies that
-specific key as customer-identifying.
+`DeepLink:` output / run-manifest `deepLink`). Omit `evidence_link` only when no link
+was surfaced, or when the query carries a secret/credential/token or reproduces
+`pii-marker`/do-not-republish customer content; carry de-identified raw query text in
+Details in that case. Identifier-shaped literals from internal operational telemetry
+are **not** a reason to omit the link: disclosure follows provenance and verified
+lineage, not shape ([investigation-invariants.md](investigation-invariants.md)).
 The primary clickable-query surface is the **Failure path**: the Grader selects the
 1-3 decisive verification queries by `runId` (from a deterministic candidate menu) into
 `5_grader/decisive-queries.toon`, and the posting capability resolves those runIds to deep-links mechanically
-— so the links never depend on a specialist copying a URL. When a safe selected query's
+— so the links never depend on a specialist copying a URL. When a canonical selected query's
 `observation_ref` proves one Failure path node, attach `[query]` to that node and include the observed
 result in the node label; do not duplicate it. Render a fallback **Evidence Kit** immediately after the
 path only for a selected query that cannot map to one node or when no chain exists. The kit is the decisive
 few, never every query. `6_report/evidence-kit.md` and `6_report/incident-update-with-kit.md` are
 **reserved** for the report-only finalize output (the assembled concise draft + fallback kit); the report
-agent must not author files with those names. Unsafe links remain omitted and their de-identified raw query
-text stays in Technical details.
+agent must not author files with those names. Links refused by the capability-owned secret,
+marked-customer-content, or lineage gates remain omitted and their de-identified raw query text stays in
+Technical details.
 Describe the observation's kind in prose when useful; do not force a fixed taxonomy.
 Keep raw rows or bulky artifacts behind pointers.
 
@@ -456,7 +457,7 @@ Detailed judging rules live in `grading-rubric.md`.
 ## `6_report/` — bounded RCA
 
 Produces a concise external-facing report bounded by the grader verdict. No internal
-observation ids; cite material claims in plain source terms. Never copy unredacted customer content that the run obtained by bypassing a source redaction (anything marked do-not-republish / enumerated by a run `pii-marker`) verbatim into the report — the report is projected into the incident post. Carry such content only as DE-IDENTIFIED facts (service/operation terms; customer-identifying values by category + count, never verbatim), per "Do not republish redacted customer content" in [investigation-invariants.md](investigation-invariants.md). A material numeric/aggregate
+observation ids; cite material claims in plain source terms. Never copy unredacted customer content that the run obtained by bypassing a source redaction (anything marked do-not-republish / enumerated by a run `pii-marker`) verbatim into the report — the report is projected into the incident post. Carry such content only as DE-IDENTIFIED facts (service/operation terms; customer-identifying values by category + count, never verbatim), per "Do not republish marked customer content or secrets" in [investigation-invariants.md](investigation-invariants.md). A material numeric/aggregate
 claim carries its source and a coverage caveat when the figure is partial, sampled, or
 measured differently by another source over the same window.
 <example>"N per <source A>; <source B> showed M, same window — unreconciled"</example>
@@ -553,7 +554,7 @@ Both shapes preserve this information hierarchy:
 5. **Action and uncertainty** — keep one owner-routed next action prominent. Name
    only the uncertainty that changes confidence, owner, mitigation, or the next
    check.
-6. **Evidence Kit** — fallback only for a safe decisive query that cannot map to one
+6. **Evidence Kit** — fallback only for a canonical capability-resolved decisive query that cannot map to one
    Failure path node or when no chain exists; place it immediately after the path and
    never duplicate an inline query link.
 7. **OCE next checks** — the compact operator-facing projection of the internal
@@ -592,9 +593,9 @@ For telemetry-query evidence, reuse the `evidence_link` that rode on the proving
 OBS/evidence row and place it with the observed result on the exact Failure path node
 it proves; when it is the primary proof, keep it on the first proving node. Do not
 repeat it in Evidence Kit. The report/post never constructs or encodes that link and
-never hunts query manifests to recover it. If the proving OBS has no safe
+never hunts query manifests to recover it. If the proving OBS has no canonical
 `evidence_link`, carry de-identified raw query text in Technical details instead and
-never fabricate a link. If neither safe link nor attributable query lineage exists,
+never fabricate a link. If neither canonical link nor attributable query lineage exists,
 state the lineage gap at the claim's existing strength. These anchors stay inline;
 do not create a standalone evidence section. Surface `TSG/KB consulted` with links
 only when those sources were actually used; omit the line when none were used.
