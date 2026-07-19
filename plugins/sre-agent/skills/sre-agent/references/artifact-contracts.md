@@ -272,7 +272,10 @@ manifest to this `OBS###`; specialists also capture `evidence_link` from the sha
 telemetry-query capability surfaced for the query that produced this observation (its
 `DeepLink:` output / run-manifest `deepLink`). Omit `evidence_link` when no shareable
 link was surfaced or when the underlying query embeds restricted identifiers; carry
-de-identified raw query text in Details instead.
+de-identified raw query text in Details instead. A service-internal `ScopeId` is an
+operational routing key and is not restricted solely because it is GUID-shaped; it may
+remain in an IcM evidence link unless service documentation explicitly classifies that
+specific key as customer-identifying.
 The primary clickable-query surface is the **Failure path**: the Grader selects the
 1-3 decisive verification queries by `runId` (from a deterministic candidate menu) into
 `5_grader/decisive-queries.toon`, and the posting capability resolves those runIds to deep-links mechanically
