@@ -6,6 +6,18 @@ This floor is SUBORDINATE to the honesty floor (`investigation-invariants.md`): 
 
 - Before each search, read, or dispatch, name the claim, discriminator, or routing decision it will close. Probes are gap-closing, not exploratory momentum: no probe without a named target it would resolve or falsify.
 
+## Orientation search budget (canonical)
+
+Orientation locates a source, identity, route, or candidate check; it does not verify a
+claim. Per lead, spend at most **3 targeted ranked searches** and **2 deep candidate
+reads**. Use ranked search first when available, then open only the highest-fit sources.
+Stop as soon as one source-pinned candidate is sufficient to arm the next direct probe,
+or when the budget is exhausted. This budget never caps receiver-owned evidence work
+required by the honesty floor.
+
+Record one line in the owning Scout/Specialist artifact:
+`orientation_spend: lead=<id>; ranked_searches=<0..3>; deep_reads=<0..2>; stop=sufficient|exhausted|not-needed`.
+
 ## Run pursuit governor (canonical)
 
 At intake, write this compact structural record to `run.md`:

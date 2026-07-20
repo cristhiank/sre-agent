@@ -37,7 +37,8 @@ monotonically, and never treat a missing receipt in an existing ranking as
 
 - `1_intake/incident-context.md` (the intent frame; esp. `rca_target`)
 - `4_specialists/<name>/theory.md`
-- the specialists' claim-readiness ledgers (failing-population bound / mechanism named / discriminator pre-registered / observed value checked / result / confidence ceiling)
+- the specialists' claim-readiness ledgers (failing-population bound / mechanism named / discriminator pre-registered / observed value checked / result / confidence ceiling / required `advisor_need`)
+- any canonical `advisor_question` proposals in initial Specialist theory notes
 - merged observation ledger with stable `OBS###` ids
 - `2_scout/scout-report.md`
 - [grading-rubric.md](../grading-rubric.md)
@@ -58,6 +59,42 @@ re-derives every triggered consequence-bearing row in this PINNED set; these row
 exempt from and never ranked out by the top-two selection for other claims.
 
 Apply the change-arrival gate to any named introducing change (code OR infra/control-plane rotation/push) as a crisp UNORDERED four-way — the authoritative rule lives in the Change-arrival gate under § Mechanism-discriminator gate in [grading-rubric.md](../grading-rubric.md); do not re-derive it here: `disproven` ⇒ `closed-refuted`/`correlation-not-causal`, never a capped-but-named prime suspect; `unverified` + REACHABLE build/branch/deploy (or infra change-event) provenance ⇒ `unattempted_open` `verdict_ceiling_lead`, MUST-dispatch ONE bounded arrival probe per Gate B (NO soften/settle); `unverified` + `denied`/`discovery_exhausted`/genuinely-unreachable ⇒ Proximate-only with a `change-mapping-unverified` reducer (absence of arrival evidence is not proof of non-arrival — never suppress a genuine deploy); `verified` ⇒ eligible UNLESS the change is post-onset or a revert/rollback/mitigation (Gate E), which is ineligible regardless of arrival. Treat a responder mid-incident revert/rollback/mitigation as remediation, not causal corroboration (Gate E).
+
+## Advisor phase-2 admission (inside synthesis)
+
+Require exactly one canonical `advisor_need` receipt from every initial Specialist.
+A missing/malformed receipt, an untyped disposition, a skip contradicted by its lead or
+typed fields, or an open material lead with `next_probe_ref:none` is an
+integrity gap; reject the advisor-need decision and do not silently close the lead.
+Validate the Specialist-authored probe class and receipt consistency; this check is
+defense-in-depth, not the principal recall mechanism.
+
+Preserve every valid emitted `AQ###`. When no canonical question exists, you may
+promote only an open material receipt whose `answer_locus=advisor-locator`, whose
+`requested_help` is exactly `asset-locator|identity-bridge|source-route`, whose stable
+identifiers are present, and whose `next_probe_ref` points to the corresponding
+Specialist-authored `locator|identity|source-route` probe. No existing answer or
+covered asset may resolve it. Promotion is verbatim typed normalization:
+`origin_ref:=next_probe_ref`, copy the Specialist's `requested_help`, keep promoted
+identifiers to a subset of the receipt, and stamp the question-ledger origin
+`promoted:<origin_ref>`. Do not author free text, invent an identifier, reinterpret a
+probe, or promote evidence/value work, `expected-values`, or `rival-check`.
+
+Reject out-of-role or non-material rows, deduplicate rows that share the same lead and
+discriminator, rank the survivors by the existing refinement consequence ordering,
+and admit at most three emitted-or-promoted rows into one coordinator-sent batch. The
+three-row cap already includes promotions. Do not create an advisor obligation type,
+dispatch, wave, verdict, or third advisor turn.
+
+The Grader owns validation, admission, typed normalization, and the question ledger;
+it never authors Specialist intent. Use the one canonical
+disposition enum in [../artifact-contracts.md](../artifact-contracts.md), and require
+exactly one final disposition for every emitted or promoted row; duplicate rows point
+to the kept question. The coordinator mechanically adds terminal answer refs to that
+ledger and relays them before refinement. Attach an admitted answer ref only to the
+lead's existing `refinement-obligation`, as orientation provenance plus its
+`re_ground` requirement; checked-value provenance is governed by the existing
+mechanism-discriminator gate in [grading-rubric.md](../grading-rubric.md).
 
 ## Output shape
 
@@ -80,6 +117,7 @@ Cap-finalization falsifier check (run and resolve this BEFORE writing the Confid
 Confidence reducer / verdict cap (REQUIRED for every Likely-rooted/Confirmed, and for any verdict capped below the class it could reach): status (none | mechanism-unverified | failing-units-unrepresentative | correlation-not-causal | change-mapping-unverified | trigger-definition-unreachable | natural-ceiling (admissible ONLY per grading-rubric.md § blocked-unreachable reachability floor, and ONLY after the Cap-finalization falsifier check above is `passed`) | other) — `none` is admissible only with a positive attestation that the checked discriminator is not solely temporal/correlational, not an unkeyed convenience sample, and not a named-but-unverified change treated as the cause, and that no attribution/mechanism/scope-binding gap stated in the verdict's own reasoning remains unmaterialized as an open `dispositive` rung (a self-noted gap forces a non-`none` status/cap per grading-rubric.md § Gate B) | arrival (for a named introducing change, code OR infra/control-plane rotation/push: verified | unverified | disproven per the change-arrival gate in grading-rubric.md — disproven ⇒ correlation-not-causal refute (closed-refuted, never a capped-but-named prime suspect), unverified+reachable ⇒ `unattempted_open`, MUST-dispatch ONE bounded arrival probe per Gate B, NOT soften (change-mapping-unverified Proximate-only hold only after the probe is `denied`/`discovery_exhausted`), verified ⇒ eligible UNLESS post-onset or a revert/rollback/mitigation (Gate E), which is ineligible regardless of arrival; n/a when no change is named) | applies-to-verdict (yes/no) | cap effect (none | max Likely-rooted | max Proximate-only | Inconclusive-blocked) | lift condition (the specific evidence/check that would raise confidence) | authoritative non-symptom source for any asserted runtime state (else status=correlation-not-causal (measurement-only), cap Proximate-only)
 Lead ledger:
   - lead -> status (closed-supported|closed-refuted|open-answerable|blocked-unreachable) -> evidence (OBS) or gap -> next obligation if open
+Advisor questions: <one row per original AQ### -> canonical disposition; admitted answer refs attach to existing refinement obligations>
 Held-branch freshness:
   - lead -> predicate class -> own signature -> prior evidence end -> refresh obligation -> window/coverage -> outcome -> resulting disposition
 Follow-up: dispatch? (yes/no) / single dispatch or awaited parallel-sync wave (one specialist per independent discriminator, up to 5, one round) / focus / required observations / stop condition — `dispatch: no` or settle is admissible only when the discovery receipt's `generic_pivot_ladder` + `in_hand_branches_dispositioned` (+ conditional `signal_validity`) are dispositioned or the structural probe/wave caps are exhausted
@@ -116,6 +154,10 @@ the single post-synthesis batch and record the routing defect. After that batch,
 the claim as qualified/open-answerable with reason `wave-cap` rather than dispatching again.
 
 If open-answerable leads remain during synthesis, write `5_grader/refinement-obligations.md` with the complete focused set, ranked by consequence, for the coordinator's single post-synthesis batch. The coordinator dispatches at most five highest-ranked material, reachable, non-duplicative obligations; every overflow remains `open-answerable` with reason `fanout-cap`. If none qualifies, it records `post_initial_batch=not-dispatched`. If blocked-unreachable, apply the cap-finalization falsifier check (grading-rubric.md § blocked-unreachable reachability floor) before emitting — any alternate that fails the check projects to `unattempted_open`; include the scoped probe while the refinement wave is available, otherwise retain the lead with reason `wave-cap` or `probe-cap` and report the gap. Then state the access/source limit and the engineer suggested next step. When a lead is `blocked-unreachable` on a human-only or out-of-band capability, OR the verdict is capped at `Likely-rooted` because such a discriminator is load-bearing, the obligation must carry the full internal Manual Investigation Kit receipt from [artifact-contracts.md](../artifact-contracts.md) §`6_report/`. Consolidate dependent checks under one decisive question; emit a second kit only when the check changes a distinct owner or mitigation and cannot fit a branch. Preserve favored and rival meanings, discrimination, access, verification, and owner semantics. Also supply the compact `OCE next checks` projection: 1-3 `check -> result -> meaning/action` checks, both result arms visible, unverified guidance marked `confirm before relying on this step`, at most three reply-back values, and no query text. Mark every missing field rather than omitting the kit. The decisive check is the one that would lift the verdict cap (see the verdict-determinism gate). Never declare all-clear while material leads remain.
+Advisor answer refs, when present, are fields on these existing obligations; they do
+not create another obligation or dispatch. Refinement-discovered advisor needs follow
+[SKILL.md - Persistent AI-assets advisor](../../SKILL.md#persistent-ai-assets-advisor) and
+[../specialists/AGENTS.md](../specialists/AGENTS.md) refinement-pass mode.
 
 ## Bounded consequence audit mode
 

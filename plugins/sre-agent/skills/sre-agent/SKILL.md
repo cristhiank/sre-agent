@@ -241,15 +241,15 @@ separate turns. Honor the host concurrency limit (max 5 concurrent). The initial
 Specialist wave and the post-synthesis evidence batch never chunk: they dispatch at most
 five and record overflow `open-answerable` with reason `fanout-cap`; no generic
 overflow-batch allowance exists.
-Serialize two dispatches only on a
-genuine data dependency (one's output is a required input to the other) — for
-example, run a common prerequisite pass first when several downstream
-specialists would otherwise each rediscover the same unresolved failing-unit
-enumeration, join key, authoritative source, or producer path.
+Default independent dispatches to the parallel wave. Serialize only with the
+canonical dependency receipt in `references/artifact-contracts.md`, naming each exact
+prerequisite output field and blocked downstream brief. Before downstream dispatch,
+publish every promised field as `resolved:<ref>|unresolved:<reason>`; partial
+publication releases the briefs with explicit gaps.
 
-The sole background exception is the non-detached advisor below: it owns no required
-stage/evidence artifact, never gates progress, and may coexist with the unchanged
-maximum-five evidence-worker batch. No second advisor or sixth evidence worker.
+The auxiliary advisor below is not a numbered/evidence stage and does not consume an
+evidence-worker slot. Collect or terminally disposition each activated phase before
+its receiving Specialist wave. No second advisor or sixth evidence worker.
 
 Keep batch membership tight: include only verdict-relevant Specialists in the
 awaited batch. When the host requires explicit collection, minimize poll count:
@@ -498,11 +498,12 @@ with a required dispatch pending.
 
 Scout/Specialist brief contract: each dispatch carries a compact orientation
 packet with what the coordinator already established — incident facts, candidate
-known-issue/KB hits with pointers, and resolved cluster/db/join-key targets when
-known — so the worker verifies rather than rediscovers them. Pass compact facts
-plus pointers, not raw bulk context. The brief also names the exact single
-question, evidence probe/read caps, capability handles to use, and asks for partial
-findings plus named gaps rather than a long-running sweep.
+known-issue/KB hits with pointers, and exact resolved monitor/source/URL/decoded-query/
+telemetry/join-key locator refs when known — so the worker consumes them before search
+and verifies rather than rediscovers them. Pass compact facts plus pointers, not raw
+bulk context. The brief also names the exact single question, evidence probe/read
+caps, capability handles to use, and asks for partial findings plus named gaps rather
+than a long-running sweep.
 
 Every subagent brief sets `console_return` to one plain-language sentence (about
 30 words): outcome plus the remaining gap, with technical receipts written only to
@@ -512,18 +513,41 @@ the assigned artifacts.
 
 After run/capability/service-source resolution, resolve advisor mode exactly once:
 launch one read-only persistent conversational advisor when the host exposes a stable
-idle handle, point-to-point follow-up, state, and awaited terminal collection; otherwise use a fresh
-stateless advisor for the same initial scan. Unknown handle support selects stateless;
-never skip both. Route either at `balanced/high`, `full-evidence`; the initial scan is
-non-blocking but its answer, abstention, or host timeout/cancellation disposition is
-consumed before Grader synthesis. The coordinator asks one question at a time and
-collects once. A host-emitted timeout/cancellation retires the handle. The read-only
-advisor returns `asset_record`; the coordinator validates it, adds persistence/relay
-fields, and appends `advisor/assets.toon`. Before a reachability cap, ask exactly one
-follow-up when a fit probe fails or returns empty while an in-hand stable key or fit
-alternate source remains; use the same question with a fresh stateless advisor when
-no handle survived. Guidance creates no OBS/verdict/root cause and the receiver
-re-grounds it. All other rules: `references/subagents/ai-assets-advisor.md`.
+idle handle, point-to-point follow-up, state, and awaited terminal collection;
+otherwise use a fresh stateless advisor for each activated phase. Unknown handle
+support selects stateless; never skip an activated phase. Route either at
+`balanced/high`, `full-evidence`. The coordinator is the sole caller and relay.
+
+The coordinator records advisor phase state in the existing run digest as
+`not-started|phase-1-complete|phase-2-complete`. It may advance only in that order;
+a completed phase cannot repeat, and `phase-2-complete` is terminal. Before any
+advisor launch/relay, assert advisor phase-state != `phase-2-complete`; otherwise
+refuse and record the need as an `OCE next check`. After Scout, phase 1 relays its
+optional admitted question before the initial Specialist wave. After Grader synthesis,
+phase 2 relays the admitted Specialist-question batch before the existing refinement
+wave. If phase 1 has no admitted question, fail open and first launch the advisor at
+phase 2 when needed. A phase with no admitted row closes with a terminal skip receipt
+and consumes no terminal advice response. Phase completion counts a validated terminal
+answer/disposition response, not a physical launch; timeout/cancellation with no
+validated answer leaves the same logical phase open.
+
+Persistent mode reuses the same handle across both activated phases. Stateless mode
+reconstructs each phase from the pinned CAPABILITY MAP, question rows, prior
+`asset_record` refs, and source identities, never transcript replay. A host-emitted
+timeout/cancellation retires the handle. Before a same-phase stateless retry, charge
+all available partial host resource receipts to the persisted phase and cumulative
+usage. Retry only when the same question remains answerable, that phase's
+`retry_used=false`, receipt coverage is complete, and both remaining allowances
+suffice; then set `retry_used=true`. Unknown/incomplete usage or exhausted allowance
+refuses retry and uses the existing `open-answerable` budget/blocked disposition.
+Phase 2 remains eligible after a phase-1 retry only from the persisted cumulative
+remainder. The coordinator validates each terminal answer/disposition against the
+canonical answer contract, applies only its same-phase transport repair at
+validate→append when eligible, appends the linked record to `advisor/assets.toon`,
+and relays answer refs only to the originating phase-1 lead or owning existing phase-2
+refinement obligation. Evidence authority, `re_ground`, budget, repair, and
+answer-shape rules:
+`references/subagents/ai-assets-advisor.md`.
 
 The advisor brief passes the canonical CAPABILITY MAP pointer plus its phase-current
 identity and the resolved service/source pointers. Its `capabilities_to_invoke` lists
@@ -649,12 +673,15 @@ an explicit advice blocker, never evidence that no relevant asset exists.
    Keep explicit gaps when no honest discriminator exists yet; Scout emits no findings or verdicts.
    When a discovered asset describes a known or ongoing issue whose signature matches this incident AND supplies (or lets Scout derive) a falsifiable discriminator, Scout names it the leading candidate to test first — recorded as an inherited/open rung, never a settled answer — so the first specialist wave checks it before broad fanout; a weaker symptom-only match stays a non-leading orientation lead. It never reads unreviewed run-local `7_knowledge` candidates or sibling run directories; here too, missing prior knowledge is a gap, not a block.
    **Cross-service prior-investigation-METHOD layer (standing read).** Scout consults it whenever the CAPABILITY MAP exposes it as `confirmed`; dispatch Scout `full-evidence` with it so Scout resolves the knowledge root, reads the generalized learnings, and applies phase-matched checks as questions. Honor applies-when scope and does-not-apply-when falsifiers; matching checks shape hypotheses/routing but never decide them, and "none apply" is valid. This one-compact-file read is cheap and self-degrades to a silent no-op, so — unlike the per-service reusable-guidance shelf — it is NOT subject to the high-severity triage bypass: keep the prior-method intake read even when that bypass applies and the root resolves. It stays map-gated on ACCESS STATUS, non-discretionary once exposed. Re-consult the late/skeptic checks at Grade before accepting a benign/artifact/known-noise disposition. If the capability is absent, proceed normally (a gap, not a block). For any method-check actually consulted, record one line for later curation in the report: `generalized-heuristic <id>: applied | misleading | not-applicable`.
+   After accepting `scout-report.md`, relay its optional canonical
+   `advisor_question` as advisor phase 1 before the initial Specialist wave. No
+   admitted Scout question means skip/fail-open; there is no pointer-index turn.
 3. **Specialists (`3_evidence`, `4_specialists`).** Dispatch one Specialist per
    material hypothesis area, and launch all independent specialists as a SINGLE
    awaited parallel-sync batch (see Execution model: awaited parallel-sync
    batch; max 5, record any overflow without chunking; never background/detached, never
-   one-at-a-time across turns). Serialize a specialist only on a genuine input
-   dependency. **Core-and-edge roster (deep-lane) — coverage-asserted, not fan-out-mandated.** A COVERAGE
+   one-at-a-time across turns). Default to parallel; any serialization must satisfy the
+   canonical dependency receipt above. **Core-and-edge roster (deep-lane) — coverage-asserted, not fan-out-mandated.** A COVERAGE
    FLOOR of three standing hypothesis classes — a timeline/changepoint capability, a
    dependency/downstream capability, and a service-mechanics capability — is CONSIDERED on every
    deep-lane run, each getting a deterministic per-run disposition recorded in a DISTINCT
@@ -736,6 +763,14 @@ an explicit advice blocker, never evidence that no relevant asset exists.
    slots in this batch; neither creates another. Each worker receives one scoped
    discriminator, prior OBS reuse/freshness mode, and a stop condition, and returns only
    its delta as answered / invalid-premise / unanswerable with citations.
+
+   Inside that synthesis, the Grader also dispositions every initial-Specialist
+   advisor-question proposal and identifies the admitted phase-2 batch. The
+   coordinator relays that one batch before dispatching the existing refinement
+   obligations, then attaches returned answer refs to those obligations as
+   orientation provenance only. This adds no obligation type or evidence wave.
+   Refinement-discovered advisor needs remain explicit gaps and project to `OCE next
+   checks`; they never activate another advisor phase.
 
    If no obligation survives the structural gates, record
    `post_initial_batch=not-dispatched`. Merge

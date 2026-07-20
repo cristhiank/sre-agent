@@ -117,6 +117,8 @@ Correct: scope the refutation probe to the enumerated failing cohort's keys; `cl
 
 **Gate E — post-onset actor eligibility.** A change whose SERVING-ref merge/arrival timestamp (the same serving-ref resolution the change-arrival gate uses — NOT the feature-branch date; a responder cherry-pick/backport into the serving branch after onset carries an earlier feature-branch date but a post-onset serving arrival, and Gate E fires on that serving arrival) is AT/AFTER incident onset, or that is a revert/rollback/mitigation/failover of a suspected change, is a REMEDIATION action, not an introduction — CAUSALLY INELIGIBLE as evidence of what introduced the incident, REGARDLESS of arrival (a revert DOES reach prod, so it passes the change-arrival gate cleanly; this is a separate temporal+actor filter). It may corroborate WHICH artifact responders suspected, but it is NOT causal corroboration of the root cause and never lifts the verdict. When merge–onset separation is within the onset-estimate uncertainty, treat timing as UNVERIFIED (dispatch to tighten onset), not automatically ineligible. Gate E bars the revert ARTIFACT as an introduction; it does NOT bar a targeted rollback's OBSERVED EFFECT on the symptom from serving as a discriminator for the reverted cause class. Where Gate C guards a prior CONCLUSION entering as fact, Gate E guards a responder ACTION entering as causal evidence.
 
+Every action cites a supported (`closed-supported`) branch + expected causal effect (action-row text, no field). Unresolved cause → only evidence acquisition or labeled reversible containment, not repair. Withhold timeout/threshold/monitor quieting unless live evidence proves the config/policy is the defect → then admit the cause-linked repair + effect. Symmetric.
+
 ## Failing-unit enumeration gate
 
 After target-alignment and signal-validity establish that real underlying failures exist, and the cause claim rests on an aggregate signal (a rate, count, ratio, or threshold breach), one population standard governs both promoting and refuting a rival. Promote only when the theory accounts for the authoritative failing population — the concrete failing units, or a justified keyed cohort, keyed to the producer; a count or time coincidence without a key-compatible join is salience, not proof. A refutation resting on a population join or empty result counts only from a fit-for-population probe (an empty join with incompatible ID-space/scope, or a non-authoritative source, is a probe defect, not refutation, per "Empty is not absent" in [investigation-invariants.md](investigation-invariants.md)); discriminator-predicate or bounded-as-non-material refutations (per the mechanism-discriminator gate) are unaffected. Exact failed-ID joins are strongest but not the only valid form — any key-compatible join to the producing population (keyed cohort, per-failure records, or direct mechanism telemetry) also qualifies. If units were enumerable but not inspected, mark the lead `open-answerable`, keep **Proximate-only**, and require one focused enumeration pass — which precedes the producer code/config verification the mechanism-discriminator gate requires. The gate does not fire on a pure measurement/threshold artifact, when the mechanism is already verified from a direct non-aggregate source that is itself the authoritative failing population (not a coincident side-population), or when fit-for-purpose enumeration was attempted and the units/keys are genuinely unreachable — the last becomes `blocked-unreachable` with the discovery receipt.
@@ -167,6 +169,8 @@ rubber-stamp the specialists' conclusion. The final independent check is the bou
 consequence audit below, not another broad grading pass.
 
 ## Bounded consequence audit
+
+A secondary-pass change to a consequence-bearing conclusion needs a discriminating delta: new observation/corrected provenance/invalidated evidence/changed population-time. Consumes one existing consequence-audit slot; within `<=2` regrade ≤1 highest-consequence rival, others open. No delta → retain prior/mark unresolved; Report cannot strengthen. No call/wave/artifact.
 
 After initial synthesis and the optional single post-synthesis batch, perform one final
 reasoning-only audit. It replaces a broad second re-grade.
@@ -238,6 +242,8 @@ discovery again, broaden the class, spawn a sibling/child residual, or create an
 additional pursuit round.
 
 ## Lead ledger: no silent null-close
+
+Derive (no record) the union of Specialist receipts + artifact-contracts.md §`5_grader/` receipts/`ranking.md`. A `represented consequence-bearing branch` = union branch whose disposition changes failing-population coverage/verdict/owner/episode-class/action/mitigation; include receipt-only concurrent. Missing disposition/receipt/relationship → existing single wave only. Apply existing closure states + relationship `alternative|sequential|concurrent/contributing|unresolved`; no record/field/wave. Incomplete → open/typed gap, never exempt; absent from union → capability-bound.
 
 List each material lead or hypothesis from scout + specialists and close each as:
 
@@ -322,6 +328,8 @@ refinement wave and a max-five slot are available."
 IMPORTANT: do not settle Inconclusive-blocked or a final Proximate-only — and do not emit `dispatch: no` — while the discovery receipt's cross-source-pivot, its `generic_pivot_ladder`, and `in_hand_branches_dispositioned` (and, when the trigger is signal-shaped, `signal_validity`) remain unspent within the single refinement allowance — each completes only as a probed source + observed result, or a terminal value cited to its source/absence (not a soft "unavailable"; for `signal_validity`, the routed capability's disposition is the completing result); see [artifact-contracts.md](artifact-contracts.md) §`5_grader/`. These passes share that one refinement wave and consume at most one focused pass each. When no reachable in-hand-keyed path and no capability-map-named source consuming the generic ladder's dimensions remain, or the applicable wave/probe cap is exhausted, that terminal IS the receipt — settle and name the engineer next step; do not loop.
 
 ## Time-dependent held-branch closure
+
+Affirmative episode class needs cited live evidence for window/onset/last-failure/current-state/recovery/recurrence/significance + current policy source/revision/eval-basis + live re-ground. Missing/stale → `episode unclassified` + closing evidence; never infer from a last failure or ended window. No public thresholds.
 
 A branch has a **time-dependent reactivation predicate** when its disposition depends
 on a live value that can change after the branch's prior authoritative evidence window,
