@@ -56,7 +56,10 @@ completeness, coverage, dispatch, and closure sweep. When the advisor capability
 activated, the coordinator creates `advisor/assets.toon` and is its sole physical
 writer. The read-only advisor authors each structured record in its answer; the
 coordinator validates it, adds persistence/relay fields, and appends it. The canonical
-record schema and behavior live only in `subagents/ai-assets-advisor.md`.
+question/disposition fields live in `artifact-contracts.md`; answer shape and behavior
+live in `subagents/ai-assets-advisor.md`. Extend each existing `assets.toon` entry only
+with its `AQ###`, phase, canonical disposition, and answer-ref links; add no path or
+parallel store.
 
 ## `run.md` and observations
 
@@ -83,7 +86,8 @@ run_state_digest:
   open gaps: gap id, why it matters, best next source/capability
   current hypotheses: hypothesis id, mechanism, discriminator, status, confidence cap
   specialist assignments: role/question, capability handles, status, output pointer
-  advisor session: persistent attempt/handle, route receipt, state, question/search/open/word caps, auxiliary ledger pointer
+  specialist dependencies: canonical receipt refs; prerequisite brief; exact promised output fields; blocked downstream briefs; per-field resolved ref or unresolved reason
+  advisor session: mode; persistent handle identity or stateless phase refs; phase state (`not-started|phase-1-complete|phase-2-complete`, counting validated terminal answer/disposition responses only); per-phase `retry_used=false|true`; per-launch resource receipt completeness + searches/new-opens/answer-words (including partial host receipts); cumulative `advisor_resource_used` totals; phase-current CAPABILITY MAP/source identities; AQ### rows with canonical dispositions and answer refs; budget receipt by advisor-contract reference; auxiliary ledger pointer
   stage attempts: attempt id, stage/obligations, terminal event/returned-at, result state, durable delta, merge disposition, integrity gap
   evidence conflicts: conflict id, competing claims, sources, needed resolver
   report-ready claims: claim, support OBS ids, verdict wording allowed, caveats

@@ -18,6 +18,92 @@ Per-lead specialist-authored values are `reused|adapted|rejected-because:<reason
 high-severity shelf bypass is stamped once at run level as
 `curated_guidance_reuse=bypassed:high-severity-triage`.
 
+Use the same reuse-mode values for resolved locator refs carried from intake or Scout:
+monitor, source, URL, decoded-query, telemetry, or join-key locators. Key each row by
+the exact locator ref. Consume it before searching; `reused|adapted` cites that ref
+plus receiver-owned evidence when evidence is produced, while
+`rejected-because:<reason>|not-applicable` closes that exact ref. Reproducing live
+evidence is allowed; rediscovering an already resolved locator is not. Do not create a
+second consumption vocabulary.
+
+## Advisor relay records (canonical)
+
+Advisor questions remain in their owning Scout or Specialist/Grader artifact; they do
+not create a stage or store. Every initial Specialist writes exactly one
+`advisor_need` decision in its claim-readiness ledger:
+
+```toon
+advisor_need:
+  disposition: emitted:AQ### | skipped:<answer-in-hand|reachable-direct|no-stable-id|non-material|not-locator-fit>
+  requested_help: <asset-locator|identity-bridge|source-route|none>
+  answer_locus: advisor-locator | in-hand-evidence | unreachable
+  identifiers: <stable ids|none>
+  next_probe_ref: <Specialist-authored probe ref|none>
+```
+
+There is no untyped or `none` disposition. Skip meanings are closed:
+`answer-in-hand` means an existing answer or covered asset resolves the need;
+`reachable-direct` means the receiver owns a reachable direct probe; `no-stable-id`
+requires `identifiers:none`; `non-material` requires a non-material lead; and
+`not-locator-fit` means the remaining work is evidence/value work rather than a
+locator, identity, or source route. Every open material lead has a non-`none`
+`next_probe_ref`; the referenced probe records
+`probe_class: locator|identity|source-route|evidence|value`. Contradictory typed fields
+are an integrity gap, not a silent skip.
+
+For a directly Specialist-authored `expected-values|rival-check` question,
+`advisor_need.requested_help` remains `none`; the canonical question carries its
+existing request type and is never promotion-derived.
+
+An emitted or Grader-promoted question uses this thin shape:
+
+```toon
+advisor_question:
+  id: AQ###
+  origin_ref: <scout/theory/obligation/probe pointer>
+  lead_id: <canonical lead>
+  requested_help: <asset-locator|identity-bridge|source-route|expected-values|rival-check>
+  identifiers: <stable monitor/source/symbol/account+metric ids; applicability fields when material>
+  known_asset_refs: <refs|none>
+```
+
+Promotion is only a typed projection of Specialist-authored locator intent:
+`answer_locus=advisor-locator`; `requested_help` is exactly
+`asset-locator|identity-bridge|source-route`; stable identifiers are present; and
+`next_probe_ref` points to the corresponding Specialist-authored
+`locator|identity|source-route` probe. The promoted row copies `requested_help`,
+sets `origin_ref:=next_probe_ref`, keeps identifiers to a subset of the receipt, and
+is stamped `promoted:<origin_ref>` in the question ledger. Existing answers or covered
+assets block promotion. Evidence/value probes and `expected-values|rival-check` are
+never promotion sources.
+
+Every emitted or promoted question closes exactly once with
+`answered:<ref>|duplicate:<q>|rejected:<reason>|non-material|out-of-role|open-answerable:<budget|fanout|wave|blocked>`.
+The shared answer contract in
+[subagents/ai-assets-advisor.md](subagents/ai-assets-advisor.md) extends the existing
+`advisor_answer` with `question_id`, `lead_id`, `phase`, and `guidance`; its
+`re_ground` field names the receiving role and exact independent check. Persisted
+answer records retain those links.
+
+## Specialist dependency serialization receipt (canonical)
+
+Independent Specialist briefs remain in the parallel wave. Serialize only when the
+coordinator writes this receipt in `run.md`:
+
+```toon
+specialist_dependency:
+  prerequisite_brief: <brief/attempt id>
+  promised_fields:
+    - output_field: <exact prerequisite output field>
+      blocked_briefs: <exact downstream brief ids>
+      publication: pending|resolved:<ref>|unresolved:<reason>
+```
+
+Before dispatching a blocked brief, every promised field must leave `pending`.
+Publish resolved fields and unresolved reasons independently; a partial prerequisite
+therefore releases downstream briefs with explicit gaps. Without an exact consumed
+field and blocked-brief mapping, keep the work parallel.
+
 ## Material Claim Integrity Receipt (canonical)
 
 The Grader writes `5_grader/claim-integrity.toon` before Report for every
@@ -307,7 +393,8 @@ when checked) — and ends with the compact claim-readiness ledger (failing-popu
 bound / mechanism named / discriminator pre-registered / coverage-map disposition
 `consulted:<capability> -> covered:<asset> | no-coverage` / specialist reuse mode
 `reused | adapted | rejected-because:<reason> | not-applicable` / reusable-guidance receipt per § Reusable guidance receipt / observed value
-checked / result / confidence ceiling).
+checked / result / confidence ceiling / required initial-pass `advisor_need` receipt
+per § Advisor relay records).
 For a consequence-bearing claim, the ledger also supplies the conditional semantic
 inputs the Grader needs for the Material Claim Integrity Receipt: observed state plane
 and time basis, population entity/key role and empty policy, observed-versus-claimed
@@ -485,6 +572,8 @@ ended query window or missing later sample into `stopped`, `ceased`, `recovered`
 In iteration mode (`followup.md`), the report and any incident post are a delta/update —
 what changed since the last iteration plus the updated verdict (including honest
 downgrades) — bounded by the current grader verdict.
+
+Projection (exception-only), no new heading/layout. Unsatisfied dimensions ordered: unresolved L1; blocked source; unresolved `represented consequence-bearing branch`; `episode unclassified`; withheld action; retained-prior/revision. Satisfied: no prose. Summary ≤70 words on existing surfaces: highest-consequence first, count rest + IDs in Technical details/Kit. L1/L2: subtract L2 alert-trigger arithmetic; L1 remainder = evidence-backed failing unit/mechanism/cohort, else `L1 unresolved` + closing evidence; trigger never satisfies L1; ≤25 inside the 70.
 
 ### Adaptive operator projection
 
