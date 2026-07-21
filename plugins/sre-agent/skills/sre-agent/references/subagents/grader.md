@@ -138,6 +138,9 @@ In synthesis mode, also write provisional `5_grader/claim-integrity.toon` using 
 canonical Material Claim Integrity Receipt. Include every consequence-bearing claim,
 including decisive Manual Investigation Kit branches. Do not defer obvious semantic
 mismatches to the final audit.
+When writing or finalizing it, set `post_carry` on every row under the canonical gate
+in [artifact-contracts.md](../artifact-contracts.md) and select at most two
+`required` signatures using its §`6_report/` ranking and merge rule.
 
 Model-route-aware audit: consume the per-dispatch `model_tiering` receipts; never load
 the model registry. When a verdict-critical claim comes from a specialist whose receipt

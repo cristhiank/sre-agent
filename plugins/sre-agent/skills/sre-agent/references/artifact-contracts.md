@@ -128,13 +128,14 @@ time_basis: <observed_at + as_of/freshness + source|n/a>
 rival_test: <favored predicts ...; rival predicts ...; observed ...; discriminates=yes|no|n/a>
 attribution_scope: <authoritatively closed sources/entities + open sources/entities|n/a>
 post_candidate: yes|no
+post_carry: required|not-required
 terminal_attempt_refs: <attempt ids|n/a>
 ref_resolution: resolved-exact|missing|invalid|identity-mismatch|n/a
 availability: <observed|typed field gaps|n/a>
 publish: exact|qualified:<allowed wording>|blocked:<reason>
 ```
 
-All rows require `evidence`, `source_fit`, `post_candidate`, and `publish`. Conditional facets are required
+All rows require `evidence`, `source_fit`, `post_candidate`, `post_carry`, and `publish`. Conditional facets are required
 only when their claim class triggers them: state/time for incident state or recovery;
 population semantics for counts/cohorts; protocol semantics for a cross-layer
 projection; rival test for exclusions, causal selection, or a decisive manual branch;
@@ -159,6 +160,15 @@ facts, and family/population claims cannot use this path. The final audit freeze
 fields. One observed confirmation permits only one-unit wording, never unsupported
 family/population wording. Report may omit or weaken a row, but never repair its
 lineage in prose or strengthen it.
+
+`post_carry: required` is admissible only for an externally publishable technical
+failure signature with `post_candidate: yes`, `publish: exact|qualified:<allowed
+wording>`, fit source and keyed population semantics, and any triggered discriminating
+rival test, when its normalized signature materially changes cause, owner, action,
+verdict, or a causal branch. Mark every other row `not-required`. Human-only or
+unverified rows, rows backed by an `open-answerable` lead, and `blocked`, `proxy`,
+`unfit`, or key/population-unfit rows can never be `required`. The bounded selection
+and projection rule is canonical in §`6_report/`.
 
 ## Awaited Stage Attempt Receipt (canonical)
 
@@ -629,6 +639,17 @@ Both shapes preserve this information hierarchy:
    **Why it matters**. Do not repeat the answer. When present, compress Operator
    exemplars into these existing Facts or the existing Proof bullets, never both and
    never a new heading; move only unique telemetry to Technical details.
+   `post_carry` completeness is part of Report completeness: cap the `required` set at
+   two, rank by measured contribution to the alerted population and then
+   owner/action/verdict delta under the
+   [failing-unit enumeration and homogeneity rule](grading-rubric.md#failing-unit-enumeration-gate),
+   and merge variants with the same owner, action, causal branch, and verdict effect.
+   Project every required signature exactly once into an existing Facts label (use
+   **Delta** for collaborator/additive posts) or the single `Failure path`, never both
+   and never a new heading. Each clause includes at least a normalized exception/error
+   class or salient reason/code plus keyed count/denominator; exclude raw stacks,
+   payloads, secrets, PII, and private identifiers. `not-required` technical
+   signatures add no signature clause.
 4. **Proof** — represent the mechanism once. A local Decision Brief uses at most
    three unique proof bullets OR a compact failure path; a Mechanism Handoff uses a
    compact failure path. A live incident-management projection with a causal chain always re-projects
