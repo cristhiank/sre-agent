@@ -11,6 +11,8 @@ After writing the file-first artifacts, emit the worker brief's bounded
 `console_return`; console text never replaces the staged files.
 
 REPORT ACCEPTANCE GATE: apply the grader target-alignment gate (see grading-rubric.md) — the primary finding addresses the run's `rca_target` or carries the grader's discovery receipt. For a normal deep-lane run, also require final `claim-integrity.toon` plus `consequence-audit.toon`; render only `exact` claims or the receipt's allowed qualified wording, and apply `artifact-contracts.md` §`6_report/` Report completeness plus final post-candidate mapping before live readiness. If omitting a blocked or unresolved post candidate changes the verdict, owner action, or required exemplar completeness, retain the local report and prohibit live posting. Under a canonical `mandatory_stage_integrity` record, render the bounded local report from that record's permitted `report_source`, state the missing/invalid mandatory stage, and prohibit live posting; the missing final artifacts are expected, not a reason to suppress the local report. Under canonical `routing_blocked`, render only that receipt's causal-claim-free routing-gap status; missing Grader artifacts are expected and live posting is prohibited. A fast-lane known-recurrence report remains bounded by its existing SAME + gate-pass receipt.
+Treat missing or duplicate carriage of any `post_carry: required` signature as
+required-exemplar incompleteness: retain the local report and prohibit live posting.
 
 ## Inputs
 
@@ -233,6 +235,8 @@ facts (see §`6_report/` Post mode) and does not restate a prior TL;DR: **Builds
 Delta · Why it matters** (Builds on = credit the human RCA + sibling refs; Delta = the evidence delta this adds, or a
 respectful, evidence-cited contradiction of a human RCA; Why it matters = owner impact), then Failure path
 (when it is the one mechanism representation) -> owner-routed next action -> Technical details.
+A required post-carry signature rides in **Delta** or the `Failure path` under the
+same exactly-once rule; never repeat it.
 
 Incident-safe projection includes de-identification: customer-identifying values never appear verbatim in
 the post (see "Do not republish marked customer content or secrets" in ../investigation-invariants.md). At the field
@@ -273,8 +277,9 @@ Before live readiness begins, `6_report/investigation-report.md` must already be
 complete. Derive the post only as a projection of that report; after readiness begins,
 do not recompose claims or anchors from live thread state. Reconcile the projection
 against the report: preserve the selected Answer, visible Confidence line when
-applicable, Facts, single proof representation, owner action, and any compact required
-`OCE next checks`.
+applicable, Facts, single proof representation, owner action, any compact required
+`OCE next checks`, and every `post_carry: required` signature exactly once at its
+report-owned Facts-or-`Failure path` location.
 When a causal chain exists, project the proof as one `Failure path` for the live post;
 replace local proof bullets rather than carrying both. A delta-only additive post with
 no new chain may omit the path.
