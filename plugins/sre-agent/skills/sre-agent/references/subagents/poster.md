@@ -102,8 +102,13 @@ Rendering:
   different outcomes. Mark unverified or missing-citation guidance
   `confirm before relying on this step`, ask for at most three values, and keep query
   text in the separate Evidence Kit or Technical details. Preserve access and owner
-  semantics that change execution. Render only — never invent or verify a step. Name
-  missing required fields and mark the checks incomplete.
+  semantics that change execution. Do not abstract away concrete values already supplied
+  by the projection. Example — non-actionable: `Obtain an authorized exact export to
+  identify the dominant category.` Actionable: `Query <named source> for <bounded
+  request>; requires <named access or resolver>; join with <keys>; <result> means
+  <owner/action>.` These literal phrases are examples, not a denylist. Render only —
+  never invent or verify a step. Name missing required fields and mark the checks
+  incomplete.
 - Call a Manual Investigation Kit branch decisive only when its final `manual-branch`
   receipt records `discriminates=yes`; otherwise render it as non-decisive context and
   state that both rivals remain compatible with the result.
