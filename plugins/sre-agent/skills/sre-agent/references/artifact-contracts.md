@@ -740,7 +740,13 @@ Conditional content:
   Render the operator-facing projection as **OCE next checks**:
   1. Keep 1-3 checks and approximately 120 authored words, excluding a
      safety-critical command.
-  2. Use `check in source -> result -> meaning/action`; name what to inspect and where.
+  2. Use `check in source -> result -> meaning/action`; preserve the selected probe's
+     safe concrete source/location, required access or resolver, bounded endpoint/window
+     or equivalent scope, identity/correlation keys, and observable result meanings with
+     the next owner/action. If a value is unavailable, use the existing convention:
+     `Missing <detail>. <owner> should <smallest evidence-supported action>.` Apply the
+     existing privacy, secret, and customer-data gates; when a detail cannot be published
+     safely, preserve the safe resolver/owner and state that it is withheld, not absent.
   3. For a decisive two-result check, keep both favored and rival result arms visible.
      If a result does not choose between causes, say so and route to the next safe
      check.
