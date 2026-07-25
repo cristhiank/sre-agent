@@ -46,7 +46,10 @@ srch def <Symbol> [-p DIR]…              # indexed definition lookup (fastest;
 srch index -p <DIR> [--rebuild]          # build/refresh the ctags symbol DB for a root
 srch <query…> [-p DIR] [-e cs,ts,md]     # ranked search; single indexed symbol → defs only
 srch <Symbol> --usages [-p DIR]          # …add the scoped live usage scan
-srch <query…> --regex "<re>"             # raw regex, no identifier expansion
+srch <query…> -x "*-ledger.*" -x "*.min.js"   # drop bulk/append-only files from the results
+srch "<alert title as pasted>" [-p DIR]  # punctuation-split into terms; ranked by rarity
+srch <query…> --no-expand                # literal: only the terms exactly as typed
+srch <query…> --regex "<re>"             # raw regex, no tokenization or expansion
 srch <query…> --json | --stats           # machine output / timing + files scanned|matched
 ```
 
@@ -65,8 +68,24 @@ Full flag list: `cli/README.md`.
 - **Index freshness.** `srch def` and the single-symbol fast path read the last `srch index`; after
   source/submodule advances, `srch index --rebuild` for the affected root. Live searches
   (`--usages`, multi-term, regex) always reflect the current working tree.
-- **Ranking** favors likely definitions/declarations, original-term over expanded-subtoken matches,
-  path/filename hits, and term density; comments and test paths are mildly penalized.
+- **Paste alert titles verbatim.** Query terms are split on punctuation, so a discriminative
+  identifier glued to scaffolding still matches: `[Service][QOS]` searches `Service` and `QOS`,
+  `*POST-/tenant/api/v1.0/parserecordsfromrequest*` reaches `parserecordsfromrequest`. Terms are
+  OR-ed and ranked by IDF — common fragments cost nothing, rare ones decide the order. Short
+  operational codes (`WW`, `DF`, `TBD`, `403`) are kept. Use `--no-expand` to search the literal
+  punctuated string, or `--regex` for a raw pattern.
+- **Ranking is BM25F** over heading / body / comment / path zones: rare query terms outweigh common
+  ones, repetition saturates, and long files are length-normalized so a large aggregate cannot win
+  on volume. Terms the caller typed outweigh terms recovered from inside them. A definition-shaped
+  line adds a bonus scaled by how rare its term is. Test paths are
+  mildly demoted. Definition shape and comment markers are read **per file type** — in Markdown a
+  leading `#` is a heading (boosted), while in code it is a comment (demoted). `--stats --json`
+  reports each term's document frequency and IDF.
+- **Write for retrieval.** In prose, put the identifying term in a heading or at the start of its
+  line, keep one subject per file, and use the rare exact token (an ID, a processor name) rather
+  than a generic paraphrase. Long append-only ledgers rank poorly by design; `-x` removes them.
+- **Long lines are clipped** to `--max-line-width` (default 400) around the hit, so `-C` context
+  stays readable on minified or table-packed files; `--max-line-width 0` restores full lines.
 - **Smart case** by default (case-insensitive unless the query has an uppercase letter); `-i` forces
   insensitive. Common junk (binaries, build/output dirs, generated assets) is excluded; a
   `--max-files` cap aborts an accidental giant scan with guidance.

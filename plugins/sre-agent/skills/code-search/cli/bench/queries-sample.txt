@@ -1,0 +1,8 @@
+# Sample query list. One query per line; blank lines and `#` lines are ignored.
+# Replace with a real query set and keep that set outside this repository.
+# Prose-shaped queries exercise ranking far better than bare identifiers.
+connection pool exhausted on the write path
+retry budget for a downstream timeout
+HTTP 429 throttling from the storage tier
+background processor availability below threshold
+certificate rotation runbook

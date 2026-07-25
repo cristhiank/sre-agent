@@ -1,0 +1,3 @@
+query,expect,max_rank
+MyServiceClient,Clients[\\/]MyServiceClient\.cs$,1
+IRetryPolicy,Interfaces[\\/]IRetryPolicy\.cs$,1
