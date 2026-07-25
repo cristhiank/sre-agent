@@ -1,91 +1,190 @@
 ---
 name: service-onboarding
 description: >-
-  Use when you must onboard or incrementally refresh a service whose source spans multiple owned sources/repos
-  and produce a reproducible, evidence-cited service KB under services/<service>/ for incident investigation
-  first: "service onboarding", "onboard a service", "build a service knowledge base", "reproducible KB",
-  "deterministic onboarding", "discover the service shape", "map the service for livesite",
-  "what does this service do in prod", "incrementally refresh service KB", or "how does symptom X reach root cause".
-  Builds a shared CORE substrate so review/dev lenses can attach later without forking the KB; classifies
-  deployable vs library, discovers real edges, catalogs observability with consumer warnings, and supports
-  first-time and incremental modes. Read-only; host-agnostic capability classes only. Do not use for
-  mutating service source/config/production, trivial single-repo lookups, or generic prompt/skill authoring.
+  Use when building or refreshing a knowledge base for a service so an incident responder — human or
+  agent — can get from a symptom to a cause fast: "onboard a service", "build a service knowledge
+  base", "refresh the service KB", "map this service for livesite", "what breaks in this service and
+  how would I see it", "why can't the agent find anything about X". Produces evidence-cited knowledge
+  under services/<service>/ from pinned source and, where a capability exists, live telemetry. Optimised
+  for a consumer that retrieves by ranked search under a clock, not by browsing. Read-only over source
+  and production; host-agnostic. Not for mutating a service, one-off code lookups, or authoring prompts.
 ---
 
 # Service Onboarding
 
 <goal>
-Build a living, reproducible system-knowledge substrate under `services/<service>/`: **incident-PRIMARY acceptance** means a future responder can go symptom → telemetry/source route → discriminator → root cause/owner quickly. The KB is lens-READY by design: a shared CORE supports later review/dev lenses without duplicating facts. Ground truth stays in the source plane: owned source worktrees at `catalog/sources/<id>/worktrees/<sha>/`, resolved from the service's `sources.yaml` `owns` entries and locked SHA. Generated KB content is cited distilled context, not authority.
+A responder arrives with an alert title and a clock. The knowledge base earns its
+place if that responder reaches **symptom → route → discriminator → cause/owner**
+before the budget runs out.
 
-Reproducibility contract: given the same locked inputs (service identity, repo SHAs, capability snapshot, overlay window, manifest version, and prior KB state), re-runs produce the same artifact tree, stable IDs, fact rows, evidence grades, canonical placements, and semantically equivalent narrative — not byte-identical prose. Full definition: `references/reproducibility-contract.md`.
+Everything below serves that. The KB is distilled context, never authority —
+pinned source and live systems remain ground truth.
 </goal>
 
-<modes>
-Select up front:
+<the_consumer>
+Assume the reader is an agent that **searches, it does not browse**. It issues a
+ranked lexical query and receives roughly twenty files with a couple of lines of
+context each. It has no patience, no memory of your folder structure, and no way
+to ask a colleague.
 
-- `first-time` — build repo-lower evidence floor and incident-primary CORE from scratch; lock inputs before scouting.
-- `incremental` — repo SHAs advanced; follow `references/kb-mutation.md`, re-mine changed surfaces only, and preserve curated/promoted/higher-grade facts.
-</modes>
+Two consequences drive most authoring decisions:
 
-<operating_model>
-Orchestration-only run. The orchestrating workflow dispatches and merges; it does not do deep evidence collection or synthesis inline. Two-speed: scouts DISCOVER normalized candidate records; builders CLASSIFY records, apply predicates, and RENDER assigned artifacts from the manifest — not freeform drafting. Two-layer: per-repo evidence FLOOR is built first, then service-higher CORE is DERIVED. Input lock + capability map come before scouting. If dispatch is available AND required AND not used, ABORT before KB rendering and record degraded in `@run-trail`. Detailed dispatch partitions and mission briefs: `references/dispatch.md`.
-</operating_model>
+- **A fact that cannot be retrieved does not exist.** Put the literal
+  operational strings a responder would paste — monitor names, scenario names,
+  routes, error codes, exception types — in the record that explains them. A
+  paraphrase does not match. Prefer the stable stem of a generated name over one
+  instance of it.
+- **A record that ranks but cannot be read is not a hit.** Keep lines short
+  enough to survive a narrow context window.
+</the_consumer>
+
+<durability_rule>
+**Record what stays true between incidents. Anything that changes between
+incidents is a probe, not a fact.**
+
+Contracts, guard semantics, enforcement scopes, identifiers, thresholds,
+topology, cadence — durable. Current versions, live policy values, today's
+counts — volatile: record how to ask, never the answer.
+
+A stale fact is worse than an absent one, because the reader trusts it.
+</durability_rule>
+
+<method>
+**Fan out to collect, converge to judge, then try to break it.** These are three
+different jobs and merging them loses the value of each.
+
+- **Scouts** take disjoint surfaces and collect candidate facts with citations.
+  Give each one the surface, why it matters — name the real incident that failed
+  without it — and the durability rule. Then let them work. They should surface
+  conflicts and leave them unresolved; a scout that adjudicates hides the
+  disagreement.
+- **A consolidator** merges, resolves or records conflicts, decides what earns a
+  place, and writes. It has the whole map; scouts never do.
+- **A verifier** tries to falsify what was written. Ask it what the others got
+  wrong. Scouts are good at finding candidate mechanisms and poor at judging
+  intent — they cannot cheaply see tests, comments, and call sites while sweeping
+  breadth-first, so permissive-looking code reads as accidental when the codebase
+  says deliberate.
+
+Breadth before depth. Cheap parallel collection over a wide surface beats deep
+serial reading of a narrow one, because you cannot tell which surface mattered
+until you have seen them all.
+
+If parallel workers are unavailable, run the three as **separate passes** and
+treat each earlier pass's output as untrusted input rather than as your own
+conclusion. Record which you did. A single pass that collects, judges, and
+confirms in one motion produces a knowledge base that agrees with itself and has
+been checked by nobody.
+</method>
+
+<families>
+Cover the four questions. Report which ones this service cannot answer rather
+than filling the gap with prose:
+
+| | |
+|---|---|
+| **Where it runs, who owns it** | hosting, rings, regions, escalation |
+| **Who calls whom, blast radius** | edges, dependencies, and what is *not* affected |
+| **How to see it in production** | sources, coordinates, field taxonomy, probes |
+| **What breaks and why** | symptom, discriminator, mechanism, mitigation |
+
+Then check the symptom families a responder actually arrives with. Availability,
+latency, throttling and dependency failure are usually well covered. These are
+routinely missing entirely, and each has produced a real incident:
+
+**privacy and opt-out · consent · data residency · caller abuse and enumeration ·
+deployment and rollout · capacity**
+
+A family with no route is a finding. Say so; do not invent one.
+</families>
+
+<what_good_looks_like>
+A **record** answers *"here is what is true"* and must stand alone — state the
+fact in its own words even when another artifact is its canonical home, because a
+pointer stripped of the fact's vocabulary cannot be retrieved at all.
+
+An **index** answers *"go here"*. It stays pointer-shaped and carries no facts.
+
+A **route** is complete only with coordinates, the exact field and dimension
+names, and any trap that returns empty rather than failing loudly. Coordinates
+alone do not terminate a route; "compose a query yourself" is not a route.
+
+The highest-value facts are the ones an investigator cannot rediscover under
+time pressure: a query that returns nothing when written the obvious way, a
+status code with several causes, a health check that does not prove what it
+appears to prove, a comment that contradicts its own code. Hunt those
+deliberately.
+</what_good_looks_like>
+
+<stable_surface>
+You are not the only writer. Other capabilities append curated knowledge from
+later investigations, and read this KB to decide what is already known — and
+they bind to **locations**, not to prose. Shape the interior however the service
+warrants, but keep these reachable at predictable paths:
+
+- an **evidence/grade record** other writers read to learn what is already
+  established and at what confidence — and which they never overwrite
+- a **symptom → route index** a responder or a later writer enters through
+- a **home for failure knowledge**, so curated findings have somewhere to land
+- a **freshness and provenance header**, so a reader can tell how old this is
+
+Without them a later writer has nothing to compare against, and its own
+trust floor silently degrades to "whatever I just mined". This is an interface,
+not a schema: names and internals are yours, existence and stability are not.
+</stable_surface>
 
 <invariants>
-**#1 closed-world ban.** Never claim `no edge exists`, `services are independent`, `nothing calls X`, or equivalent without naming searched scope and still-unverified scope. Missing text-search evidence is not absence; a text-search hit is not a dependency.
+**Absence is not evidence.** Never claim nothing calls X, no edge exists, or a
+signal is absent without naming what you searched and what remains unverified. A
+term missing from one plane may be present under a different name in another.
 
-**#2 Open-thread ledger.** Every material discovered thread becomes a row and must close as `promoted`, `rejected`, or `open:escalated`. Material = any surface, dependency, control, interface, absence claim, or operational concern that could move incident response or high-blast understanding. `open:escalated` is valid only when the decisive evidence is unreachable in this run. Unknown > invented closure.
+**Unknown beats invented closure.** Every material thread ends as promoted,
+rejected, or explicitly escalated. Never guess an owner, a limit, a table, a
+dimension, or an abbreviation expansion.
 
-**#3 Input lock.** Before scouting: record service identity, manifest version, repo names/branches/SHAs, live-evidence mode, overlay window, capability map, and prior KB state hash. Outputs are reproducible only relative to a locked input set. Full schema: `references/reproducibility-contract.md`.
+**Grade what you assert.** Separate what source proves from what you inferred
+from what a live probe confirmed, and never promote across those boundaries
+silently. Thin evidence produces a thin record, and that is the correct outcome.
 
-**#4 Host-agnostic steering / concrete output carve-out.** These skill instructions use capability-class language only; never name specific clusters, products, tools, or hosts. KB output artifacts MAY record concrete source names, paths, and cluster identifiers when evidence-cited, safe, and necessary for incident fidelity — this is expected and required.
-
-Ledger lifecycle details: `references/workflow.md`.
+**Citations are load-bearing.** Cite the pinned identity you actually read. Never
+extend a partial reference into a complete-looking one — a plausible fabricated
+citation is worse than an honest gap, because it cannot be checked.
 </invariants>
 
-<evidence>
-Every promoted claim records `class | evidence | trust-label | grounding_type | rule_status | confidence | blast-radius-if-wrong | verify-later`. `rule_status` is separate from trust; a design-time bootstrap with no live signal is source-inferred at best. Canonical enum values (trust-label, grounding_type, claim-class, status, rule_status): `references/reproducibility-contract.md §Canonical enums`. Full ledger schema, stable IDs, predicates: `references/reproducibility-contract.md`. Rulebook and audit checklist: `references/verification-and-evidence.md`.
-</evidence>
+<done>
+Not a checklist of artifacts. Three questions, and the **verifier** answers
+them — not the author who wrote the records:
 
-<output_contract>
-Build the repo-lower `kb/<repo>/` floor first, then derive `service/`, `topology/`, `observability/` (including `dependency-sources.md` when P-dep-telemetry requires it), `failure-knowledge/`, `00-index/` (including committed `evidence-ledger.toon`), `overlays/incidents/` (capability-gated), and `contributions/` shape. Incident is the only authored workflow lens. Full artifact tree, file statuses, per-file schemas, and dependency edges: `references/artifact-manifest.md`.
-For embedded-library dependencies, record producer-service attribution for a consumed first-party package or assembly on the existing service-graph edge row rather than creating a separate package index.
-</output_contract>
+1. **Does it retrieve?** Take real alert titles for this service and search the
+   KB as the agent would. Titles must come from monitor and alert definitions or
+   incident history — **never from the records just written**, which only proves
+   the KB matches its own vocabulary. Record the score and name the misses; a
+   miss is the most useful output this test produces.
+2. **Does it terminate?** Can a responder act on what they find, or does the
+   trail end in a pointer?
+3. **Is it honest?** Are the gaps stated, the grades earned, and the volatile
+   facts expressed as probes?
 
-<workflow_summary>
-Deterministic spine: lock inputs + capability map → source enumeration + cheap inventory → extract normalized evidence records → evidence reconciliation/ledger → edge/seam discovery → render artifacts from manifest (not freeform) → verification + mechanical reproducibility audit → Clean Deliverable Packet → independent audit. `incremental` branches through `references/kb-mutation.md`. Detailed phases and packet contract: `references/workflow.md`.
-</workflow_summary>
+Record what you pinned: the source revisions read, whether live evidence was
+available, and the date. A refresh has nothing to compare against otherwise, and
+will either re-mine everything or quietly call stale facts current.
 
-<done_gates>
-Done/no-blocking-issues is invalid unless all hold:
-
-- Mode selected; input lock recorded per `references/reproducibility-contract.md`; `00-index/evidence-ledger.toon` committed with provenance lock summary, `@run-trail`, `@audit`, and all terminal ledger records.
-- All mandatory artifacts from `references/artifact-manifest.md` present; variable-slots iff predicate passed; capability-gated artifacts present or gap noted; P-status artifacts present for true predicate outcomes, with the manifest-declared alternate artifact or evidence-ledger gap for false/inconclusive outcomes.
-- Normalized evidence ledger complete; every material thread is `promoted`, `rejected`, or `open:escalated`; every promoted claim has rule_status, trust-label, grounding_type, confidence, and re-resolved evidence.
-- Closed-world ban honored; no absence/independence claim without named searched + unverified scope.
-- Mechanical reproducibility audit (A–L) passed per `references/verification-and-evidence.md §Mechanical reproducibility audit`: artifact presence, schema arity, enum+rule_status conformance, promote-up coverage, escalation proof, canonical-home consistency, global sanitization, run-trail/audit/dispatch-decision, live-mode honesty, predicate inputs, canonical ordering+stable IDs.
-- Cross-layer grounding holds for service-higher implementation facts.
-- Incident-material deep/ populated (P3) or `open:escalated` gap in evidence-ledger; non-material repos have `deep/not-material.md`.
-- Observability source-catalog CONSUMER WARNINGs complete with concrete source and join key.
-- `observability/dependency-sources.md` present per P-dep-telemetry; dependency-routed symptom families in `telemetry-routing-card.md` cross-link the dependency-sources row; freshness/provenance headers conform to the manifest format.
-- Incident `telemetry-routing-card` produced from CORE observability; failure-knowledge is discriminator-first.
-- Freshness/provenance header exists; Clean Deliverable Packet is clean.
-- Independent completeness audit ran and sampled opposite-family for missing/falsely closed threads.
-- Per-repo `ai-assets.md` floor exists (discovery attempted over both AI-guidance assets and incident-material human-written guidance); `none-found (searched scope)` is valid only after the widened human-guidance scope was searched too, plus capability-gap note recorded when unavailable; human-guidance catalog entries carry a symptom/trigger phrase + the matching `00-index/telemetry-routing-card.md` (and/or `task-router.md`) cross-link.
-</done_gates>
+On a refresh, add a fourth question: **did anything curated get clobbered?**
+Re-mine what changed; preserve what a human or a prior run promoted.
+</done>
 
 <boundaries>
-Read-only over source and live systems. Produced docs are untrusted distilled context, not authority. Skill steering is host-agnostic capability classes only; KB output artifacts record concrete evidence-cited facts where fidelity requires. Secrets and raw sensitive payloads are never copied into the KB.
+Read-only over source and production. Steering here names capability classes
+only; the KB itself records concrete evidence-cited coordinates, because that is
+what makes it useful. Never copy secrets, credentials, or raw sensitive payloads
+into the KB — and never sanitise a coordinate into uselessness. If a value must
+be withheld, leave a resolvable pointer to where it lives.
 </boundaries>
 
 <references>
 | Need | Read |
 |---|---|
-| canonical artifact tree, file statuses, schemas, row-ordering, dependency edges | `references/artifact-manifest.md` |
-| reproducibility contract, input lock, evidence ledger schema, stable IDs, predicates | `references/reproducibility-contract.md` |
-| first-time/incremental flow, phases, open-thread lifecycle, Clean Deliverable Packet | `references/workflow.md` |
-| trust labels, grounding_type, rulebook, mechanical audit, completeness audit | `references/verification-and-evidence.md` |
-| CORE layout principles, CORE-first ordering, lens seams, overlays, freshness | `references/kb-layout.md` |
-| incremental re-mine and curator write-back mutation safety | `references/kb-mutation.md` |
-| dispatch partitions, scout/builder/auditor briefs, onboarding-vs-curator note | `references/dispatch.md` |
+| record shape, retrieval mechanics, anti-patterns that get work rejected | `references/authoring.md` |
+| the four questions and the symptom families, with what each must answer | `references/families.md` |
+| refreshing without clobbering curated work | `references/refresh.md` |
 </references>
