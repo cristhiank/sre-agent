@@ -832,12 +832,7 @@ fn build_query_plan(args: &SearchArgs, force_expand: bool) -> Result<QueryPlan> 
         all.extend(sub_terms.iter().cloned());
     }
     all.sort_by_key(|s| std::cmp::Reverse(s.len()));
-    let escaped = all
-        .iter()
-        .map(|s| regex::escape(s))
-        .collect::<Vec<_>>()
-        .join("|");
-    let regex_text = wrap_word(&format!("(?:{})", escaped), args.word, false);
+    let regex_text = union_pattern(&all, args.word);
 
     let search_re = RegexBuilder::new(&regex_text)
         .case_insensitive(case_insensitive)
@@ -1041,13 +1036,35 @@ fn wrap_word(body: &str, word: bool, raw: bool) -> String {
     }
 }
 
-fn build_union_re(terms: &[String], ci: bool, word: bool) -> Result<Regex> {
-    let escaped = terms
+/// Terms at or above this length match as unbounded substrings, which is what lets a corpus
+/// record of `getrecordsshowuiarchived` answer a query that pasted the shorter `getrecords`.
+/// Shorter terms get word boundaries instead. Operational codes (`ICE`, `ACE`, `DF`, `WW`)
+/// have no such prefix relationship, and as substrings they collide with ordinary corpus
+/// words — `ice` inside `services`, `ace` inside `namespace`, `df` inside `sdfv2` — which
+/// inflates their document frequency, collapses their IDF toward zero, and destroys exactly
+/// the discrimination they exist to provide. Measured on the example-service KB: bounding moved
+/// `ice` from df=125/idf=0.16 to df=9/idf=2.74, `ace` from 114/0.25 to 13/2.39, and `df`
+/// from 91/0.47 to 10/2.64, while non-colliding `ww` and `staging` were unchanged.
+const MIN_UNBOUNDED_TERM_LEN: usize = 5;
+
+/// `-w` forces boundaries on every term; otherwise only short terms are bounded.
+fn bound_term(term: &str, word: bool) -> bool {
+    word || term.chars().count() < MIN_UNBOUNDED_TERM_LEN
+}
+
+/// Build an alternation that bounds each term independently. Wrapping the *joined* pattern
+/// would force one policy on every term and lose the asymmetry.
+fn union_pattern(terms: &[String], word: bool) -> String {
+    let parts = terms
         .iter()
-        .map(|s| regex::escape(s))
+        .map(|s| wrap_word(&regex::escape(s), bound_term(s, word), false))
         .collect::<Vec<_>>()
         .join("|");
-    let pat = wrap_word(&format!("(?:{})", escaped), word, false);
+    format!("(?:{})", parts)
+}
+
+fn build_union_re(terms: &[String], ci: bool, word: bool) -> Result<Regex> {
+    let pat = union_pattern(terms, word);
     RegexBuilder::new(&pat)
         .case_insensitive(ci)
         .build()
@@ -1055,10 +1072,14 @@ fn build_union_re(terms: &[String], ci: bool, word: bool) -> Result<Regex> {
 }
 
 fn build_term_re(term: &str, ci: bool, word: bool) -> Result<Regex> {
-    RegexBuilder::new(&wrap_word(&regex::escape(term), word, true))
-        .case_insensitive(ci)
-        .build()
-        .context("building term regex")
+    RegexBuilder::new(&wrap_word(
+        &regex::escape(term),
+        bound_term(term, word),
+        true,
+    ))
+    .case_insensitive(ci)
+    .build()
+    .context("building term regex")
 }
 
 /// Definition-anchor patterns, one per file class. `@T@` is replaced with an alternation over
@@ -1269,8 +1290,12 @@ fn collect_file_candidate(
     let mut anchor_mask = vec![false; n_terms];
     let mut anchor_width = 0usize;
 
-    for (i, (term, _)) in plan.term_res.iter().enumerate() {
-        let count = count_occurrences_in(&path_key, &key(term, plan.case_insensitive));
+    // The path zone is matched with the term's own compiled regex, not a raw substring scan:
+    // every ancestor directory contributes to `path_key`, so an unbounded short term (`ice`
+    // inside `.../services/...`) would otherwise score a path hit on every candidate in the
+    // corpus and flatten the zone it is supposed to discriminate with.
+    for (i, (_, re)) in plan.term_res.iter().enumerate() {
+        let count = re.find_iter(&path_key).take(MAX_TF_PER_LINE).count();
         if count > 0 {
             tf_path[i] = count as f64;
             present[i] = true;
@@ -1639,22 +1664,6 @@ fn ranking_stats(plan: &QueryPlan, corpus: &Corpus) -> RankingStats {
         avgdl_bytes: corpus.avgdl.round(),
         terms,
     }
-}
-
-fn count_occurrences_in(haystack: &str, needle: &str) -> usize {
-    if needle.is_empty() {
-        return 0;
-    }
-    let mut count = 0usize;
-    let mut from = 0usize;
-    while let Some(pos) = haystack[from..].find(needle) {
-        count += 1;
-        from += pos + needle.len();
-        if count >= MAX_TF_PER_LINE {
-            break;
-        }
-    }
-    count
 }
 
 /// Clip a match line to a window around the first match so a multi-kilobyte line cannot
