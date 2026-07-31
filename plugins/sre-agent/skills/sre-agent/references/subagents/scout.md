@@ -18,6 +18,14 @@ After writing the file-first artifacts, emit the worker brief's bounded
 
 Orient on the run's declared `rca_target`; test whether it reflects a real underlying failure versus pure signal/threshold noise.
 
+Derive the window; do not inherit it. The declared window says when the problem was
+noticed, not when it started: detection trails the cause by ingestion delay,
+aggregation interval, and evaluation period, so a window copied from the alert can
+exclude the onset it exists to explain. Propose a search window running from the
+earliest plausible precursor through recovery, and state the lag you assumed so a
+specialist can test it. Evidence that the cause sits outside the declared window
+widens the scope; it never closes the lead.
+
 Run a bounded related-incident check: using an available read-only incident-history capability, find (a) prior/concurrent incidents matching the run's recurrence identity (same-signal siblings) and (b) incidents on the same resource/scale-unit joined by the failing unit's correlation/identity key, or a directly dependent component on a known dependency edge, within an overlapping window under DIFFERENT signals/monitors/owning teams (cross-signal cascade candidates) — title/team or bare co-residency alone is insufficient. Prefer the native relationship links the history source exposes — parent/child, related-incident links, and the per-incident correlation key — over title-matching alone. Using available service dependency topology, label each related incident per the cross-incident attribution tiers in [grading-rubric.md](../grading-rubric.md) — `related` or `cascade-candidate` — a neutral relationship label, not a directional verdict (the grader owns `likely-downstream-of`). Treat every match — its verdict, mitigation, or candidate label — as a claim that shapes which hypotheses lead and what to test first, never as an answer. If no incident-history capability is available, record this as an explicit gap.
 
 Read the captured discussion-thread summary: surface the material human comments, transfers, owner notes, prior RCA/mitigation, linked change/rollout notes, and open questions, and let any human-stated cause or mitigation shape which hypotheses lead and what to corroborate first — never as a settled answer. If the thread was empty or unavailable, note it.
