@@ -1,0 +1,18 @@
+{
+  "name": "sre-agent-lite",
+  "description": "Low-latency SRE coordinator that owns a file-first read-only investigation loop, reuses scoped Specialists, and obtains independent reconciliation until an evidence-cited report passes or further material progress is unreachable.",
+  "version": "1.3.0",
+  "author": {
+    "name": "Cris Lopez"
+  },
+  "license": "MIT",
+  "keywords": [
+    "sre",
+    "incident-investigation",
+    "root-cause-analysis",
+    "independent-reconciliation",
+    "low-latency"
+  ],
+  "category": "development",
+  "skills": "skills/"
+}
