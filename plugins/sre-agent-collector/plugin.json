@@ -1,0 +1,18 @@
+{
+  "name": "sre-agent-collector",
+  "description": "Hourly collector that reduces accumulated deferred judgments into one proposal-only IMPROVEMENTS.md, ranking a small number of prompt-hardening areas by evidenced weight, preserving evidenced strengths, and reporting judging-loop health separately from agent quality.",
+  "version": "1.3.0",
+  "author": {
+    "name": "Cris Lopez"
+  },
+  "license": "MIT",
+  "keywords": [
+    "sre",
+    "judgment-aggregation",
+    "prompt-hardening",
+    "evaluation",
+    "proposal-only"
+  ],
+  "category": "development",
+  "skills": "skills/"
+}
