@@ -106,7 +106,7 @@ set. Mismatched identity is evidence of contamination in its own right.
 
 ## Human closure text is a claim, not an oracle
 
-Mitigation, HowFixed, Summary, and discussion prose are what a human wrote under
+The closure record's narrative fields and discussion prose are what a human wrote under
 time pressure while an outage burned. They are a claim to test against the same
 evidence you would demand of the agent. You may and should conclude that the agent
 was right and the human account was shallow, incomplete, or wrong; when the two
@@ -130,11 +130,11 @@ Record two independent fields and never collapse them:
 "thin". Conflating a broken tool with a silent human mislabels well-documented
 incidents as undocumented and poisons every aggregate built on top.
 
-Concretely: the incident warehouse carries no free-text root-cause column, only a
-numeric root-cause identifier. Human explanation lives in Mitigation, HowFixed and
-Summary. A provider returning an empty string for a root-cause field is a schema
-artifact, not evidence that the human was silent. Read the narrative fields before
-you claim there is no narrative.
+Concretely: an incident provider may carry no free-text root-cause field at all, only a
+coded root-cause identifier, with the human explanation living in separate narrative
+fields. A provider returning an empty string for a root-cause field is a schema
+artifact, not evidence that the human was silent. Read whatever narrative fields the
+provider exposes before you claim there is no narrative.
 
 ## Signal type is the aggregation boundary
 
@@ -626,7 +626,7 @@ normal, complete record.
   },
   "truthAcquisition": "ok",
   "truthEvidence": "status_only",
-  "truthNote": "Closure record retrieved; Mitigation, HowFixed and Summary all read and all blank apart from a lifecycle note. Numeric root-cause identifier present, no narrative to test.",
+  "truthNote": "Closure record retrieved; every narrative field read and all blank apart from a lifecycle note. Coded root-cause identifier present, no narrative to test.",
   "incidentStatusStamp": {
     "incidentStatus": "Resolved",
     "reopenCount": 0,
@@ -819,7 +819,7 @@ The degraded default: no report bound, no manifest, and still a useful record.
   },
   "truthAcquisition": "ok",
   "truthEvidence": "narrative",
-  "truthNote": "Closure record retrieved; Mitigation and Summary carry a human explanation naming a downstream configuration rollback.",
+  "truthNote": "Closure record retrieved; its narrative fields carry a human explanation naming a downstream configuration rollback.",
   "incidentStatusStamp": {
     "incidentStatus": "Resolved",
     "reopenCount": 1,

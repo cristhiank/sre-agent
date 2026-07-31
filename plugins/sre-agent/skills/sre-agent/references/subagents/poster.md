@@ -218,7 +218,7 @@ from internal operational telemetry, even when values look like GUIDs, IPs,
 account/subscription/resource ids, tenant-like ids, hostnames, or paths. **MUST NOT**
 withhold, downgrade, or choose report-only for shape alone. Withhold only when the query
 carries a secret/credential/token or reproduces `pii-marker`/do-not-republish customer
-content. The posting capability decodes the query; its `E_PII` content-match gate
+content. The posting capability decodes the query; its PII content-match gate
 fires only on a marked-content digest match, while unusable markers and missing required
 PII decisions also fail closed. It never refuses for identifier shape. The capability owns canonical run-id/host/decode/lineage validation
 ([../investigation-invariants.md](../investigation-invariants.md)). This applies to both structured HTML and

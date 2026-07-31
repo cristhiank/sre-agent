@@ -899,7 +899,7 @@ fn segments_of(term: &str) -> Vec<String> {
         .collect()
 }
 
-/// Short codes carry real discriminative power in operational text (`WW`, `DF`, `QOS`, `403`),
+/// Short codes carry real discriminative power in operational text (`NA`, `EU`, `QOS`, `403`),
 /// so segments are deliberately not length-filtered the way expanded fragments are. Only
 /// single characters and bare one/two-digit numbers are dropped as noise.
 fn keep_segment(s: &str) -> bool {
@@ -1038,13 +1038,13 @@ fn wrap_word(body: &str, word: bool, raw: bool) -> String {
 
 /// Terms at or above this length match as unbounded substrings, which is what lets a corpus
 /// record of `getrecordsshowuiarchived` answer a query that pasted the shorter `getrecords`.
-/// Shorter terms get word boundaries instead. Operational codes (`ICE`, `ACE`, `DF`, `WW`)
+/// Shorter terms get word boundaries instead. Short operational codes
 /// have no such prefix relationship, and as substrings they collide with ordinary corpus
 /// words — `ice` inside `services`, `ace` inside `namespace`, `df` inside `sdfv2` — which
 /// inflates their document frequency, collapses their IDF toward zero, and destroys exactly
-/// the discrimination they exist to provide. Measured on the example-service KB: bounding moved
+/// the discrimination they exist to provide. Measured on a service knowledge base: bounding moved
 /// `ice` from df=125/idf=0.16 to df=9/idf=2.74, `ace` from 114/0.25 to 13/2.39, and `df`
-/// from 91/0.47 to 10/2.64, while non-colliding `ww` and `staging` were unchanged.
+/// from 91/0.47 to 10/2.64, while longer non-colliding terms were unchanged.
 const MIN_UNBOUNDED_TERM_LEN: usize = 5;
 
 /// `-w` forces boundaries on every term; otherwise only short terms are bounded.
@@ -2282,7 +2282,7 @@ mod tests {
             .into_iter()
             .map(|s| s.to_ascii_lowercase())
             .collect::<Vec<_>>();
-        for expected in ["get", "manager", "summary", "statistics"] {
+        for expected in ["get", "account", "summary", "statistics"] {
             assert!(parts.contains(&expected.to_string()));
         }
         assert_eq!(
@@ -2331,9 +2331,9 @@ mod tests {
         let indexed = vec![PathBuf::from(r"C:\repo\services")];
         assert!(db_covers_roots(
             &indexed,
-            &[PathBuf::from(r"C:\repo\services\insights")]
+            &[PathBuf::from(r"C:\repo\services\payments")]
         ));
-        let subset = vec![PathBuf::from(r"C:\repo\services\insights")];
+        let subset = vec![PathBuf::from(r"C:\repo\services\payments")];
         assert!(!db_covers_roots(
             &subset,
             &[PathBuf::from(r"C:\repo\services")]
@@ -2511,7 +2511,7 @@ mod tests {
 
     #[test]
     fn subtokens_split_punctuated_query_terms() {
-        let subs = subtokens_of("[WW JobName: GetPersonalizedTasksForbiddenScenario]");
+        let subs = subtokens_of("[NA JobName: GetPersonalizedTasksForbiddenScenario]");
         assert!(subs.iter().any(|s| s.eq_ignore_ascii_case("personalized")));
         assert!(subs.iter().any(|s| s.eq_ignore_ascii_case("forbidden")));
         assert!(subs.iter().any(|s| s.eq_ignore_ascii_case("job")));
@@ -2636,7 +2636,7 @@ mod tests {
     #[test]
     fn segments_keep_short_codes_but_drop_bare_noise() {
         // Short operational codes are highly discriminative and must survive.
-        for code in ["WW", "DF", "QOS", "ACE", "ICE", "TBD", "403"] {
+        for code in ["NA", "EU", "QOS", "OPS", "API", "TBD", "403"] {
             assert!(keep_segment(code), "{code} should be kept");
         }
         // Single characters and bare small numbers are not.

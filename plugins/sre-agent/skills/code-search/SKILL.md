@@ -72,7 +72,7 @@ Full flag list: `cli/README.md`.
   identifier glued to scaffolding still matches: `[Service][QOS]` searches `Service` and `QOS`,
   `*POST-/tenant/api/v1.0/parserecordsfromrequest*` reaches `parserecordsfromrequest`. Terms are
   OR-ed and ranked by IDF — common fragments cost nothing, rare ones decide the order. Short
-  operational codes (`WW`, `DF`, `TBD`, `403`) are kept. Use `--no-expand` to search the literal
+  operational codes (`NA`, `EU`, `TBD`, `403`) are kept. Use `--no-expand` to search the literal
   punctuated string, or `--regex` for a raw pattern.
 - **Ranking is BM25F** over heading / body / comment / path zones: rare query terms outweigh common
   ones, repetition saturates, and long files are length-normalized so a large aggregate cannot win

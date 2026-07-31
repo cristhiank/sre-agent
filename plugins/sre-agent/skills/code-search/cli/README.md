@@ -5,11 +5,11 @@
 ## Usage
 
 ```powershell
-srch GetAccountSummaryStatistics --path C:\repos\sre-agent-repos\services --stats
-srch GetAccountSummaryStatistics --path C:\repos\sre-agent-repos\services --usages --stats
-srch DocumentDbConnector IDocumentDbConnector CosmosDb --path C:\repos\sre-agent-repos\services --json
-srch --regex "OBS[0-9]{3}" --path C:\repos\sre-agent-repos\services\insights
-srch index --path C:\repos\sre-agent-repos\services\insights --rebuild
+srch GetAccountSummaryStatistics --path C:\repos\example\services --stats
+srch GetAccountSummaryStatistics --path C:\repos\example\services --usages --stats
+srch DocumentDbConnector IDocumentDbConnector CosmosDb --path C:\repos\example\services --json
+srch --regex "OBS[0-9]{3}" --path C:\repos\example\services\payments
+srch index --path C:\repos\example\services\payments --rebuild
 srch def GetAccountSummaryStatistics
 ```
 
@@ -64,7 +64,7 @@ identifier: `GetRecordsShowUIArchivedShowOrgEnabledScenario` yields
 capped per identifier.
 
 Segments are deliberately **not** length-filtered: short operational codes
-(`WW`, `DF`, `QOS`, `ACE`, `TBD`, `403`) are highly discriminative. Only single
+are highly discriminative. Only single
 characters and bare one/two-digit numbers are dropped. Fragments *are* filtered,
 because they are guesses rather than things the caller typed.
 

@@ -18,9 +18,12 @@
 
 schema: 1
 
-# Handles are named, never valued: the host stages the value, this file stages the
-# name. A handle that is unset this run is `not-exposed` — that is a presence fact,
-# never `blocked` and never absence of the capability class.
+# Handles: this file names only the handles this project itself defines. A capability
+# backed by a provider-specific tool is marked `discovered` — the host stages both the
+# name and the value, and a staged handle is matched to a capability by what it does,
+# never from a name written here. That keeps provider bindings where they belong and
+# lets one baseline serve any host. A capability with no staged handle this run is
+# `not-exposed` — a presence fact, never `blocked` and never absence of the class.
 invocation:
   note: >
     Handles naming a script entrypoint are invoked through their runtime, not
@@ -35,7 +38,7 @@ capabilities:
   - id: incident-record
     class: incident-record-read
     does: incident detail, description and discussion thread, recurrence siblings
-    handle: INCIDENT_RECORD_CLI
+    handle: discovered — incident-record CLI
     stages: [intake, scout]
     recipe: node <handle>
     read_only: true
@@ -43,14 +46,14 @@ capabilities:
   - id: metrics-query
     class: metrics-query
     does: metric namespaces, dimensions, time series, and monitor rule definitions
-    handle: METRICS_QUERY_CLI
+    handle: discovered — metrics-query CLI
     stages: [scout, specialist, grader]
     recipe: node <handle>
     read_only: true
 
   - id: telemetry-query
     class: structured-telemetry-query
-    does: service logs and structured event telemetry; also incident warehouse reads
+    does: service logs and structured event telemetry; also incident-history reads
     handle: KUSTO_CLI
     stages: [specialist, grader]
     recipe: node <handle>
@@ -70,7 +73,7 @@ capabilities:
   - id: log-trace-grep
     class: log-trace-grep
     does: raw request, log, and span streams
-    handle: LOG_TRACE_GREP_CLI
+    handle: discovered — log/trace-grep CLI
     stages: [specialist]
     recipe: node <handle>
     prerequisite: signed-in browser remote-debugging session
@@ -117,9 +120,10 @@ capabilities:
     class: incident-mutation
     does: decisive-query evidence menu, evidence kit, report template, and the live
       incident update
-    handle: INCIDENT_UPDATE_CLI
+    handle: discovered — incident-update CLI
     stages: [grader, report]
-    constraint_handles: [INCIDENT_UPDATE_FORCE_DRY_RUN, INCIDENT_UPDATE_REQUIRE_WATERMARK]
+    constraint_handles: discovered — posting constraints staged by the host, such as a
+      forced dry-run or a required watermark
     recipe: node <handle>
     routing: the only EVIDENCE capability that mutates; a forced dry-run is a posting
       constraint to record, never an access block
