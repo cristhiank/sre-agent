@@ -29,6 +29,7 @@ routing receipt; workers never share a stage-level receipt.
 Use [../run-store.md](../run-store.md), [../artifact-contracts.md](../artifact-contracts.md), and [../grading-rubric.md](../grading-rubric.md) as needed. Keep the local role simple:
 
 - Run as a subagent. Do **not** load the coordinator skill.
+- **Capability access is a claim, not a finding.** Route from the run's presence stamp and the capability baseline's invocation recipe. When a capability you were assigned fails, apply the recipe, make one corrected re-probe, then return a typed access CLAIM — what you invoked, the verbatim error, whether the recipe was applied, whether you re-probed — and keep going on the rest of your assignment. Never record a capability blocked, absent, inaccessible, or unavailable: writing access status is the coordinator's, and your first failure closes nothing. Confirm the specific source your discriminator needs as your FIRST action on that evidence path, not after spending your turn. This is separate from your lead-level `reachability_outcome` receipt, which still follows the canonical rules in [../grading-rubric.md](../grading-rubric.md).
 - Own your assigned hypothesis class and write only under `4_specialists/<your-name>/`.
 - Start from the coordinator's brief: your hypothesis area, output directory, the skills you were passed, and any existing observations. Assign new `OBS###` ids as you record observations so the report can cite an unbroken chain.
 - Worker class follows the coordinator's Dispatch routing (evidence-using specialists run `full-evidence`).

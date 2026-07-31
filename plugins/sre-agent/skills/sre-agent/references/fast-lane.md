@@ -61,7 +61,7 @@ curated per-service registry file is consulted or required.
 ## Where this fires
 
 End of `1_intake`, AFTER recurrence-identity capture, the intake recurrence cluster, and the
-completed CAPABILITY MAP, BEFORE Scout dispatch. The deep-lane (`2_scout` → `5_grader` →
+stamped CAPABILITY MAP, BEFORE Scout dispatch. The deep-lane (`2_scout` → `5_grader` →
 `6_report` → `7_knowledge`), the Grader gates, the duplicate/verdict-determinism gate, and the
 poster contract are all unchanged; the fast-lane only ADDS a pre-Scout wave-1 dispatch and REUSES
 the poster.

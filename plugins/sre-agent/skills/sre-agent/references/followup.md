@@ -208,8 +208,9 @@ prior `Confirmed`/`Likely-rooted` verdict as the answer (over-anchor).
 
 ## Capability map
 
-Rebuild the CAPABILITY MAP for this iteration; access and capabilities can differ between
-runs. Prior ACCESS STATUS is a claim, re-probed on the critical evidence path.
+Re-stamp the CAPABILITY MAP for this iteration and open a fresh access ledger; access and
+capabilities can differ between runs. The pinned baseline is re-bound by hash, not rebuilt.
+Prior ACCESS STATUS never carries over — it is a claim, re-probed on the critical evidence path.
 
 ## Delta report
 

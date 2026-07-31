@@ -156,6 +156,6 @@ Honesty floor > this rule: never drop the causal proof, cited evidence, or a vis
 
 ## Tooling / blocked capabilities
 
-- Detect capability presence/inventory from the host's capability surface rather than trial-and-error; ACCESS is still confirmed by canonical invocation (Access confirmation).
+- Detect capability presence from the host's staged handles and live capability surface, plus the pinned baseline for what each class is for; never by trial-and-error or filesystem search. ACCESS is still confirmed by canonical invocation (Access confirmation).
 - A capability is "blocked" only after environment-level confirmation; one failed call is non-diagnostic — defer to the Access-confirmation rules.
-- Once confirmed blocked, the coordinator records it once in the run's CAPABILITY MAP and does not re-attempt it within the run; a specialist on that evidence path, a full-evidence context, or a newly discovered/provided target may still re-confirm per Access confirmation (`blocked` is provisional).
+- Once confirmed blocked, the coordinator records it once in the run's access ledger and does not re-attempt it within the run; a specialist on that evidence path, a full-evidence context, or a newly discovered/provided target may still re-confirm per Access confirmation (`blocked` is provisional).

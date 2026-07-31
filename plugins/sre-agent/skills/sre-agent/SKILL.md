@@ -38,6 +38,18 @@ an evidence-calibrated verdict.
   the existing redacted-content handling unchanged.
 - Discover host-agnostic capabilities from the harness; do not assume a fixed toolset.
 
+**Operating stance.** What this file writes down is the contract: safety and authority
+boundaries, output shapes another role consumes, orderings that are real data
+dependencies, and evidence standards. The route between them is yours to judge. Explore
+what the host exposes, choose what fits the incident in front of you, and go after the
+evidence that would falsify your leading explanation — proactively, without waiting to be
+told which tool to reach for. Where this file names a route it is naming a floor, not a
+ceiling: a better-fitting exposed capability is a legitimate choice, recorded rather than
+skipped. Absence of an instruction is not a prohibition, and absence of evidence is not a
+finding. This stance governs route choice INSIDE the coordinator action taxonomy and the
+worker briefs below — it never widens them, and never licenses inline evidence collection
+the taxonomy assigns to a specialist.
+
 **Decision rules.**
 - Reconcile staged and authorized-live intake, then write the canonical **Bootstrap
   Evidence Manifest** in `references/artifact-contracts.md` § Bootstrap Evidence
@@ -86,8 +98,8 @@ advisor continuation below.
 
 ## Coordinator contract
 
-The coordinator is orchestration-only. It may ONLY create/own the run, inventory
-available capabilities and write the CAPABILITY MAP, dispatch subagents, merge and
+The coordinator is orchestration-only. It may ONLY create/own the run, bind the
+capability baseline and stamp the CAPABILITY MAP, dispatch subagents, merge and
 cite returned observations, run the bounded Grader refinement, and assemble the final
 handoff/Report dispatch, and operate/persist the single optional advisor below.
 
@@ -100,7 +112,7 @@ call fits one allowed class: (a) intake/run-artifact read (including the intake
 recurrence-cluster read for the fast-lane decision), (b) dispatch a
 subagent, (c) await/read a subagent's output, (d) update the run-state digest, (e)
 merge/adjudicate/synthesize cited observations, (f) assemble the handoff/Report,
-or (g) inventory capability metadata from host-provided handles, or (h)
+or (g) bind the capability baseline and stamp presence from host-provided handles, or (h)
 target-independent capability access-confirmation — the cheapest
 capability-level health/list/schema/status check per § Access confirmation (no
 guessed incident-specific target), or (i) point-to-point interaction with the
@@ -134,7 +146,7 @@ missing or stale digest is a run defect. The schema lives in
 `references/run-store.md#run-state-digest`.
 
 Mandatory dispatch points:
-- Scout is always dispatched after intake and the completed CAPABILITY MAP, unless the
+- Scout is always dispatched after intake and the stamped CAPABILITY MAP, unless the
   Bootstrap FAST-LANE DECISION admits the fast lane under `references/fast-lane.md`,
   which defers Scout and fails open to it on any uncertainty.
 - At least one Specialist is dispatched per material hypothesis area from Scout, or
@@ -157,10 +169,11 @@ Mandatory dispatch points:
   `references/artifact-contracts.md`; do not restate or vary its schema here. Only
   rows that contract marks selectable may be selected. A decoded alert
   telemetry/monitor query becomes selectable only after execution maps it to a
-  normalized `OBS###`. The Grader selects 1-3 eligible queries by `runId`; the posting
-  capability resolves each deep-link deterministically. Attach a canonical capability-resolved selected link
-  to the exact Failure path node identified by its `observation_ref` when possible
-  without duplication; only an unmappable selection falls back to Evidence Kit. Each
+  normalized `OBS###`. The Grader selects exactly one most-decisive eligible query by
+  `runId`; the posting capability resolves its deep-link deterministically. Attach the
+  canonical capability-resolved link to the exact visible claim or optional Failure path
+  node proved by its `observation_ref`, without duplication; only an unmappable selection
+  falls back to Evidence Kit. The
   selection and downstream handoff MUST satisfy the canonical **Decisive-query
   Evidence Frame**. If the menu capability or runId-to-OBS mapping is unavailable,
   record a gap and proceed without selecting those rows.
@@ -274,88 +287,96 @@ answer, relevant evidence sources/capabilities to use, `capabilities_to_invoke`,
 Observations carry stable ids so the final report cites an unbroken chain; details live
 in `references/run-store.md`.
 
-## Capability inventory (do this first)
+## Capability binding (do this first)
 
-Before Scout, inspect the host's available skill/capability metadata by name and
-description. Build a compact CAPABILITY MAP for this run recording, per capability:
-capability (what it does), match or mismatch to this incident, stage served
-(intake/scout/specialist/grader/report), and action-or-gap (load/dispatch/use-later,
-or gap).
+`references/capability-baseline.toon` is the pinned inventory: what each capability
+class is for, which handle names expose it, the invocation shape that works, and where
+one class is preferred over another. Bind it by hash. Do not re-derive it, and do not
+restate its rows into the run — the inventory already exists, and copying it is the
+expensive mistake this binding removes.
 
-At this checkpoint, perform the one model-registry read and live-roster intersection
-defined by § Dispatch routing. Record the registry ref/hash and live intersection in
-the CAPABILITY MAP. Later roles consume only resolved routes or dispatch receipts;
-they never load the registry.
+Three things vary per run, so establish exactly these:
 
-**Knowledge-consultation model (two layers, shared untrusted floor).** Both layers are
-claims-not-authority: they predict and arm questions only; they never fill checked values,
-close/downgrade leads, or force a match. "None applies" is valid, and each use records a
-breadcrumb.
-- **Per-service reusable-guidance shelf** (service-specific, bypassable): a service-orientation /
-  reusable-investigation-guidance capability class that resolves where-to-look assets plus reusable
-  checks/queries/decision-path/expected outcomes. Scout routes coverage scans through this shelf,
-  not raw KB paths; specialists reuse/adapt/reject it and re-ground live. It is bounded and may be
-  bypassed only by the high-severity triage rule below.
-- **Cross-service prior-investigation-METHOD layer** (service-agnostic, always-on cheap read):
-  a capability that resolves generalized phase-tagged method — root-cause discriminators,
-  ownership/routing questions, and skeptic checks. Scout consults it when ACCESS STATUS is
-  `confirmed`, and Grader re-consults the supplied skeptic questions before benign/artifact/noise
-  dispositions. It is not subject to the per-service shelf's high-severity triage bypass.
+- **Presence** — which capabilities the host exposes right now. Read the staged handles
+  and the live skill/tool surface. A handle the host did not stage is `not-exposed`: a
+  presence fact, never `blocked`, and never absence of the capability class. Never infer
+  presence by searching the filesystem for binaries, and never downgrade a
+  description-matching capability from an environment guess ("no data here", "wrong
+  working dir") — that guess is non-diagnostic.
+- **Model routes** — the one registry read and live-roster intersection defined by
+  § Dispatch routing. Later roles consume resolved routes or dispatch receipts; they
+  never load the registry.
+- **Relevance** — which exposed capabilities this incident needs, and what you will
+  dispatch. This is judgment. Reason from the incident in front of you.
 
-Flag every read-only orientation/knowledge/history/documentation/search capability so Scout's known-issue
-discovery pass is dispatched with ALL matching ones, never only the most obvious knowledge source.
-Separately and always, inventory as its own first-class entry any cross-service, service-AGNOSTIC
-prior-investigation-METHOD capability — one that resolves a generalized investigation-knowledge root
-and exposes durable phase-tagged method rather than per-service content. It is present in the map
-whenever such a capability is discoverable among host skills, with an ACCESS STATUS: `confirmed`
-when its knowledge root resolves, `unconfirmed-nondiagnostic(probe-defect)` when a retryable
-control-probe defect prevents a trustworthy root decision, or `blocked(hard-absent)` when a
-fit corrected probe proves the root absent — only `blocked(hard-absent)` is a satisfying no-op,
-NOT a coverage gap (it must not make the map 'incomplete'). A retryable probe defect carries an
-explicit retry/follow-up and does not satisfy or skip the always-on prior-method gate. Do not fold
-it into the per-service reusable-guidance shelf; a service-agnostic method capability that matches
-no service-content predicate must still be inventoried on its own class.
-A ranked code/knowledge-search capability counts here: classify its
-find/rank use as a Scout orientation capability AND its deep-read use as a specialist
-source-verification capability, and pass the find/rank use to Scout (full-evidence) for fast
-discovery over the KB/docs/repo text while specialists retain deep code mechanism verification.
+Record those three as the run's CAPABILITY MAP: baseline hash, presence stamp, model
+intersection, relevance calls, and any material need that has no matching capability
+(an explicit gap). Keep it small.
 
-Inventory concrete entrypoints from host-provided tool handles and capability
-descriptions (for example, environment variables or metadata that name the
-telemetry-query, code-search, or incident-posting CLI handles). Do not recursively
-search the filesystem to locate tool binaries; absence from a guessed path is not
-a capability result.
+Explore the exposed surface proactively and use what fits. The baseline names classes,
+not the limit of what a host may offer: an exposed capability it does not list is still
+yours to use — record it in the stamp. Stay selective in the same breath — inventory
+broadly, but load or dispatch only for an immediate stage obligation, a Scout-discovered
+discriminator, or a Grader follow-up. Do not load everything.
 
-Load and use every available capability whose description matches an immediate
-investigation obligation. If a material need has no matching capability, record an
-explicit gap. Do NOT proceed to Scout until the run exists, the CAPABILITY MAP is
-complete, the intake intent frame is set, intake satisfies the canonical pre-Scout
-coverage admission in Six-stage flow -> Bootstrap, the canonical **Bootstrap Evidence Manifest** in
-`references/artifact-contracts.md` § Bootstrap Evidence Manifest is written, AND the
-RUN-STATE DIGEST is initialized.
+**Knowledge layers (two, shared untrusted floor).** Both are claims-not-authority: they
+predict and arm questions, never fill checked values, close or downgrade leads, or force
+a match. "None applies" is valid, and each use records a breadcrumb.
+- **Per-service reusable-guidance shelf** (service-specific, bypassable): where-to-look
+  assets plus reusable checks, queries, decision paths, and expected outcomes. Scout
+  routes coverage scans through the shelf rather than raw KB paths; specialists reuse,
+  adapt, or reject it and re-ground live. Bypassable only by the high-severity triage
+  rule below.
+- **Cross-service prior-investigation-METHOD layer** (service-agnostic, always-on cheap
+  read): generalized phase-tagged method — root-cause discriminators, ownership and
+  routing questions, skeptic checks. It is its own first-class class and is never folded
+  into the service shelf, even when it matches no service-content predicate. Scout
+  consults it whenever it is exposed; Grader re-consults its skeptic questions before any
+  benign, artifact, or noise disposition. Not subject to the shelf's triage bypass. Not
+  exposed is a gap that degrades to a silent no-op, never a block and never a coverage
+  hole.
 
-Do not mark a description-matching capability gap/skip from an unverified environment guess ("no data here", "wrong working dir").
-Availability is confirmed by invoking it and reading its self-report, not by guessing inputs exist; coordinator confirmation uses class (h) when it is target-independent. Assumed-unavailable-from-environment-guess is non-diagnostic (see Access confirmation).
-If the description matches an obligation, use it; otherwise it is irrelevant by description.
+Dispatch Scout's known-issue discovery pass with EVERY exposed read-only orientation,
+knowledge, history, documentation, or search capability — never only the most obvious
+one. A ranked code/knowledge-search capability serves twice: find/rank for Scout
+orientation (dispatch Scout `full-evidence` with it), deep-read for specialist source
+verification.
 
-Keep it eager-but-selective: inventory ALL available capability metadata, but only
-load or dispatch capabilities matching an immediate stage obligation, a
-Scout-discovered discriminator, or a Grader follow-up obligation. Do not load
-everything.
-
-A capability confirmed environment-blocked (per Access confirmation) is recorded in
-the CAPABILITY MAP and not re-attempted within the run by the coordinator; a
-specialist on that evidence path (or a full-evidence context, or a newly discovered/
-provided target) may still re-confirm per Access confirmation. Prefer the host
-availability surface over trial-and-error (see `references/operational-discipline.md`).
+Do NOT proceed to Scout until the run exists, the CAPABILITY MAP carries baseline hash
+plus presence stamp plus model intersection, the intake intent frame is set, intake
+satisfies the canonical pre-Scout coverage admission in Six-stage flow -> Bootstrap, the
+canonical **Bootstrap Evidence Manifest** in `references/artifact-contracts.md` §
+Bootstrap Evidence Manifest is written, AND the RUN-STATE DIGEST is initialized.
 
 ## Access confirmation
 
-After the map, runtime-confirm access only for capabilities on the CRITICAL EVIDENCE PATH: a capability the incident question cannot be answered without, or one intake metadata marks as primary evidence. All others stay `unconfirmed / not-probed`.
+Access has two questions. Different roles answer them at different times.
+
+**Host physics — coordinator, before Scout.** For capabilities on the CRITICAL EVIDENCE
+PATH only (one the incident question cannot be answered without, or one intake metadata
+marks as primary evidence), confirm the entrypoint runs: apply the baseline's invocation
+recipe, then the cheapest target-independent health/list/schema/status check. This answers
+"can this start at all," and settling it once spares every later worker the same discovery.
+All other capabilities stay `unconfirmed / not-probed` with `target_status:
+deferred-to-consumer`.
+
+**Target reachability — the consuming worker, at point of use.** Whether a capability
+reaches the specific source a lead needs is confirmed by the worker assigned that evidence
+path, as its FIRST action on that path rather than after spending its turn. Confirmation is
+per evidence source, not global.
+
+**Only the coordinator writes access status.** A worker returns a typed access CLAIM: what
+it invoked, the verbatim error, whether it applied the recipe, and whether it re-probed. The
+coordinator promotes claims to status in the run access ledger (`references/run-store.md`
+§ Access ledger), which is also the run's memoization — a capability already settled there
+is not re-probed by the coordinator, though a specialist on that evidence path, a
+`full-evidence` context, or a newly discovered target may re-confirm. A worker never records
+a capability blocked, absent, or inaccessible on its own authority, and a first failure
+closes nothing.
 
 A capability appearing absent inside a `reasoning-only`/restricted worker is non-diagnostic about availability and MUST NOT change a capability's ACCESS STATUS; re-confirm from a `full-evidence` context before recording it absent or blocked. Use coordinator context only as class (h) target-independent capability access-confirmation.
 
-Read the capability's own help, metadata, or error guidance first. Confirm through its canonical invocation, starting with the cheapest capability-level health/list/schema/status check that does not depend on a guessed incident-specific target; do not first-probe by firing a guessed incident-specific query.
+Read the capability's own help, metadata, or error guidance first, and apply the baseline's invocation recipe before reading any failure — an invocation defect says nothing about availability. Confirm through its canonical invocation, starting with the cheapest capability-level health/list/schema/status check that does not depend on a guessed incident-specific target; do not first-probe by firing a guessed incident-specific query.
 
 If that control probe exits 0 with EMPTY stdout/stderr, it is a silent no-op, not a confirmation: record `unconfirmed-nondiagnostic(probe-defect)` (never `confirmed` or `blocked`), retry once via an alternate host-supported invocation (a real absolute path rather than a wrapper/symlink, or a documented alternate entry point), and carry the alternate-invocation next step for a specialist.
 
@@ -549,9 +570,10 @@ refinement obligation. Evidence authority, `re_ground`, budget, repair, and
 answer-shape rules:
 `references/subagents/ai-assets-advisor.md`.
 
-The advisor brief passes the canonical CAPABILITY MAP pointer plus its phase-current
+The advisor brief passes the canonical CAPABILITY MAP pointer plus its stable identity —
+baseline hash, presence stamp, and access-ledger head — its phase-current
 identity and the resolved service/source pointers. Its `capabilities_to_invoke` lists
-every usable read-only map entry whose description can locate service orientation,
+every exposed read-only entry whose description can locate service orientation,
 dependencies, owners/runbooks/failure modes, observability/schema/join-key/source
 pointers, or reusable investigation guidance. The advisor reads the map, chooses at
 most three fit service-reference capabilities by description, and records them in
@@ -595,8 +617,9 @@ an explicit advice blocker, never evidence that no relevant asset exists.
    evidence to bypass a redaction. Admission is complete only when every row is
    `complete` or carries its explicit gap.
    Regardless of staging, still produce the agent's own reasoning products — set the
-   intake intent frame, and build the CAPABILITY MAP (a host stages DATA plus a
-   provenance manifest, never the intent frame, the capability map, or the recurrence
+   intake intent frame, and stamp the CAPABILITY MAP (a host stages DATA, a provenance
+   manifest, and the pinned capability baseline — never the intent frame, the run's
+   presence/relevance stamp, or the recurrence
    identity). This stage captures the
    literal trigger and measured/impacted failure target; it does not hypothesize
    causes. If `rca_target` resolves only to `clarification_required`, resolve the
@@ -615,7 +638,7 @@ an explicit advice blocker, never evidence that no relevant asset exists.
    below. If that capability or include is unavailable, the cluster is an explicit GAP —
    the fast-lane cannot fire and the run takes the deep-lane (fail open). Do not make the
    FAST-LANE DECISION or dispatch Scout until the run exists, the CAPABILITY MAP is
-   complete, the intent frame is set, every row satisfies the canonical pre-Scout
+   stamped, the intent frame is set, every row satisfies the canonical pre-Scout
    coverage admission above, and the Bootstrap Evidence Manifest is written.
    #### FAST-LANE DECISION
 
@@ -654,7 +677,8 @@ an explicit advice blocker, never evidence that no relevant asset exists.
    with it, otherwise record recurrence as an explicit gap. Orientation also includes a
    bounded known/ongoing-issue discovery pass across whatever read-only knowledge,
    orientation, documentation, service-orientation, and reusable-guidance capabilities the run
-   exposes — discovered by description from the CAPABILITY MAP, never a single hardcoded
+   exposes — discovered by description from the capability baseline and the run's presence
+   stamp, never a single hardcoded
    knowledge source; dispatch Scout `full-evidence` with the ones it must search, and record an
    explicit gap when none is available.
    **Per-service reusable-guidance shelf (bounded, observability-only).** When exposed, Scout asks
@@ -672,7 +696,7 @@ an explicit advice blocker, never evidence that no relevant asset exists.
    - shared specialist reuse mode: `reused | adapted | rejected-because:<reason> | not-applicable`; receipt semantics are canonical in `references/artifact-contracts.md` § Reusable guidance receipt.
    Keep explicit gaps when no honest discriminator exists yet; Scout emits no findings or verdicts.
    When a discovered asset describes a known or ongoing issue whose signature matches this incident AND supplies (or lets Scout derive) a falsifiable discriminator, Scout names it the leading candidate to test first — recorded as an inherited/open rung, never a settled answer — so the first specialist wave checks it before broad fanout; a weaker symptom-only match stays a non-leading orientation lead. It never reads unreviewed run-local `7_knowledge` candidates or sibling run directories; here too, missing prior knowledge is a gap, not a block.
-   **Cross-service prior-investigation-METHOD layer (standing read).** Scout consults it whenever the CAPABILITY MAP exposes it as `confirmed`; dispatch Scout `full-evidence` with it so Scout resolves the knowledge root, reads the generalized learnings, and applies phase-matched checks as questions. Honor applies-when scope and does-not-apply-when falsifiers; matching checks shape hypotheses/routing but never decide them, and "none apply" is valid. This one-compact-file read is cheap and self-degrades to a silent no-op, so — unlike the per-service reusable-guidance shelf — it is NOT subject to the high-severity triage bypass: keep the prior-method intake read even when that bypass applies and the root resolves. It stays map-gated on ACCESS STATUS, non-discretionary once exposed. Re-consult the late/skeptic checks at Grade before accepting a benign/artifact/known-noise disposition. If the capability is absent, proceed normally (a gap, not a block). For any method-check actually consulted, record one line for later curation in the report: `generalized-heuristic <id>: applied | misleading | not-applicable`.
+   **Cross-service prior-investigation-METHOD layer (standing read).** Scout consults it whenever the presence stamp exposes it; dispatch Scout `full-evidence` with it so Scout resolves the knowledge root, reads the generalized learnings, and applies phase-matched checks as questions. Honor applies-when scope and does-not-apply-when falsifiers; matching checks shape hypotheses/routing but never decide them, and "none apply" is valid. This one-compact-file read is cheap and self-degrades to a silent no-op, so — unlike the per-service reusable-guidance shelf — it is NOT subject to the high-severity triage bypass: keep the prior-method intake read even when that bypass applies and the root resolves. It stays gated on presence, not on a probe result, and is non-discretionary once exposed. Re-consult the late/skeptic checks at Grade before accepting a benign/artifact/known-noise disposition. If the capability is not exposed, proceed normally (a gap, not a block). For any method-check actually consulted, record one line for later curation in the report: `generalized-heuristic <id>: applied | misleading | not-applicable`.
    After accepting `scout-report.md`, relay its optional canonical
    `advisor_question` as advisor phase 1 before the initial Specialist wave. No
    admitted Scout question means skip/fail-open; there is no pointer-index turn.
@@ -874,7 +898,8 @@ and post nothing. Default to PROCEED when origin or materiality is uncertain (fa
 materiality test, classes, and fail-open refresh comparator: `references/followup.md` § Early-exit gate.
 
 In iteration mode: mint a NEW run-id (read prior runs in place; never copy or write into a
-prior run dir), rebuild the CAPABILITY MAP, and focus Scout/Specialists on the new info
+prior run dir), re-stamp the CAPABILITY MAP and open a fresh access ledger, and focus
+Scout/Specialists on the new info
 plus still-open/blocked leads — carrying settled, untouched leads forward as cited
 prior-iteration claims rather than redoing them. The Grader re-derives the verdict on the
 merged evidence (never inherited); Report is a delta with honest downgrades. Reading

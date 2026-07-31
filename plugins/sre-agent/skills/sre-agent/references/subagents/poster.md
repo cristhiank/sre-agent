@@ -196,19 +196,21 @@ a verbatim customer/tenant/subscription/GUID/IP/resource path. Fix / Do next is 
 owner-routed action. Known recurrence is the live-verified recurrence-family match,
 never a `duplicate-of` or `canonical` claim.
 
-**Evidence and deep-links:** the **Evidence Kit** is a curated set of **1-3 decisive
-verification queries** an OCE can use to verify the RCA, but it is fallback-only. The
-primary surface is the Failure path: attach each selected canonical capability-resolved link to the exact node
-identified by its proving observation and show the observed result on that node. Do
-not duplicate that link. Use Evidence Kit immediately after the path only when a
-selected query cannot map to one node or no chain exists. It is distinct from the
-human-only checks in the internal **Manual Investigation Kit**. The Grader selects Evidence Kit queries by
-`runId` from its candidate menu and records them in
-`5_grader/decisive-queries.toon`; the posting capability alone resolves their links
+**Evidence and deep-links:** the Grader selects **one decisive verification query**
+that best lets an OCE verify the RCA. Manual selection is the only relevance signal;
+query text, labels, identifiers, row counts, and diagnostics never establish relevance
+by themselves. Attach the canonical capability-resolved link to the exact visible claim
+or Failure path node identified by its proving observation and show the observed result
+there. Do not duplicate that link. Use the fallback **Evidence Kit** only when the
+selected query cannot map to one exact visible claim. It is distinct from the
+human-only checks in the internal **Manual Investigation Kit**. The Grader selects the
+one decisive query by `runId` from its candidate menu and records it in
+`5_grader/decisive-queries.toon`; the posting capability alone resolves its link
 from manifests. Clickable evidence therefore never depends on an agent pasting or
-recovering a URL. The capability uses each selection's `observation_ref` to place its
-resolved link on the proving node; report-only finalize does the same. When no selected
-query needs fallback placement, omit Evidence Kit — empty beats noisy. If the capability
+recovering a URL. The capability uses the selection's `observation_ref` to place its
+resolved link on the exact visible claim or optional Failure path node it proves;
+report-only finalize does the same. When the selected query does not need fallback
+placement, omit Evidence Kit — empty beats noisy. If the capability
 cannot resolve a canonical link, put de-identified raw query text in Technical details
 instead; never fabricate a link. **Disclosure follows provenance and verified lineage,
 not identifier shape:** retain a canonical capability-resolved link whose literals came
@@ -221,7 +223,7 @@ fires only on a marked-content digest match, while unusable markers and missing 
 PII decisions also fail closed. It never refuses for identifier shape. The capability owns canonical run-id/host/decode/lineage validation
 ([../investigation-invariants.md](../investigation-invariants.md)). This applies to both structured HTML and
 report-only/additive markdown drafts: HTML uses `<a href>` on the proving tree node/proof line, and markdown
-uses `[label](evidence_link)` on the proving node/claim. Surface `TSG/KB consulted` with links only when the
+uses `[label](evidence_link)` on the proving claim. Surface `TSG/KB consulted` with links only when the
 investigation actually used those sources; omit the line when none were used. Hyperlink incident ids whenever
 an owner-resolvable incident URL is available.
 
@@ -312,8 +314,8 @@ query into the operator checks.
 Why wrong: the operator cannot route the result, the rival silently disappears, and
 query evidence is conflated with a human continuation.
 Correct: render one compact check with both result meanings and next actions; keep the
-query link on its proving Failure path node, or in fallback Evidence Kit only when it
-cannot map to one node.
+selected query link on its exact proving claim or Failure path node, or in fallback
+Evidence Kit only when it cannot map to one exact visible claim.
 
 Wrong proximate-only TL;DR: "At 07:50Z, 43 unexpected metric samples appeared
 against 4,238 successes; obtain producer/cache-fill and firing-evaluation records."
@@ -321,15 +323,17 @@ Correct operator envelope: "CAUSE NOT CONFIRMED: A brief metric failure spike
 occurred. The failures we traced came after provider rejections or cached responses.
 Missing cache history means the original cause and owner remain unknown; the owning
 team should retrieve that history." Keep `producer/cache-fill`, `firing-evaluation`,
-the evidence pointer, and the causal caveat in the Failure path or Technical details.
+and the causal caveat in the optional Failure path or Technical details. Put the selected
+query on the exact visible claim it proves, using fallback Evidence Kit only when no
+exact claim can carry it.
 
 Wrong likely-rooted TL;DR: "The sole HTTP 499 followed inbound caller cancellation;
 Monitoring/Telemetry should validate metric-emitter semantics."
 Correct operator envelope: "LIKELY CAUSE: One request ended because the caller
 cancelled it; the service recorded that as HTTP 499. The deployment and dependency
 were ruled out. Monitoring should reconcile the alert count." Keep `HTTP 499`,
-`metric-emitter semantics`, and its evidence pointer in the Failure path or Technical
-details.
+`metric-emitter semantics`, and the causal boundary in the optional Failure path or
+Technical details. Put the selected query on the exact visible claim it proves.
 </bad-example>
 
 **Post:**

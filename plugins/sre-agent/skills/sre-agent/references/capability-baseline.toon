@@ -1,0 +1,147 @@
+# Pinned capability baseline — ROUTING METADATA ONLY.
+#
+# What this is: the capability classes this agent may be given, what each is for,
+# which env handle NAMES expose it, and the invocation shape that is known to work.
+# It is a function of the shipped closure, not of any incident, so the coordinator
+# binds it by hash instead of re-deriving it every run.
+#
+# What this is NOT, and can never become:
+#   - Proof a capability is present. Presence is per-run (a handle may be unset).
+#   - Proof a capability works. Liveness is per-run and per evidence source.
+#   - A closer. Absence from this file closes no lead, excludes no candidate, and
+#     never licenses a reachability cap. See grading-rubric.md § blocked-unreachable.
+#
+# No row here carries access status, and none may be added. Status is per-run and
+# lives only in the run access ledger (run-store.md § Access ledger).
+#
+# Rebind when the shipped closure changes, a handle is renamed, or a recipe changes.
+
+schema: 1
+
+# Handles are named, never valued: the host stages the value, this file stages the
+# name. A handle that is unset this run is `not-exposed` — that is a presence fact,
+# never `blocked` and never absence of the capability class.
+invocation:
+  note: >
+    Handles naming a script entrypoint are invoked through their runtime, not
+    executed directly. On PowerShell hosts `& <handle> --help` fails with a
+    document-in-pipeline error that says nothing about availability; `node <handle>
+    --help` is the working shape. Apply the recipe before reading any failure.
+  probe: cheapest target-independent surface the capability documents (help,
+    version, status, list, schema). Nonempty well-formed output is entry-confirmed;
+    exit 0 with empty output is a probe defect, never a confirmation and never a block.
+
+capabilities:
+  - id: incident-record
+    class: incident-record-read
+    does: incident detail, description and discussion thread, recurrence siblings
+    handle: INCIDENT_RECORD_CLI
+    stages: [intake, scout]
+    recipe: node <handle>
+    read_only: true
+
+  - id: metrics-query
+    class: metrics-query
+    does: metric namespaces, dimensions, time series, and monitor rule definitions
+    handle: METRICS_QUERY_CLI
+    stages: [scout, specialist, grader]
+    recipe: node <handle>
+    read_only: true
+
+  - id: telemetry-query
+    class: structured-telemetry-query
+    does: service logs and structured event telemetry; also incident warehouse reads
+    handle: KUSTO_CLI
+    stages: [specialist, grader]
+    recipe: node <handle>
+    read_only: true
+
+  - id: monitor-definition
+    class: control-plane-config-read
+    does: published monitor definition as configured
+    handle: host skill
+    stages: [specialist]
+    recipe: skill invocation
+    prerequisite: signed-in browser remote-debugging session; a cold session is a
+      retryable auth state, not an absent capability
+    routing: overlaps metrics-query monitor reads; prefer metrics-query first
+    read_only: true
+
+  - id: log-trace-grep
+    class: log-trace-grep
+    does: raw request, log, and span streams
+    handle: LOG_TRACE_GREP_CLI
+    stages: [specialist]
+    recipe: node <handle>
+    prerequisite: signed-in browser remote-debugging session
+    routing: last-resort log provider; prefer telemetry-query first
+    read_only: true
+
+  - id: service-catalog
+    class: service-orientation
+    does: owner, topology, dependencies, observability pointers, failure knowledge,
+      source ids, and the per-service reusable-guidance shelf
+    handle: [SRE_SERVICES_ROOT, SRE_SOURCES_ROOT]
+    stages: [scout, specialist]
+    routing: current source for a resolved source id is that source's pinned head
+    read_only: true
+
+  - id: investigation-method
+    class: cross-service-method
+    does: service-agnostic, phase-tagged prior investigation method — discriminators,
+      ownership and routing questions, skeptic checks
+    handle: SRE_KNOWLEDGE_ROOT
+    stages: [scout, grader]
+    routing: first-class class of its own; never folded into service-catalog. Absent
+      handle is a gap that degrades to a silent no-op, never a block.
+    read_only: true
+
+  - id: code-search
+    class: ranked-code-search
+    does: ranked symbol and text lookup over knowledge, docs, and current source
+    handle: SRCH_CLI
+    stages: [scout, specialist]
+    recipe: <handle> is a native binary; invoke directly
+    routing: dual use — find/rank for orientation, deep-read for source verification
+    read_only: true
+
+  - id: change-provenance
+    class: source-control-and-build-read
+    does: commits, pull requests, builds, branches, wiki — provenance a local
+      checkout cannot carry
+    handle: host skill and tools
+    stages: [specialist]
+    read_only: true
+
+  - id: incident-posting
+    class: incident-mutation
+    does: decisive-query evidence menu, evidence kit, report template, and the live
+      incident update
+    handle: INCIDENT_UPDATE_CLI
+    stages: [grader, report]
+    constraint_handles: [INCIDENT_UPDATE_FORCE_DRY_RUN, INCIDENT_UPDATE_REQUIRE_WATERMARK]
+    recipe: node <handle>
+    routing: the only EVIDENCE capability that mutates; a forced dry-run is a posting
+      constraint to record, never an access block
+    read_only: false
+
+  - id: knowledge-extraction
+    class: knowledge-curation
+    does: durable knowledge extraction and service onboarding after the report
+    handle: host skill
+    stages: [knowledge]
+    read_only: false
+
+# Evidence lenses. Available every run; which ones activate is incident judgment,
+# recorded per run, never pinned here.
+lenses:
+  - id: signal-validity
+    reads: monitor semantics, raw-signal reconstruction, aggregation and null handling
+  - id: timeline
+    reads: onset, changepoint, and change-arrival ordering
+  - id: service-mechanics
+    reads: implementation and config of the failing path
+  - id: dependency
+    reads: downstream and provider latency, correlated failure
+  - id: infra-change
+    reads: shared control-plane, config, certificate, and DNS change

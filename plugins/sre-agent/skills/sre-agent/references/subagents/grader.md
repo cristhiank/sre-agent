@@ -175,15 +175,15 @@ ranking fields affected by the audit. No tools, no new leads or obligations, no 
 artifact reads, and no prose recap. If the output/read cap is reached, qualify/block the unaudited
 claim and leave its gap visible so Report can proceed.
 
-## Decisive verification queries (Evidence Kit selection)
+## Decisive verification query (Evidence Kit selection)
 
-From the `selection_eligible=yes` rows in the candidate evidence-query menu, pick the **1-3 queries that would let an OCE independently verify the root cause** and write `5_grader/decisive-queries.toon`, beginning with `schema_version: sre-agent.decisive-queries.v2` and then one canonical frame per selected query. Never select a manifest-only row with `observation_ref=none`. Each frame begins with `runId:` and `why:`; `why` is the OCE-facing label for what the query proves (for example, the throttle↔failure correlation join or the cap-constant-both-weeks check). Rules:
+From the `selection_eligible=yes` rows in the candidate evidence-query menu, pick the **one query that best lets an OCE independently verify the root cause** and write `5_grader/decisive-queries.toon`, beginning with `schema_version: sre-agent.decisive-queries.v2` and then its canonical frame. Manual selection is the only relevance signal: query text, labels, identifiers, row counts, and diagnostics never establish relevance by themselves. Never select a manifest-only row with `observation_ref=none`. The frame begins with `runId:` and `why:`; `why` is the OCE-facing label for what the query proves (for example, the throttle↔failure correlation join or the cap-constant-both-weeks check). Rules:
 
-Each selected query must satisfy the canonical [Decisive-query Evidence Frame](../artifact-contracts.md#decisive-query-evidence-frame-canonical); do not restate or vary that frame here.
+The selected query must satisfy the canonical [Decisive-query Evidence Frame](../artifact-contracts.md#decisive-query-evidence-frame-canonical); do not restate or vary that frame here.
 
 - Reference queries **only** by their menu `runId`. Never paste or construct a URL — the link is resolved deterministically downstream from the runId.
-- Choose the **load-bearing proof** queries — the ones behind "the single fact that proves it" — not schema or exploration queries.
+- Choose the **load-bearing proof query** behind "the single fact that proves it" — not a schema or exploration query.
 - A query or operator step behind a Manual Investigation Kit branch is decisive only
   when that branch's claim-integrity row has distinct favored/rival predictions and
   `discriminates=yes`. Otherwise label it non-decisive and keep the rival open.
-- This is a **required deliverable** whenever the menu is non-empty and the verdict rests on query evidence. Pick fewer than 3 when fewer are truly decisive. **Always write the file** when the verdict rests on query evidence: when no single query is decisive, write it with one `# none decisive: <reason>` line and no selections. (So an absent file signals a wiring break, while a present file with no selections is your explicit "nothing decisive" decision — and the Evidence Kit is correctly omitted either way.)
+- This is a **required deliverable** whenever the menu is non-empty and the verdict rests on query evidence. Select exactly one when one is truly decisive. **Always write the file** when the verdict rests on query evidence: when no single query is decisive, write it with one `# none decisive: <reason>` line and no selection. (So an absent file signals a wiring break, while a present file with no selection is your explicit "nothing decisive" decision — and the Evidence Kit is correctly omitted either way.)

@@ -70,7 +70,8 @@ condition.
 Conversation memory is only a locator/identity/required-field index. Reuse content
 only when the coordinator supplies the same SHA/mtime/version identity; otherwise
 re-open it. Reuse a capability selection only while the supplied CAPABILITY MAP
-identity is unchanged; otherwise re-open the map and select again. Prior accuracy
+identity — baseline hash, presence stamp, and access-ledger head — is unchanged;
+otherwise re-open the map and select again. Prior accuracy
 grants no reputation or trust.
 
 | Phase | Question rows | Searches | New source opens | Answer words |
@@ -114,7 +115,7 @@ advisor_answer:
     exact_ref: <exact URL/path|none>
     source_identity: <SHA+mtime+watermark | page/version/retrieved-at | searched-scope identity>
     service_route: <service/source route>
-    capability_route: <CAPABILITY MAP ref+identity; selected map capability refs/handles | none-map-fit + fallback/gap>
+    capability_route: <CAPABILITY MAP ref + identity (baseline hash, presence stamp, ledger head); selected map capability refs/handles | none-map-fit + fallback/gap>
     incident_ref: <incident id or supplied case id>
     query_seq: <same seq>
     applicability: applicable|abstain-missing-identifiers|rejected-stale|rejected-instruction|irrelevant|unknown

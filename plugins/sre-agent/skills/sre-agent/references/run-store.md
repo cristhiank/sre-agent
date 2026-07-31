@@ -167,8 +167,74 @@ Grader, fast-lane verifier, and Report consume only resolved routes or receipts 
 never load the registry.
 
 The coordinator tracks open questions and gaps there in whatever compact form is clear. When a known-issue acceleration path is taken or considered (per the Grader's known-issue decision rule in [grading-rubric.md](grading-rubric.md)), `run.md` records a compact line: the leading candidate's source asset/capability, the dispositive `OBS###` id(s) that closed its discriminator, and the settle-or-fail-open reason — so the acceleration is auditable and a wrong shortcut is visible.
-A CAPABILITY MAP lives in `run.md` or `1_intake/capability-map.md`; per capability,
-record capability, match, stage, and action-or-gap. Keep it small.
+A CAPABILITY MAP lives in `run.md` or `1_intake/capability-map.md`. It records the pinned
+baseline's ref and content hash, the presence stamp, the live model intersection, and this
+incident's relevance calls and gaps. It does NOT restate the baseline's rows — bind, do not
+copy.
+
+```toon
+capability_binding:
+  baseline_ref: references/capability-baseline.toon
+  baseline_hash: <SHA-256 of the baseline file, computed by the coordinator at bind time>
+  exposed: <capability ids the host staged this run>
+  not_exposed: <capability ids with no staged handle — presence fact, never a block>
+```
+
+The hash is the baseline's identity for downstream cache invalidation; a worker that holds
+a selection made under a different hash re-opens the map. If the baseline cannot be read or
+hashed, record `baseline_ref: unavailable` plus a gap and establish presence by live
+discovery instead — a missing baseline degrades to the old behavior and never becomes a
+block, a closure, or a reason to skip a capability class.
+
+### Access ledger
+
+Presence lives in `capability_binding` above and nowhere else. The ledger records only
+probe-derived state, uses the same enum as the ACCESS STATUS line in
+[artifact-contracts.md](artifact-contracts.md) §`1_intake/`, and has exactly one writer:
+the coordinator. Workers return typed access CLAIMS; the coordinator promotes them. The
+ledger is also the run's memoization — a settled capability is not re-probed by the
+coordinator.
+
+**Activation.** A row is opened only for a capability that is `exposed` AND either sits on
+the critical evidence path or has received a worker claim. Everything else has no row and
+is `unconfirmed / not-probed` by default. A `not-exposed` capability never gets a row.
+
+```toon
+access_ledger:
+  head: <monotonic revision id, bumped on every promotion — the "ledger head" workers cite>
+  rows:
+    - capability: <baseline id>
+      state: advertised-unverified | confirmed | unconfirmed-nondiagnostic(<class>) | candidate-failure | blocked(<class>) | open-gap
+      source: <evidence source the state applies to, or target-independent>
+      claim_refs: <worker claim ids, when the state came from a claim>
+      corrected_reprobe: yes | no
+      next_action: <required whenever state is candidate-failure or open-gap>
+```
+
+**Transitions.** `candidate-failure` is never terminal — every row must leave it.
+
+| From | Event | To |
+|---|---|---|
+| (row opened) | exposed, not yet probed | `advertised-unverified` |
+| `advertised-unverified` | control probe returned nonempty well-formed output | `confirmed` (bound to that source) |
+| `advertised-unverified` | probe defect, wrong target, self-misuse, or auth cold start | `unconfirmed-nondiagnostic(<class>)` |
+| any | worker claim reports a failure | `candidate-failure` |
+| `candidate-failure` | corrected re-probe succeeded | `confirmed` |
+| `candidate-failure` | four-field bar met AND one corrected re-probe spent | `blocked(<class>)` |
+| `candidate-failure` | corrected re-probe exhausted or nondiagnostic, bar NOT met | `open-gap` |
+| `blocked(*)` | specialist on that path, a `full-evidence` context, or a newly discovered target re-confirms | `confirmed` or `candidate-failure` |
+
+**Per-state behavior.** `confirmed` binds to the source it was checked against, never to
+the capability globally, and is reused rather than re-probed. `advertised-unverified` and
+`unconfirmed-nondiagnostic` are dispatchable — they are not gaps and never cap a verdict.
+`candidate-failure` is a worker's report, not a finding: it never closes a lead, never
+caps, and never suppresses a dispatch on its own. `open-gap` is the honest terminal when a
+failure could not be resolved and could not meet the blocked bar — it keeps the lead
+`open-answerable`, carries `next_action`, and never licenses a cap. Only `blocked(*)` may
+contribute to a reachability receipt, and only through the four-field bar in
+[SKILL.md § Access confirmation](../SKILL.md#access-confirmation). No ledger state carries
+across runs or iterations.
+
 Mark a capability confirmed usable only from a target-independent liveness/control
 probe expected to emit output (help/version/health/list/schema/status) that returned
 nonempty, well-formed output — not a bare exit 0: such a probe exiting 0 with EMPTY
