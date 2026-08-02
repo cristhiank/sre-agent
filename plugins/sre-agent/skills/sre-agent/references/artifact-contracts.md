@@ -563,6 +563,16 @@ claim carries its source and a coverage caveat when the figure is partial, sampl
 measured differently by another source over the same window.
 <example>"N per <source A>; <source B> showed M, same window — unreconciled"</example>
 
+**Identifiers are query keys, not prose.** Reproduce any value that names a queryable
+key exactly as the source returned it — dimension values, scenario/metric/table/column
+names, normalized error classes, and build or version strings. Never shorten, prettify,
+re-case, split, or partially quote one. The test is that a reader can paste the value
+back into a filter and reproduce the same population; an abbreviated key silently breaks
+that and can read as a different entity class than it is. When a value is long, keep it
+whole and cut surrounding words instead. This never overrides de-identification above:
+customer-identifying values stay categorized and counted, never verbatim.
+<example>"CheckoutLeaderScenarios 0/66", never "Checkout 0/66"</example>
+
 For deep-lane runs, every consequence-bearing report claim must map to a final
 `claim-integrity.toon` row with `publish: exact|qualified`. Render the exact claim or its
 allowed qualified wording; omit `blocked` claims and name the integrity gap when it
